@@ -1,0 +1,48 @@
+{
+  "name": "@repo/auto-index",
+  "version": "1.0.0",
+  "author": "wonseok-han",
+  "description": "디렉토리 내 파일들의 export를 자동으로 index.ts에 추가해주는 CLI 도구",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "auto-index": "./bin/auto-index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "watch": "auto-index --watch",
+    "lint": "eslint . --fix --max-warnings 0",
+    "check-types": "tsc --noEmit",
+    "start": "node bin/auto-index.js",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "clean": "rm -rf dist"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint",
+      "prettier --write",
+      "vitest run"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^22.15.3",
+    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/ui": "^3.2.4",
+    "eslint": "^9.30.0",
+    "typescript": "5.8.2",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "chokidar": "^3.6.0"
+  }
+}

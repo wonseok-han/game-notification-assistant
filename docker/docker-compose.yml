@@ -1,0 +1,26 @@
+services:
+  dev-kit:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      no_cache: true
+    container_name: dev-kit-app
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - HOSTNAME=0.0.0.0
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "node.*server.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - dev-kit-network
+
+networks:
+  dev-kit-network:
+    driver: bridge

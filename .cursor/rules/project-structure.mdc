@@ -1,0 +1,28 @@
+---
+alwaysApply: true
+---
+
+# 프로젝트 구조 및 모노레포 규칙
+
+## 프로젝트 구조
+- **모노레포**: Turbo + pnpm workspace
+- **메인 앱**: `apps/dev-kit` (Next.js 15.3.0)
+- **공통 패키지**: `packages/ui`, `packages/shared`
+- **설정 패키지**: `packages/eslint-config`, `packages/tailwind-config`, `packages/typescript-config`
+
+## 기술 스택
+- **프레임워크**: Next.js 15.3.0, React 19.1.0
+- **언어**: TypeScript 5.8.2
+- **스타일링**: Tailwind CSS 4.1.11
+- **상태 관리**: Zustand + persist
+- **패키지 매니저**: pnpm 9.0.0
+
+## 모노레포 패키지 관리
+- 공통 컴포넌트는 `packages/ui`에 배치
+- 공통 유틸리티는 `packages/shared`에 배치
+- 설정은 각각의 설정 패키지에서 관리
+
+## 도구별 구현 패턴
+- 각 도구는 `/apps/dev-kit/src/app/[tool-name]/` 경로에 배치
+- 도구별 store는 `/apps/dev-kit/src/store/[tool-name]-store.ts`에 생성
+- 도구별 타입은 `/apps/dev-kit/src/types/`에 정의

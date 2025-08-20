@@ -1,0 +1,40 @@
+{
+  "targets": [
+    {
+      "paths": [
+        "src/components",
+        "src/app/**/components"
+      ],
+      "fileExtensions": [
+        ".tsx",
+        ".ts"
+      ],
+      "outputFile": "index.ts",
+      "exportStyle": "auto"
+    },
+    {
+      "paths": [
+        "src/hooks",
+        "src/store"
+      ],
+      "fileExtensions": [
+        ".tsx",
+        ".ts"
+      ],
+      "outputFile": "index.ts",
+      "exportStyle": "auto"
+    },
+    {
+      "paths": [
+        "public/assets/icons"
+      ],
+      "fileExtensions": [
+        ".svg"
+      ],
+      "outputFile": "index.ts",
+      "exportStyle": "named",
+      "namingConvention": "PascalCase",
+      "fromWithExtension": true
+    }
+  ]
+}

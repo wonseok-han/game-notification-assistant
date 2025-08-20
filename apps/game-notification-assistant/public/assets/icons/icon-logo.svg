@@ -1,0 +1,42 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 그라데이션 정의 -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF"/>
+      <stop offset="50%" style="stop-color:#F9FAFB"/>
+      <stop offset="100%" style="stop-color:#F3F4F6"/>
+    </linearGradient>
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1F2937"/>
+      <stop offset="100%" style="stop-color:#000000"/>
+    </linearGradient>
+    <linearGradient id="borderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#D1D5DB"/>
+      <stop offset="100%" style="stop-color:#E5E7EB"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 완전한 원형 배경 -->
+  <circle cx="16" cy="16" r="15" fill="url(#bgGradient)" stroke="url(#borderGradient)" stroke-width="1"/>
+
+      <!-- 곡선 경로 정의 (아래쪽으로 휘는 호) -->
+  <path id="textCurve" d="M 6 22 Q 16 26 26 22" fill="none" stroke="none"/>
+
+    <!-- 소문자 텍스트 "hws" - 곡선을 따라 배치 -->
+  <text
+    font-family="'Inter', 'SF Pro', system-ui, sans-serif"
+    font-size="11"
+    font-weight="700"
+    text-anchor="middle"
+    fill="url(#textGradient)"
+    letter-spacing="1.8px">
+    <textPath href="#textCurve" startOffset="50%">hws</textPath>
+  </text>
+
+  <!-- 미묘한 내부 하이라이트 원 -->
+  <circle cx="16" cy="16" r="14" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+
+  <!-- w의 상단 꼭지점 양쪽에 포인트 2개 -->
+  <circle cx="12.5" cy="11.5" r="2.0" fill="#000000" opacity="0.7"/>
+  <circle cx="19.5" cy="11.5" r="2.0" fill="#000000" opacity="0.7"/>
+</svg>

@@ -1,0 +1,73 @@
+# 의존성 및 빌드 파일
+**/node_modules
+**/.next
+**/dist
+**/build
+**/coverage
+
+# 개발 도구
+**/.git
+**/.gitignore
+**/.eslintrc*
+**/.prettierrc*
+**/.prettierignore*
+**/.editorconfig
+**/eslint.config.js
+
+# 로그 파일
+**/*.log
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/pnpm-debug.log*
+
+# 런타임 파일
+**/.DS_Store
+**/Thumbs.db
+
+# 테스트 파일
+**/*.test.*
+**/*.spec.*
+**/__tests__/
+**/test/
+**/tests/
+
+# 문서
+**/docs/
+**/*.md
+
+# 임시 파일
+**/.tmp/
+**/.temp/
+**/.cache/
+
+# IDE 설정
+**/.vscode/
+**/.idea/
+**/.cursor/
+**/*.swp
+**/*.swo
+
+# Docker 관련
+**/Dockerfile*
+**/docker-compose*
+**/.dockerignore
+
+# Turbo 캐시
+**/.turbo/
+
+# husky
+**/.husky/
+
+# 추가 제외 파일들
+**/.env*
+**/.npmrc
+**/.yarnrc
+**/.pnpmrc
+**/tsconfig.tsbuildinfo
+**/.swc/
+**/coverage/
+**/.nyc_output/
+**/.jest/
+**/cypress/videos/
+**/cypress/screenshots/

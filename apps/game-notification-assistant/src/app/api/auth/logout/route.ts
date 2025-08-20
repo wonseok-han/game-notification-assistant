@@ -1,0 +1,45 @@
+import type { NextRequest } from 'next/server';
+
+import { createClientServer } from '@utils/supabase/server';
+import { NextResponse } from 'next/server';
+
+// ===== 로그아웃 응답 타입 =====
+interface LogoutResponse {
+  success: boolean;
+  message: string;
+}
+
+// ===== POST 메서드 - 로그아웃 처리 =====
+export async function POST(_request: NextRequest) {
+  try {
+    // Supabase 클라이언트 생성
+    const supabase = await createClientServer();
+
+    // Supabase 로그아웃 처리
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.error('Supabase 로그아웃 오류:', error);
+      // 로그아웃 오류가 발생해도 성공으로 처리
+    }
+
+    // 응답 생성
+    const response: LogoutResponse = {
+      success: true,
+      message: '로그아웃이 완료되었습니다.',
+    };
+
+    // 세션 쿠키 제거
+    const responseObj = NextResponse.json(response);
+    responseObj.cookies.delete('sb-access-token');
+    responseObj.cookies.delete('sb-refresh-token');
+
+    return responseObj;
+  } catch (error) {
+    console.error('로그아웃 처리 오류:', error);
+    return NextResponse.json(
+      { success: false, message: '로그아웃 처리 중 오류가 발생했습니다.' },
+      { status: 500 }
+    );
+  }
+}

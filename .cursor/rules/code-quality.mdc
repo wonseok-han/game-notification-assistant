@@ -1,0 +1,34 @@
+---
+alwaysApply: true
+---
+
+# 코드 품질 규칙
+
+## ESLint
+- `@repo/eslint-config` 패키지 사용
+- Next.js 권장 설정 적용
+- TypeScript 엄격 모드
+- React Hooks 규칙 준수
+
+## Prettier
+- 일관된 코드 포맷팅
+- 자동 저장 시 포맷팅
+- 프로젝트 전체 포맷팅 규칙 통일
+
+## TypeScript
+- 엄격한 타입 체크
+- any 타입 사용 금지
+- 명시적 타입 정의
+- 모든 API 응답에 대한 타입 정의
+- 공통 타입은 `types/` 폴더에 정의
+
+## 타입 정의 규칙
+- 컴포넌트의 Props 타입은 interface에 postfix로 `Props`로 명명
+- 컴포넌트의 Props를 제외한 모든 타입은 type에 postfix로 `Type`으로 명명
+- 인터페이스는 `I` 접두사 없이 정의
+
+## 모니터링
+- Vercel Analytics
+- 에러 추적
+- 성능 메트릭
+- 사용자 행동 분석

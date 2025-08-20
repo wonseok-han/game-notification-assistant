@@ -1,0 +1,31 @@
+---
+alwaysApply: true
+---
+
+# UI 컴포넌트 패턴
+
+## SVG 처리
+- SVG는 `@svgr/webpack`로 React 컴포넌트로 변환하여 사용
+- `@assets/icons/` 경로에서 SVG 컴포넌트 import
+- SVG 컴포넌트는 일반 React 컴포넌트처럼 사용
+
+## 반응형 디자인
+- 모바일/데스크톱 분기 처리
+- `useDeviceStore`로 디바이스 타입 감지
+- 사이드바는 모바일/데스크톱 별도 컴포넌트
+
+## 한국어 UI
+- 한국어 UI 텍스트 사용 (향후 국제화 준비)
+- 사용자 친화적인 메시지 작성
+- 에러 메시지도 한국어로 표시
+
+## 메뉴 시스템
+- `SIDEBAR_MENU_ITEMS` 상수로 메뉴 정의
+- `getCurrentPageInfo` 함수로 현재 페이지 정보 추출
+- 경로별 메뉴 아이템 맵핑
+- 메뉴 아이템 타입: `{ id, label, icon, path }`
+
+## 컴포넌트 구조
+- 공통 컴포넌트는 `packages/ui`에 배치
+- 도구별 컴포넌트는 해당 도구 폴더에 배치
+- 재사용 가능한 컴포넌트는 UI 패키지로 이동

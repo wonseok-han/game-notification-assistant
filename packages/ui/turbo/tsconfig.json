@@ -1,0 +1,14 @@
+{
+    "extends": "@repo/typescript-config/base.json",
+    "compilerOptions": {
+        "noEmit": true,
+        "skipLibCheck": true
+    },
+    "include": [
+        "**/*.ts",
+        "**/*.tsx"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}

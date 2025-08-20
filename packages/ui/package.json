@@ -1,0 +1,61 @@
+{
+  "name": "@repo/ui",
+  "version": "0.0.0",
+  "private": true,
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./styles.css": "./dist/index.css",
+    "./components/*": {
+      "types": "./dist/src/components/index.d.ts",
+      "default": "./dist/src/components/*.js"
+    }
+  },
+  "scripts": {
+    "lint": "eslint . --fix --max-warnings 0",
+    "generate:component": "turbo gen react-component",
+    "check-types": "tsc --noEmit",
+    "build:styles": "tailwindcss -i ./src/styles.css -o ./dist/index.css",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "build:components": "tsc",
+    "dev:styles": "tailwindcss -i ./src/styles.css -o ./dist/index.css --watch",
+    "dev:components": "tsc --watch"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint",
+      "prettier --write"
+    ],
+    "*.{json,css,md}": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/tailwind-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@tailwindcss/postcss": "^4.1.11",
+    "@turbo/gen": "^2.5.0",
+    "@types/node": "^22.15.3",
+    "@types/react": "19.1.0",
+    "@types/react-dom": "19.1.1",
+    "eslint": "^9.30.0",
+    "postcss": "^8.5.6",
+    "sass": "^1.89.2",
+    "tailwindcss": "^4.1.11",
+    "typescript": "5.8.2"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "^4.1.11",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  }
+}
