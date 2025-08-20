@@ -4,7 +4,6 @@ import { useSnackbar } from '@repo/ui';
 import {
   deleteNotification,
   getNotifications,
-  updateNotificationStatus,
   updateNotification,
   type GameNotification,
 } from '@services/notification';
@@ -121,32 +120,6 @@ export function NotificationList() {
       console.error('알림 삭제 오류:', error);
       showSnackbar({
         message: '알림 삭제에 실패했습니다.',
-        type: 'error',
-        position: 'bottom-right',
-        autoHideDuration: 6000,
-      });
-    }
-  };
-
-  // ===== 상태 변경 핸들러 =====
-  const handleStatusChange = async (id: string, status: string) => {
-    try {
-      await updateNotificationStatus(id, status);
-
-      showSnackbar({
-        message: '알림 상태가 변경되었습니다.',
-        type: 'success',
-        position: 'bottom-right',
-        autoHideDuration: 6000,
-      });
-
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, status } : n))
-      );
-    } catch (error) {
-      console.error('상태 변경 오류:', error);
-      showSnackbar({
-        message: '상태 변경에 실패했습니다.',
         type: 'error',
         position: 'bottom-right',
         autoHideDuration: 6000,
