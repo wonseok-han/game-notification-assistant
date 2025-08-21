@@ -13,7 +13,13 @@ export async function GET() {
     }
 
     // 카카오 OAuth 인증 URL 생성
-    const authUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=talk_message`;
+    const params = new URLSearchParams({
+      client_id: clientId,
+      redirect_uri: redirectUri,
+      response_type: 'code',
+      scope: 'profile_nickname,profile_image,account_email,talk_message',
+    });
+    const authUrl = `https://kauth.kakao.com/oauth/authorize?${params.toString()}`;
 
     return NextResponse.json({
       success: true,
