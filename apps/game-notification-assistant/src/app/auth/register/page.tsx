@@ -28,7 +28,7 @@ export default function RegisterPage() {
             <p className="text-sm text-gray-600">
               이미 계정이 있으신가요?{' '}
               <button
-                className="font-medium text-blue-600 hover:text-blue-500"
+                className="font-medium text-blue-600 hover:text-blue-500 cursor-pointer hover:underline"
                 onClick={() => router.push('/auth/login')}
               >
                 로그인

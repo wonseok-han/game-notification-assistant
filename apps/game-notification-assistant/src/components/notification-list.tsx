@@ -1,6 +1,6 @@
 'use client';
 
-import { useSnackbar } from '@repo/ui';
+import { ActionButton, useSnackbar } from '@repo/ui';
 import {
   deleteNotification,
   getNotifications,
@@ -68,6 +68,8 @@ export function NotificationList() {
       label?: string;
     }>
   >([]);
+
+  const [isSaveLoading, setIsSaveLoading] = useState(false);
 
   const { showSnackbar } = useSnackbar();
 
@@ -169,6 +171,8 @@ export function NotificationList() {
 
   const saveEdit = async (id: string) => {
     try {
+      setIsSaveLoading(true);
+
       // notification-form.tsx와 동일한 방식으로 시간을 UTC로 변환
       const utcNotificationTimes = editingTimes.map((time) => ({
         id: time.id,
@@ -203,6 +207,8 @@ export function NotificationList() {
         position: 'bottom-right',
         autoHideDuration: 6000,
       });
+    } finally {
+      setIsSaveLoading(false);
     }
   };
   // ===== 상태 관리 =====
@@ -298,7 +304,6 @@ export function NotificationList() {
   if (notifications.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="text-gray-400 text-6xl mb-4">🎮</div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">
           알림이 없습니다
         </h3>
@@ -435,36 +440,28 @@ export function NotificationList() {
                     </td>
                     <td className="px-3 py-2 align-middle">
                       <div className="flex items-center gap-2">
-                        <button
-                          className="text-blue-600 hover:underline text-sm"
+                        <ActionButton
                           onClick={(e) => {
                             e.stopPropagation();
-                            setExpandedId(expandedId === n.id ? null : n.id);
-                          }}
-                          type="button"
-                        >
-                          {expandedId === n.id ? '접기' : '자세히'}
-                        </button>
-                        <button
-                          className="text-gray-700 hover:underline text-sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
+                            setExpandedId(n.id);
                             startEdit(n);
                           }}
+                          size="sm"
                           type="button"
                         >
                           수정
-                        </button>
-                        <button
-                          className="text-red-600 hover:underline text-sm"
+                        </ActionButton>
+                        <ActionButton
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDelete(n.id);
                           }}
+                          size="sm"
                           type="button"
+                          variant="danger"
                         >
                           삭제
-                        </button>
+                        </ActionButton>
                       </div>
                     </td>
                   </tr>
@@ -548,19 +545,22 @@ export function NotificationList() {
                               </div>
                             )}
                             <div className="mt-2 flex gap-2">
-                              <button
-                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
-                                disabled={isLoading}
+                              <ActionButton
+                                disabled={isSaveLoading}
                                 onClick={() => saveEdit(n.id)}
+                                size="sm"
+                                type="button"
                               >
-                                저장
-                              </button>
-                              <button
-                                className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors text-sm"
+                                {isSaveLoading ? '저장 중...' : '저장'}
+                              </ActionButton>
+                              <ActionButton
                                 onClick={cancelEdit}
+                                size="sm"
+                                type="button"
+                                variant="secondary"
                               >
                                 취소
-                              </button>
+                              </ActionButton>
                             </div>
                           </div>
                         ) : (

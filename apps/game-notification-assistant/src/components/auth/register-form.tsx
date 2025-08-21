@@ -1,6 +1,6 @@
 'use client';
 
-import { useSnackbar } from '@repo/ui';
+import { ActionButton, useSnackbar } from '@repo/ui';
 import { registerUser } from '@services/auth';
 import { useAuthStore } from '@store/auth-store';
 import { useRouter } from 'next/navigation';
@@ -185,10 +185,12 @@ export function RegisterForm() {
         </div>
 
         {/* ===== 회원가입 버튼 ===== */}
-        <button
-          className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+        <ActionButton
+          className="w-full"
           disabled={isLoading}
+          size="lg"
           type="submit"
+          variant="success"
         >
           {isLoading ? (
             <div className="flex items-center justify-center">
@@ -198,7 +200,7 @@ export function RegisterForm() {
           ) : (
             '회원가입'
           )}
-        </button>
+        </ActionButton>
       </form>
     </div>
   );

@@ -52,7 +52,7 @@ export default function HomePage() {
                   안녕하세요, {user.username}님!
                 </span>
                 <button
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer"
                   onClick={handleGoToDashboard}
                 >
                   대시보드로 이동
@@ -61,13 +61,13 @@ export default function HomePage() {
             ) : (
               <div className="flex items-center space-x-3">
                 <button
-                  className="text-gray-700 hover:text-gray-900 px-4 py-2 rounded-lg font-medium transition-colors"
+                  className="text-gray-700 hover:text-gray-900 px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer hover:underline"
                   onClick={handleGoToLogin}
                 >
                   로그인
                 </button>
                 <button
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer"
                   onClick={handleGoToRegister}
                 >
                   회원가입
@@ -96,10 +96,10 @@ export default function HomePage() {
                 이동하세요.
               </p>
               <button
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium text-lg transition-colors shadow-lg"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium text-lg transition-colors shadow-lg cursor-pointer"
                 onClick={handleGoToDashboard}
               >
-                🚀 대시보드로 이동
+                대시보드로 이동
               </button>
             </div>
           ) : (
@@ -109,16 +109,16 @@ export default function HomePage() {
               </p>
               <div className="flex justify-center space-x-4">
                 <button
-                  className="bg-gray-600 hover:bg-gray-700 text-white px-8 py-3 rounded-lg font-medium text-lg transition-colors shadow-lg"
+                  className="bg-gray-600 hover:bg-gray-700 text-white px-8 py-3 rounded-lg font-medium text-lg transition-colors shadow-lg cursor-pointer"
                   onClick={handleGoToLogin}
                 >
-                  🔑 로그인
+                  로그인
                 </button>
                 <button
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium text-lg transition-colors shadow-lg"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium text-lg transition-colors shadow-lg cursor-pointer"
                   onClick={handleGoToRegister}
                 >
-                  ✨ 회원가입
+                  회원가입
                 </button>
               </div>
             </div>

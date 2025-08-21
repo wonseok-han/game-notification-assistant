@@ -1,6 +1,6 @@
 'use client';
 
-import { useSnackbar } from '@repo/ui';
+import { ActionButton, useSnackbar } from '@repo/ui';
 import { loginUser } from '@services/auth';
 import { useAuthStore } from '@store/auth-store';
 import { useRouter } from 'next/navigation';
@@ -70,7 +70,7 @@ export function LoginForm() {
         </p>
       </div>
 
-      <form className="space-y-6" onSubmit={handleSubmit}>
+      <form noValidate className="space-y-6" onSubmit={handleSubmit}>
         {/* ===== 이메일 입력 ===== */}
         <div>
           <label
@@ -112,10 +112,12 @@ export function LoginForm() {
         </div>
 
         {/* ===== 로그인 버튼 ===== */}
-        <button
-          className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+        <ActionButton
+          className="w-full"
           disabled={isLoading}
+          size="lg"
           type="submit"
+          variant="primary"
         >
           {isLoading ? (
             <div className="flex items-center justify-center">
@@ -125,7 +127,7 @@ export function LoginForm() {
           ) : (
             '로그인'
           )}
-        </button>
+        </ActionButton>
       </form>
     </div>
   );

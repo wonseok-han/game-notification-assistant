@@ -5,6 +5,7 @@ import {
   NotificationForm,
   NotificationList,
 } from '@components';
+import { ActionButton } from '@repo/ui';
 import { logoutUser } from '@services/auth';
 
 import { useAuthStore } from '@/store/auth-store';
@@ -29,8 +30,7 @@ export default function DashboardPage() {
               <span className="text-gray-700">
                 안녕하세요, {user?.username || '사용자'}님!
               </span>
-              <button
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              <ActionButton
                 onClick={async () => {
                   try {
                     // 로그아웃 API 호출
@@ -43,9 +43,11 @@ export default function DashboardPage() {
                     window.location.href = '/';
                   }
                 }}
+                size="lg"
+                variant="danger"
               >
                 로그아웃
-              </button>
+              </ActionButton>
             </div>
           </div>
         </div>

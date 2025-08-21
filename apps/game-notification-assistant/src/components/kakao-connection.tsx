@@ -1,6 +1,6 @@
 'use client';
 
-import { useSnackbar } from '@repo/ui';
+import { useSnackbar, ActionButton } from '@repo/ui';
 import { useState, useEffect } from 'react';
 
 // ===== 카카오톡 연결 컴포넌트 =====
@@ -132,7 +132,7 @@ export function KakaoConnection() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: `🎮 게임 알림 테스트입니다!\n\n현재 시간: ${currentTime}`,
+          message: `게임 알림 테스트입니다!\n\n현재 시간: ${currentTime}`,
         }),
       });
 
@@ -207,29 +207,31 @@ export function KakaoConnection() {
             </div>
           </div>
 
-          <button
-            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors text-sm"
+          <ActionButton
             onClick={handleDisconnect}
+            size="lg"
+            variant="secondary"
           >
             연결 해제
-          </button>
+          </ActionButton>
         </div>
 
         <div className="mt-3 p-3 bg-green-50 rounded-md">
           <p className="text-sm text-green-800">
-            ✅ 카카오톡 알림이 활성화되어 있습니다. 게임 알림을 설정하면 지정된
+            카카오톡 알림이 활성화되어 있습니다. 게임 알림을 설정하면 지정된
             시간에 카카오톡으로 알림을 받을 수 있습니다.
           </p>
         </div>
 
         {/* 테스트 버튼 추가 */}
         <div className="mt-4 flex gap-2">
-          <button
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          <ActionButton
             onClick={handleTestNotification}
+            size="lg"
+            variant="primary"
           >
-            🧪 테스트 알림 전송
-          </button>
+            테스트 알림 전송
+          </ActionButton>
         </div>
       </div>
     );
@@ -251,18 +253,19 @@ export function KakaoConnection() {
           게임 알림을 카카오톡으로 받으려면 카카오톡 계정과 연결해야 합니다.
         </p>
 
-        <button
-          className="inline-flex items-center px-6 py-3 bg-yellow-400 text-black rounded-md hover:bg-yellow-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+        <ActionButton
           disabled={isLoading}
           onClick={handleKakaoLogin}
+          size="lg"
+          variant="primary"
         >
           {isLoading ? (
-            <>
+            <div className="flex items-center">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black mr-2" />
               연결 중...
-            </>
+            </div>
           ) : (
-            <>
+            <div className="flex items-center">
               <svg
                 className="mr-2 w-5 h-5"
                 fill="currentColor"
@@ -272,9 +275,9 @@ export function KakaoConnection() {
                 <path d="M12 3C6.477 3 2 6.477 2 12c0 4.411 2.865 8.138 6.839 9.439l-1.197 4.377a.5.5 0 0 0 .766.53l5.113-3.437c6.086-.392 10.48-5.422 10.48-10.909C24 6.477 19.523 3 12 3zm.374 13.931a.75.75 0 0 1-1.248-.832l2.203-3.303H9.841a.75.75 0 0 1 0-1.5h6.283a.75.75 0 0 1 .624 1.166l-2.203 3.303h2.488a.75.75 0 0 1 0 1.5h-4.659z" />
               </svg>
               카카오톡으로 연결하기
-            </>
+            </div>
           )}
-        </button>
+        </ActionButton>
 
         <div className="mt-4 p-3 bg-blue-50 rounded-md">
           <p className="text-sm text-blue-800">

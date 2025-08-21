@@ -26,7 +26,7 @@ export default function LoginPage() {
             <p className="text-sm text-gray-600">
               계정이 없으신가요?{' '}
               <button
-                className="font-medium text-blue-600 hover:text-blue-500"
+                className="font-medium text-blue-600 hover:text-blue-500 cursor-pointer hover:underline"
                 onClick={() => router.push('/auth/register')}
               >
                 회원가입

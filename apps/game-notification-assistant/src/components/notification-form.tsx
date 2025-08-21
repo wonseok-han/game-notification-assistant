@@ -1,19 +1,16 @@
 'use client';
 
-import { useSnackbar } from '@repo/ui';
+import { useSnackbar, ActionButton } from '@repo/ui';
 import {
   createNotification,
   type CreateNotificationRequest,
 } from '@services/notification';
 import { extractMultipleTimesFromImage } from '@utils/time-extractor';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { useState, useRef } from 'react';
 
 // ===== 알림 생성 폼 컴포넌트 =====
 export function NotificationForm() {
-  const router = useRouter();
-
   // ===== 상태 관리 =====
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -43,6 +40,7 @@ export function NotificationForm() {
   const [imagePreview, setImagePreview] = useState<string>('');
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(false);
 
   // ===== refs =====
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -67,6 +65,8 @@ export function NotificationForm() {
       // 게임 이미지에서 시간 추출 시도 (이미지 기반 시간 추출이 활성화된 경우)
       if (useImageTimeExtraction) {
         try {
+          setIsImageLoading(true);
+
           const extractedData = await extractMultipleTimesFromImage(file);
           if (extractedData) {
             const {
@@ -113,6 +113,8 @@ export function NotificationForm() {
         } catch (error) {
           console.error('시간 추출 실패:', error);
           // 시간 추출 실패해도 이미지는 정상적으로 처리
+        } finally {
+          setIsImageLoading(false);
         }
       }
     }
@@ -150,6 +152,25 @@ export function NotificationForm() {
 
   const toggleImageTimeExtraction = () => {
     setUseImageTimeExtraction(!useImageTimeExtraction);
+  };
+
+  const clearForm = () => {
+    setTitle('');
+    setDescription('');
+    setGameName('');
+    setNotificationTimes([
+      {
+        id: '1',
+        scheduledTime: getDefaultScheduledTime(),
+        isEnabled: true,
+      },
+    ]);
+    setSelectedImage(null);
+    setImagePreview('');
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   // ===== 이미지 제거 핸들러 =====
@@ -219,18 +240,7 @@ export function NotificationForm() {
       await createNotification(formData);
 
       // 성공 시 폼 초기화
-      setTitle('');
-      setDescription('');
-      setGameName('');
-      setNotificationTimes([
-        {
-          id: '1',
-          scheduledTime: getDefaultScheduledTime(),
-          isEnabled: true,
-        },
-      ]);
-      setSelectedImage(null);
-      setImagePreview('');
+      clearForm();
 
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
@@ -243,7 +253,7 @@ export function NotificationForm() {
         autoHideDuration: 6000,
       });
 
-      router.refresh();
+      window.location.reload();
     } catch (error) {
       console.error('알림 생성 오류:', error);
       showSnackbar({
@@ -269,10 +279,10 @@ export function NotificationForm() {
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl mx-auto">
       <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-        🎮 게임 알림 생성
+        게임 알림 생성
       </h2>
 
-      <form className="space-y-6" onSubmit={handleSubmit}>
+      <form noValidate className="space-y-6" onSubmit={handleSubmit}>
         {/* ===== 게임 정보 섹션 ===== */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
@@ -350,20 +360,24 @@ export function NotificationForm() {
           </h3>
 
           {/* 이미지 기반 시간 추출 체크박스 */}
-          <div className="flex items-center space-x-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <label
+            className="flex items-center space-x-4 p-4 bg-blue-50 rounded-lg border border-blue-200 cursor-pointer"
+            htmlFor="useImageTimeExtraction"
+          >
             <input
               checked={useImageTimeExtraction}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              id="useImageTimeExtraction"
               onChange={toggleImageTimeExtraction}
               type="checkbox"
             />
             <span className="text-sm font-medium text-blue-800">
-              🖼️ 이미지에서 시간 자동 추출
+              이미지에서 시간 자동 추출
             </span>
             <span className="text-xs text-blue-600">
               (체크 시 이미지 업로드 후 자동으로 시간 설정)
             </span>
-          </div>
+          </label>
 
           {/* 알림 시간 목록 */}
           <div className="space-y-3">
@@ -372,7 +386,7 @@ export function NotificationForm() {
                 알림 시간 *
               </label>
               <button
-                className="inline-flex items-center px-3 py-1 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex items-center px-3 py-1 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"
                 onClick={addNotificationTime}
                 type="button"
               >
@@ -413,7 +427,7 @@ export function NotificationForm() {
                   />
                   {notificationTimes.length > 1 && (
                     <button
-                      className="px-2 py-1 text-sm text-red-600 bg-red-50 border border-red-200 rounded hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                      className="px-2 py-1 text-sm text-red-600 bg-red-50 border border-red-200 rounded hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 cursor-pointer"
                       onClick={() => removeNotificationTime(time.id)}
                       type="button"
                     >
@@ -466,7 +480,7 @@ export function NotificationForm() {
                 설정할 수 있습니다.
               </p>
               <p className="text-xs text-blue-600 mt-1">
-                💡 시간을 수동으로 조정할 수도 있습니다.
+                시간을 수동으로 조정할 수도 있습니다.
               </p>
             </div>
           )}
@@ -480,7 +494,11 @@ export function NotificationForm() {
             </label>
 
             {!imagePreview ? (
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+              <button
+                className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer"
+                onClick={() => fileInputRef.current?.click()}
+                type="button"
+              >
                 <input
                   accept="image/*"
                   className="hidden"
@@ -489,28 +507,24 @@ export function NotificationForm() {
                   ref={fileInputRef}
                   type="file"
                 />
-                <button
-                  className="text-blue-600 hover:text-blue-800 font-medium"
-                  onClick={() => fileInputRef.current?.click()}
-                  type="button"
-                >
-                  📷 이미지 선택하기
-                </button>
+                <span className="text-blue-600 font-medium">
+                  이미지 선택하기
+                </span>
                 <p className="text-sm text-gray-500 mt-2">
                   PNG, JPG, JPEG 파일을 지원합니다
                 </p>
-              </div>
+              </button>
             ) : (
               <div className="relative w-full h-48">
                 <Image
                   fill
                   alt="게임 이미지 미리보기"
-                  className="w-full h-48 object-contain rounded-lg border border-gray-300"
+                  className="w-full h-48 object-contain rounded-lg border border-gray-300 p-2"
                   loading="lazy"
                   src={imagePreview}
                 />
                 <button
-                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 transition-colors"
+                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 transition-colors cursor-pointer"
                   onClick={handleRemoveImage}
                   type="button"
                 >
@@ -523,22 +537,33 @@ export function NotificationForm() {
 
         {/* ===== 액션 버튼 ===== */}
         <div className="flex justify-end space-x-4 pt-4 border-t">
-          <button
-            className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+          <ActionButton
+            onClick={() => {
+              // 모든 입력값 초기화
+              clearForm();
+            }}
+            size="lg"
             type="button"
+            variant="secondary"
           >
             취소
-          </button>
-          <button
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+          </ActionButton>
+          <ActionButton
             disabled={
               !selectedImage ||
-              notificationTimes.filter((time) => time.isEnabled).length === 0
+              notificationTimes.filter((time) => time.isEnabled).length === 0 ||
+              isLoading ||
+              isImageLoading
             }
+            size="lg"
             type="submit"
           >
-            {isLoading ? '생성 중...' : '알림 생성'}
-          </button>
+            {isImageLoading
+              ? '이미지 처리 중...'
+              : isLoading
+                ? '생성 중...'
+                : '알림 생성'}
+          </ActionButton>
         </div>
       </form>
     </div>
