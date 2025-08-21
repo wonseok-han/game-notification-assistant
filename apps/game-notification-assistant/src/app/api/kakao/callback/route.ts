@@ -46,11 +46,12 @@ export async function GET(request: NextRequest) {
     const userInfoResponse = await fetch('https://kapi.kakao.com/v2/user/me', {
       headers: {
         Authorization: `Bearer ${tokenData.access_token}`,
+        'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
       },
     });
 
     if (!userInfoResponse.ok) {
-      console.error('Kakao user info error');
+      console.error('Kakao user info error', userInfoResponse);
       return NextResponse.json(
         { success: false, message: '사용자 정보 조회 실패' },
         { status: 400 }
@@ -58,6 +59,7 @@ export async function GET(request: NextRequest) {
     }
 
     const userInfo = await userInfoResponse.json();
+
     const kakaoUserId = userInfo.id.toString();
 
     // 2. 토큰을 HTTP-only 쿠키에 저장 (보안 강화)
