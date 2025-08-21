@@ -4,34 +4,32 @@
 
 ## ✨ 주요 기능
 
-- **게임 알림 생성**: 게임 스크린샷과 함께 알림 설정
-- **시간 기반 알림**: 지정된 시간에 자동 알림 전송
-- **카카오톡 연동**: 카카오톡으로 게임 알림 수신
-- **보안 인증**: 서버 사이드 전용 Supabase Auth 시스템
-- **데이터베이스**: Supabase를 활용한 데이터 영구 저장
-- **반복 알림**: 정기적인 게임 알림 설정
+- **🖼️ 이미지 기반 시간 추출**: Google Cloud Vision API를 사용한 고정밀 OCR로 게임 스크린샷에서 시간 정보 자동 추출
+- **⏰ 스마트 알림 시스템**: 다중 알림 시간 설정, 상대/절대 시간 자동 계산, UTC/Local 시간 처리
+- **💬 카카오톡 연동**: OAuth 2.0 인증, 자동 토큰 갱신, "나에게 보내기" 알림 전송
+- **🎮 게임 알림 관리**: CRUD 기능, 이미지 미리보기, 시간별 상세 정보 관리
+- **🔒 보안 인증**: 서버 사이드 전용 Supabase Auth 시스템
+- **🗄️ 데이터베이스**: Supabase를 활용한 데이터 영구 저장
 
 ## 🚀 기술 스택
 
 - **프론트엔드**: Next.js 15.3.0, React 19.1.0
-- **상태 관리**: Zustand
-- **스타일링**: Tailwind CSS
+- **상태 관리**: Zustand 5.0.6
+- **스타일링**: Tailwind CSS 4.1.11
 - **데이터베이스**: Supabase (PostgreSQL)
 - **인증**: Supabase Auth + 서버 전용 처리
-- **타입 안전성**: TypeScript
-
-## 🔒 보안 특징
-
-- **클라이언트 Supabase 제한**: 보안을 위해 클라이언트에서 직접 Supabase 호출 금지
-- **서버 전용 인증**: 모든 인증 로직은 서버 사이드에서만 처리
-- **HTTP 전용 쿠키**: 세션 토큰을 안전한 HTTP 전용 쿠키로 관리
-- **API 라우트 보호**: 모든 데이터베이스 접근은 서버를 통해서만 가능
+- **타입 안전성**: TypeScript 5.8.2
+- **OCR 서비스**: Google Cloud Vision API
+- **메시징**: KakaoTalk API
+- **배포**: Vercel
 
 ## 📋 요구사항
 
-- Node.js 18.0.0 이상
+- Node.js 22.18.0 이상
 - pnpm 9.0.0 이상
 - Supabase 계정 및 프로젝트
+- Google Cloud Vision API 키
+- Kakao Developers 앱 설정
 
 ## 🛠️ 설치 및 설정
 
@@ -56,15 +54,19 @@ pnpm install
 ```env
 # Supabase 설정
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
 # 애플리케이션 환경
 NODE_ENV=development
+NEXT_PUBLIC_SITE_URL=your_deployed_site_url
 
-# 카카오톡 API 설정 (선택사항)
+# 카카오톡 API 설정
 NEXT_PUBLIC_KAKAO_REST_API_KEY=your_kakao_rest_api_key
-NEXT_PUBLIC_KAKAO_REDIRECT_URI=http://localhost:3001/auth/kakao/callback
-KAKAO_ADMIN_KEY=your_kakao_admin_key
+KAKAO_CLIENT_SECRET=your_kakao_client_secret
+
+# Google Cloud Vision API
+GOOGLE_CLOUD_API_KEY=your_google_cloud_api_key
 ```
 
 ### 4. 개발 서버 실행
@@ -73,44 +75,7 @@ KAKAO_ADMIN_KEY=your_kakao_admin_key
 pnpm dev
 ```
 
-브라우저에서 `http://localhost:3001`로 접속하세요.
-
-## 🗄️ 데이터베이스 구조
-
-### 테이블
-
-- **users**: 사용자 정보 (Supabase Auth와 연동)
-- **game_notifications**: 게임 알림 데이터
-
-### 보안
-
-- Row Level Security (RLS) 활성화
-- Supabase Auth를 통한 사용자 인증
-- 사용자별 데이터 접근 제한
-- 서버 전용 데이터베이스 접근
-
-## 🔐 인증 시스템
-
-### 서버 전용 Supabase Auth
-
-- 클라이언트에 Supabase 키 노출 없음
-- 모든 인증 로직은 서버 사이드에서 처리
-- HTTP 전용 쿠키를 통한 안전한 세션 관리
-- 자동 세션 만료 및 갱신
-
-### API 엔드포인트
-
-- `POST /api/auth/login`: 로그인 (서버 전용 Supabase 처리)
-- `POST /api/auth/register`: 회원가입 (서버 전용 Supabase 처리)
-- `POST /api/auth/logout`: 로그아웃 (쿠키 제거)
-- `GET /api/auth/verify`: 세션 검증 (쿠키 기반)
-
-### 보안 장점
-
-1. **클라이언트 보안**: Supabase 키가 클라이언트에 노출되지 않음
-2. **세션 관리**: HTTP 전용 쿠키로 XSS 공격 방지
-3. **데이터 접근 제어**: 모든 데이터베이스 접근은 서버를 통해서만 가능
-4. **토큰 보안**: 액세스 토큰과 리프레시 토큰을 안전하게 관리
+브라우저에서 `http://localhost:3000`으로 접속하세요.
 
 ## 📱 카카오톡 연동
 
@@ -118,14 +83,31 @@ pnpm dev
 
 1. [Kakao Developers](https://developers.kakao.com)에서 앱 생성
 2. 카카오톡 로그인 활성화
-3. 리다이렉트 URI 설정
+3. 리다이렉트 URI 설정: `{your-domain}/api/kakao/callback`
 4. API 키를 환경 변수에 추가
+5. 필요한 스코프 설정: `profile_nickname`, `profile_image`, `account_email`, `talk_message`
 
 ### 알림 전송
 
 - 지정된 시간에 자동 알림 전송
 - 게임 스크린샷과 함께 메시지 전송
-- 반복 알림 지원
+- "나에게 보내기" API를 통한 개인 알림
+- 자동 토큰 갱신 및 연결 상태 관리
+
+## 🖼️ OCR 및 시간 추출
+
+### Google Cloud Vision API
+
+- 고정밀 텍스트 인식으로 게임 스크린샷에서 시간 정보 추출
+- 다양한 시간 형식 지원 (상대 시간, 절대 시간, 컨텍스트 기반)
+- 다중 시간 처리로 하나의 이미지에서 여러 알림 시간 동시 추출
+
+### 시간 파싱 기능
+
+- **상대 시간**: "10분 남음", "3시간 후" 등
+- **절대 시간**: "오후 3시", "내일 오전 9시" 등
+- **컨텍스트 인식**: 게임 이벤트와 연관된 시간 정보 추출
+- **UTC/Local 변환**: 서버와 클라이언트 간 시간대 일관성 유지
 
 ## 🎯 사용법
 
@@ -135,26 +117,27 @@ pnpm dev
 - 서버 전용 Supabase Auth를 통한 안전한 인증
 - 자동 세션 관리
 
-### 2. 게임 알림 생성
+### 2. 카카오톡 연동
+
+- 카카오 계정으로 OAuth 인증
+- 자동 토큰 갱신 및 연결 상태 관리
+- 테스트 알림으로 연동 상태 확인
+
+### 3. 게임 알림 생성
 
 - 게임 스크린샷 업로드
+- OCR을 통한 자동 시간 추출
 - 알림 제목과 설명 입력
-- 알림 시간 설정
-- 우선순위 및 카테고리 선택
-- 반복 알림 옵션 설정
+- 다중 알림 시간 설정 및 관리
+- 원본 텍스트와 라벨 편집
 
-### 3. 알림 관리
+### 4. 알림 관리
 
-- 생성된 알림 목록 조회
+- 생성된 알림 목록 조회 (테이블 형태)
 - 알림 수정 및 삭제
-- 상태 변경 (대기중, 활성, 완료, 취소)
-- 필터링 및 검색
-
-### 4. 카카오톡 연동
-
-- 카카오톡 계정 연결
-- 알림 수신 설정
-- 연결 상태 확인
+- 상태별 필터링 및 검색
+- 이미지 미리보기
+- 시간별 상세 정보 (아코디언 형태)
 
 ## 🔧 개발 가이드
 
@@ -164,7 +147,12 @@ pnpm dev
 src/
 ├── app/                    # Next.js App Router
 │   ├── api/               # API 라우트 (서버 전용)
-│   │   └── auth/          # 인증 관련 API
+│   │   ├── auth/          # 인증 관련 API
+│   │   ├── kakao/         # 카카오 연동 API
+│   │   ├── notifications/ # 알림 관리 API
+│   │   └── ocr/           # OCR 처리 API
+│   ├── auth/              # 인증 페이지
+│   ├── dashboard/         # 대시보드
 │   ├── layout.tsx         # 루트 레이아웃
 │   └── page.tsx           # 메인 페이지
 ├── components/             # React 컴포넌트
@@ -173,19 +161,23 @@ src/
 │   ├── notification-list.tsx    # 알림 목록
 │   └── kakao-connection.tsx     # 카카오톡 연결
 ├── store/                  # Zustand 상태 관리
-│   ├── auth-store.ts      # 인증 상태 (API 기반)
-│   └── game-notification-store.ts # 게임 알림 상태
-├── types/                  # TypeScript 타입 정의
-│   └── game-notification.d.ts
+│   ├── auth-store.ts      # 인증 상태
+│   └── notification-store.ts # 알림 상태
+├── services/               # API 서비스
+│   ├── auth.ts            # 인증 서비스
+│   └── notification.ts    # 알림 서비스
 ├── utils/                  # 유틸리티 함수
-│   ├── kakao-notification.ts
-│   └── supabase.ts        # 서버 전용 Supabase 설정
+│   ├── time-extractor.ts  # 시간 추출 로직
+│   ├── google-vision.ts   # Google Vision API
+│   └── supabase.ts        # Supabase 설정
+└── types/                  # TypeScript 타입 정의
+    └── game-notification.d.ts
 ```
 
 ### 상태 관리
 
 - **auth-store**: 사용자 인증 상태 (API 라우트 기반)
-- **game-notification-store**: 게임 알림 데이터
+- **notification-store**: 게임 알림 데이터 및 시간 관리
 
 ### 보안 원칙
 
@@ -206,25 +198,20 @@ src/
 
 프로덕션 환경에서 다음 환경 변수를 설정하세요:
 
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+```env
+# Supabase 설정
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
-## 🤝 기여하기
+# 카카오톡 API 설정
+NEXT_PUBLIC_KAKAO_REST_API_KEY=your_kakao_rest_api_key
+KAKAO_CLIENT_SECRET=your_kakao_client_secret
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+# Google Cloud Vision API
+GOOGLE_CLOUD_API_KEY=your_google_cloud_api_key
 
-## 📄 라이선스
-
-이 프로젝트는 MIT 라이선스 하에 배포됩니다.
-
-## 📞 지원
-
-문제가 발생하거나 질문이 있으시면 이슈를 생성해주세요.
-
----
-
-**게임 알림 어시스턴트**로 게임 시간을 놓치지 마세요! 🎮✨
+# 애플리케이션 설정
+NEXT_PUBLIC_SITE_URL=https://your-domain.vercel.app
+NODE_ENV=production
+```

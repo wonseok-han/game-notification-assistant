@@ -1,6 +1,6 @@
-# Utilities Kit
+# 🎮 게임 알림 어시스턴트
 
-개발할 때마다 이곳저곳 찾아서 쓰기 귀찮아서 한꺼번에 모아놓은 나만의 Dev Tools 토이 프로젝트
+게임에서 중요한 순간을 놓치지 않도록 이미지를 캡처하고 원하는 시간에 카카오톡으로 알림을 받을 수 있는 스마트 알림 시스템
 
 ## 📋 목차
 
@@ -23,37 +23,43 @@
 | **언어**          | `TypeScript@5.8.2`                       |
 | **스타일링**      | `Tailwind CSS@4.1.11`                    |
 | **상태 관리**     | `Zustand@5.0.6`                          |
+| **데이터베이스**  | `Supabase` (PostgreSQL)                  |
+| **OCR 서비스**    | `Google Cloud Vision API`                |
 
 ## 📖 프로젝트 개요
 
 ### 🎯 목적
-개발 과정에서 자주 사용하는 도구들을 한 곳에 모아서 효율적으로 사용할 수 있는 개발자 도구 모음집
+게임 플레이 중 중요한 이벤트나 시간을 놓치지 않도록 이미지 기반으로 시간을 자동 추출하고, 지정된 시간에 카카오톡으로 알림을 보내는 서비스
 
 ### 🏗️ 아키텍처
 - **모노레포**: TurboRepo + pnpm workspace
-- **앱**: Next.js 기반의 개발 도구 웹 애플리케이션
+- **앱**: Next.js 기반의 게임 알림 웹 애플리케이션
 - **패키지**: 재사용 가능한 UI 컴포넌트, 설정, 유틸리티
+- **백엔드**: Supabase (인증, 데이터베이스, 실시간 기능)
+- **OCR**: Google Cloud Vision API를 통한 이미지 텍스트 추출
 
 ## 🏗️ 모노레포 구조
 
 ```
-utilities-kit/
-├── apps/                   # 애플리케이션
-│   └── dev-kit/           # 메인 개발 도구 앱
-│       ├── src/app/       # Next.js App Router
-│       ├── src/components/ # 공통 컴포넌트
-│       ├── src/store/     # Zustand 스토어
-│       └── src/hooks/     # 커스텀 훅
-├── packages/              # 공유 패키지
-│   ├── ui/               # UI 컴포넌트 라이브러리
-│   ├── shared/           # 공유 유틸리티
-│   ├── auto-index/       # 자동 인덱스 생성 도구
-│   ├── eslint-config/    # ESLint 설정
-│   ├── typescript-config/ # TypeScript 설정
-│   └── tailwind-config/  # Tailwind CSS 설정
-├── docs/                 # 문서
-├── turbo.json            # Turborepo 설정
-└── pnpm-workspace.yaml   # pnpm 워크스페이스
+game-notification-assistant/
+├── apps/                           # 애플리케이션
+│   └── game-notification-assistant/ # 메인 게임 알림 앱
+│       ├── src/app/               # Next.js App Router
+│       ├── src/components/        # 컴포넌트
+│       ├── src/store/             # Zustand 스토어
+│       ├── src/services/          # API 서비스
+│       ├── src/utils/             # 유틸리티 함수
+│       └── supabase/              # 데이터베이스 스키마
+├── packages/                      # 공유 패키지
+│   ├── ui/                       # UI 컴포넌트 라이브러리
+│   ├── shared/                   # 공유 유틸리티
+│   ├── eslint-config/            # ESLint 설정
+│   ├── typescript-config/        # TypeScript 설정
+│   └── tailwind-config/          # Tailwind CSS 설정
+├── docker/                       # Docker 설정
+├── docs/                         # 문서
+├── turbo.json                    # Turborepo 설정
+└── pnpm-workspace.yaml           # pnpm 워크스페이스
 ```
 
 ## 🚀 Getting Started
@@ -69,11 +75,11 @@ pnpm run dev
 
 ### 특정 앱만 실행
 ```bash
-# dev-kit 앱만 실행
-pnpm run dev:kit
+# 게임 알림 앱만 실행
+pnpm run dev --filter=game-notification-assistant
 
 # UI 패키지와 함께 실행
-pnpm run dev --filter=@repo/ui --filter=dev-kit
+pnpm run dev --filter=@repo/ui --filter=game-notification-assistant
 ```
 
 ### 개발 도구
@@ -139,9 +145,20 @@ pnpm run auto-index --filter=@repo/ui
 - **TypeScript 5.8.2**: 정적 타입 검사
 - **Tailwind CSS 4.1.11**: 유틸리티 퍼스트 CSS
 
-### 상태 관리 & 데이터
+### Backend & Database
+- **Supabase**: 인증, 데이터베이스, 실시간 기능
+- **PostgreSQL**: 관계형 데이터베이스
+- **Row Level Security (RLS)**: 사용자별 데이터 접근 제어
+
+### 상태 관리 & 인증
 - **Zustand 5.0.6**: 경량 상태 관리
-- **NVD API**: CVE 데이터 소스
+- **Supabase Auth**: JWT 기반 인증 시스템
+- **HTTP-only Cookies**: 보안 강화된 토큰 저장
+
+### 외부 서비스
+- **Google Cloud Vision API**: OCR 텍스트 추출
+- **KakaoTalk API**: OAuth 2.0 및 메시지 전송
+- **Vercel**: 배포 및 호스팅
 
 ### 개발 도구
 - **ESLint**: 코드 품질 관리
@@ -173,26 +190,10 @@ pnpm run auto-index --filter=@repo/ui
 - `@repo/typescript-config`: TypeScript 설정
 - `@repo/tailwind-config`: Tailwind CSS 설정
 
-## 🎯 구현된 기능
-
-### 개발 도구
-- [x] **JSON Formatter**: JSON 데이터를 보기 좋게 정렬하고 포맷팅
-- [x] **Base64 Encoder/Decoder**: Base64 인코딩/디코딩 기능
-- [x] **JWT Encoder/Decoder**: JWT 토큰 디코딩 및 검증 기능
-- [x] **Regex Tester**: 정규식 테스트 및 유효성 검사 도구
-- [x] **Timestamp Converter**: Unix timestamp ↔ 날짜 변환 도구
-- [x] **Diff Comparator**: 두 텍스트 간의 차이점 비교 및 하이라이팅
-- [x] **Web Editor**: 실시간 HTML 에디터 (TipTap 기반)
-- [x] **CVE Viewer**: NVD API를 통한 CVE 데이터 조회 및 무한스크롤
-
-### 계획 중인 기능
-- [ ] **타입 생성기**: Backend API 응답값에서 key-value 추출해서 적절한 타입으로 만들어주는 기능
-- [ ] **Color Picker**: 색상 선택 및 변환 도구
-- [ ] **QR Code Generator**: QR 코드 생성기
-
 ## 🔗 관련 링크
 
-- [Dev Kit App README](./apps/dev-kit/README.md)
-- [Turborepo Documentation](https://turborepo.com/docs)
+- [Supabase Documentation](https://supabase.com/docs)
+- [Kakao Developers](https://developers.kakao.com/)
+- [Google Cloud Vision API](https://cloud.google.com/vision)
 - [Next.js Documentation](https://nextjs.org/docs)
-- [TipTap Editor](https://tiptap.dev/docs/editor/getting-started/install/react)
+- [Tailwind CSS](https://tailwindcss.com/docs)
