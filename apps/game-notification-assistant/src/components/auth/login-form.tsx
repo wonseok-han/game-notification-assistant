@@ -36,7 +36,6 @@ export function LoginForm() {
     setIsLoading(true);
     setLoading(true);
 
-    router.replace('/dashboard');
     try {
       const user = await loginUser({ email, password });
 
