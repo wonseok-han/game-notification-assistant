@@ -47,7 +47,8 @@ export function ActionButton({
   feedbackText,
   onClick,
   size = 'md',
-  useFeedback = true,
+  type = 'button',
+  useFeedback = type === 'submit' ? false : true,
   variant = 'primary',
   ...props
 }: ActionButtonProps) {
@@ -77,6 +78,7 @@ export function ActionButton({
       className={`text-white rounded transition-all ${variantClass} ${sizeClass} ${disabledClass} ${className}`}
       disabled={isActive || disabled}
       onClick={handleClick}
+      type={type}
     >
       {isActive && feedbackText ? `✓ ${feedbackText}` : children}
     </button>
