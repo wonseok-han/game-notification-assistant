@@ -1,7 +1,27 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
-export async function POST(request: Request) {
+import { createClientServer } from '@/utils/supabase/server';
+
+interface NotificationTime {
+  id: string;
+  scheduled_time: string;
+  status: string;
+  is_enabled: boolean;
+  raw_text: string | null;
+  label: string | null;
+}
+
+interface GameNotification {
+  id: string;
+  title: string;
+  description: string | null;
+  game_name: string;
+  image_url: string | null;
+  notification_times: NotificationTime[] | null;
+}
+
+export async function POST() {
   try {
     const cookieStore = await cookies();
     let accessToken = cookieStore.get('kakao_access_token');
@@ -74,11 +94,135 @@ export async function POST(request: Request) {
       );
     }
 
-    const { message = '테스트 알림입니다! 🎮' } = await request.json();
+    // Supabase 클라이언트 생성
+    const supabase = await createClientServer();
 
-    // 카카오톡 채널 메시지 전송
+    // 현재 사용자 정보 가져오기
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
 
-    // 임시로 기존 메모 API 사용 (채널 메시지 API 문제 해결 전까지)
+    if (userError || !user) {
+      return NextResponse.json(
+        { success: false, message: '사용자 인증이 필요합니다.' },
+        { status: 401 }
+      );
+    }
+
+    // 사용자의 게임 알림 데이터 조회
+    const { data: notifications, error: notificationsError } = await supabase
+      .from('game_notifications')
+      .select(
+        `
+        *,
+        notification_times (
+          id,
+          scheduled_time,
+          status,
+          is_enabled,
+          raw_text,
+          label
+        )
+      `
+      )
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(5); // 최근 5개 알림만 조회
+
+    if (notificationsError) {
+      console.error('알림 데이터 조회 오류:', notificationsError);
+      return NextResponse.json(
+        { success: false, message: '알림 데이터를 가져올 수 없습니다.' },
+        { status: 500 }
+      );
+    }
+
+    // 알림 데이터가 없는 경우
+    if (!notifications || notifications.length === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: '전송할 알림이 없습니다. 먼저 게임 알림을 생성해주세요.',
+        },
+        { status: 404 }
+      );
+    }
+
+    // 테스트용으로 첫 번째 알림을 선택하여 메시지 생성
+    const testNotification = notifications[0] as GameNotification;
+    const enabledTimes =
+      testNotification.notification_times?.filter(
+        (time: NotificationTime) => time.is_enabled
+      ) || [];
+
+    // 메시지 구성
+    let message = '';
+
+    // 게임 이름과 알림 제목 조합
+    if (testNotification.description) {
+      message += `${testNotification.game_name}(${testNotification.title})에서 설정한 `;
+    } else {
+      message += `${testNotification.game_name}에서 설정한 `;
+    }
+
+    // 설정된 시간 알림 설명/컨텍스트
+    if (enabledTimes.length > 0) {
+      const firstTime = enabledTimes[0];
+      if (firstTime?.raw_text) {
+        message += `"${firstTime.raw_text}"`;
+      } else if (firstTime?.label) {
+        message += `"${firstTime.label}"`;
+      } else {
+        message += `"알림"`;
+      }
+      message += `시간이 도래했어요!!\n\n`;
+
+      // 시간 정보
+      if (firstTime) {
+        message += `시간: ${new Date(firstTime.scheduled_time).toLocaleString(
+          'ko-KR',
+          {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+          }
+        )}`;
+      }
+
+      // 추가 시간 정보가 있는 경우
+      if (enabledTimes.length > 1) {
+        message += `\n\n추가 알림 시간:\n`;
+        enabledTimes.slice(1).forEach((time, index) => {
+          const scheduledTime = new Date(time.scheduled_time);
+          const localTime = scheduledTime.toLocaleString('ko-KR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+          });
+
+          message += `${index + 2}. ${localTime}`;
+          if (time.raw_text) {
+            message += ` (${time.raw_text})`;
+          }
+          if (time.label) {
+            message += ` - ${time.label}`;
+          }
+          message += `\n`;
+        });
+      }
+    } else {
+      message += `"알림"시간이 도래했어요!!\n\n`;
+      message += `시간: 설정된 알림 시간이 없습니다.`;
+    }
+
+    // 카카오톡 메모 API로 메시지 전송
     const apiUrl = 'https://kapi.kakao.com/v2/api/talk/memo/default/send';
     const requestBody = new URLSearchParams({
       template_object: JSON.stringify({
@@ -96,7 +240,8 @@ export async function POST(request: Request) {
     console.log('카카오 API 호출 정보:', {
       apiUrl,
       accessToken: `${accessToken.value.substring(0, 10)}...`,
-      requestBody: requestBody.toString(),
+      messageLength: message.length,
+      notificationCount: notifications.length,
     });
 
     const response = await fetch(apiUrl, {
@@ -121,7 +266,13 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: '테스트 알림이 전송되었습니다!',
+      message: '실제 게임 알림 데이터로 테스트 알림이 전송되었습니다!',
+      data: {
+        notificationTitle: testNotification.title,
+        gameName: testNotification.game_name,
+        timeCount: enabledTimes.length,
+        messagePreview: `${message.substring(0, 100)}...`,
+      },
     });
   } catch (error) {
     console.error('테스트 알림 전송 오류:', error);
