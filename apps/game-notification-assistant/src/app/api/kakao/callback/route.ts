@@ -32,7 +32,9 @@ export async function GET(request: NextRequest) {
       }),
     });
 
+    console.log('Kakao tokenData Response:', tokenResponse);
     const tokenData = await tokenResponse.json();
+    console.log('Kakao tokenData Json:', tokenData);
 
     if (!tokenResponse.ok) {
       console.error('Kakao token error:', tokenData);
