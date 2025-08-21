@@ -21,11 +21,11 @@ export async function GET(request: NextRequest) {
     const tokenResponse = await fetch('https://kauth.kakao.com/oauth/token', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
       },
       body: new URLSearchParams({
         grant_type: 'authorization_code',
-        client_id: process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY!,
+        client_id: process.env.KAKAO_REST_API_KEY!,
         client_secret: process.env.KAKAO_CLIENT_SECRET!,
         code,
         redirect_uri: `${process.env.NEXT_PUBLIC_SITE_URL}/api/kakao/callback`,
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     const userInfoResponse = await fetch('https://kapi.kakao.com/v2/user/me', {
       headers: {
         Authorization: `Bearer ${tokenData.access_token}`,
-        'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+        'Content-Type': 'application/json',
       },
     });
 
