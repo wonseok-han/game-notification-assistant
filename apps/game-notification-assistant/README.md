@@ -20,6 +20,7 @@
 - **인증**: Supabase Auth + 서버 전용 처리
 - **타입 안전성**: TypeScript 5.8.2
 - **OCR 서비스**: Google Cloud Vision API
+- **Cron Job**: cron-job
 - **메시징**: KakaoTalk API
 - **배포**: Vercel
 
@@ -29,6 +30,7 @@
 - pnpm 9.0.0 이상
 - Supabase 계정 및 프로젝트
 - Google Cloud Vision API 키
+- cron-job 계정 및 설정
 - Kakao Developers 앱 설정
 
 ## 🛠️ 설치 및 설정
@@ -43,9 +45,13 @@ pnpm install
 ### 2. Supabase 설정
 
 1. [Supabase](https://supabase.com)에서 새 프로젝트 생성
-2. 프로젝트 설정에서 API 키 확인
+2. 프로젝트 설정에서 API 키 확인:
+   - **Project URL**: `NEXT_PUBLIC_SUPABASE_URL`에 설정
+   - **anon/public key**: `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`에 설정
+   - **service_role key**: `SUPABASE_SECRET_KEY`에 설정
 3. SQL 편집기에서 `supabase/schema.sql` 실행
 4. Authentication > Settings에서 이메일 확인 활성화 (선택사항)
+5. **중요**: `SUPABASE_SECRET_KEY`는 서버 전용으로 사용되며 클라이언트에 노출하면 안 됩니다
 
 ### 3. 환경 변수 설정
 
@@ -53,20 +59,24 @@ pnpm install
 
 ```env
 # Supabase 설정
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url                    # Supabase 프로젝트 URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key    # 클라이언트용 공개 키 (anon key)
+SUPABASE_SECRET_KEY=your_supabase_secret_key                          # 서버 전용 비밀 키 (service_role key)
 
 # 애플리케이션 환경
-NODE_ENV=development
-NEXT_PUBLIC_SITE_URL=your_deployed_site_url
+NODE_ENV=development                                                   # 개발/프로덕션 환경 구분
+NEXT_PUBLIC_SITE_URL=your_deployed_site_url                          # 배포된 사이트 URL
+NEXT_PUBLIC_API_BASE_URL=http://localhost:3000                       # API 기본 URL (개발용)
 
 # 카카오톡 API 설정
-NEXT_PUBLIC_KAKAO_REST_API_KEY=your_kakao_rest_api_key
-KAKAO_CLIENT_SECRET=your_kakao_client_secret
+KAKAO_REST_API_KEY=your_kakao_rest_api_key                          # 카카오 REST API 키
+KAKAO_CLIENT_SECRET=your_kakao_client_secret                         # 카카오 클라이언트 시크릿
 
 # Google Cloud Vision API
-GOOGLE_CLOUD_API_KEY=your_google_cloud_api_key
+GOOGLE_CLOUD_API_KEY=your_google_cloud_api_key                       # Google Cloud Vision API 키
+
+# Cron Job 설정
+CRON_SECRET=your_cron_secret_key                                     # Cron Job 인증용 비밀키
 ```
 
 ### 4. 개발 서버 실행
@@ -93,6 +103,35 @@ pnpm dev
 - 게임 스크린샷과 함께 메시지 전송
 - "나에게 보내기" API를 통한 개인 알림
 - 자동 토큰 갱신 및 연결 상태 관리
+
+## ⏰ Cron Job 설정
+
+### cron-job.org 설정
+
+1. [cron-job.org](https://cron-job.org)에서 계정 생성
+2. 새 cron job 생성
+3. URL 설정: `{your-domain}/api/cron/notifications`
+4. HTTP Method: `GET`
+5. 실행 주기: 5분마다
+6. Headers 설정:
+   ```
+   Authorization: Bearer your_cron_secret_key
+   ```
+
+### 보안 설정
+
+- `CRON_SECRET` 환경변수에 강력한 비밀키 설정
+- cron-job.org에서만 API 호출 가능
+- 10분 전부터 현재까지의 대기 중인 알림 처리
+- 활성 상태인 게임 알림만 대상으로 처리
+
+### 동작 방식
+
+- **실행 주기**: 5분마다 자동 실행
+- **조회 범위**: 현재 시간 기준 10분 전부터
+- **처리 대상**: `status = 'pending'`, `is_enabled = true`, `is_active = true`
+- **알림 전송**: 카카오톡 "나에게 보내기" API 사용
+- **상태 업데이트**: 성공 시 `sent`, 실패 시 `failed`로 자동 업데이트
 
 ## 🖼️ OCR 및 시간 추출
 
@@ -200,18 +239,22 @@ src/
 
 ```env
 # Supabase 설정
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url                    # Supabase 프로젝트 URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key    # 클라이언트용 공개 키 (anon key)
+SUPABASE_SECRET_KEY=your_supabase_secret_key                          # 서버 전용 비밀 키 (service_role key)
 
 # 카카오톡 API 설정
-NEXT_PUBLIC_KAKAO_REST_API_KEY=your_kakao_rest_api_key
-KAKAO_CLIENT_SECRET=your_kakao_client_secret
+KAKAO_REST_API_KEY=your_kakao_rest_api_key                          # 카카오 REST API 키
+KAKAO_CLIENT_SECRET=your_kakao_client_secret                         # 카카오 클라이언트 시크릿
 
 # Google Cloud Vision API
-GOOGLE_CLOUD_API_KEY=your_google_cloud_api_key
+GOOGLE_CLOUD_API_KEY=your_google_cloud_api_key                       # Google Cloud Vision API 키
+
+# Cron Job 설정
+CRON_SECRET=your_cron_secret_key                                     # Cron Job 인증용 비밀키
 
 # 애플리케이션 설정
-NEXT_PUBLIC_SITE_URL=https://your-domain.vercel.app
-NODE_ENV=production
+NEXT_PUBLIC_SITE_URL=https://your-domain.vercel.app                  # 배포된 사이트 URL
+NEXT_PUBLIC_API_BASE_URL=https://your-domain.vercel.app              # API 기본 URL (프로덕션용)
+NODE_ENV=production                                                   # 프로덕션 환경
 ```

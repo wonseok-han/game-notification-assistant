@@ -25,6 +25,7 @@
 | **상태 관리**     | `Zustand@5.0.6`                          |
 | **데이터베이스**  | `Supabase` (PostgreSQL)                  |
 | **OCR 서비스**    | `Google Cloud Vision API`                |
+| **Cron Job**    | `cron-job`                |
 
 ## 📖 프로젝트 개요
 
@@ -197,3 +198,4 @@ pnpm run auto-index --filter=@repo/ui
 - [Google Cloud Vision API](https://cloud.google.com/vision)
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Tailwind CSS](https://tailwindcss.com/docs)
+- [cron-job](https://cron-job.org)
