@@ -5,35 +5,52 @@ import { NextResponse } from 'next/server';
 const CRON_LOOKBACK_MINUTES = 10; // 10분 전부터 조회
 
 // ===== 카카오 토큰 갱신 함수 =====
+interface TokenRefreshResult {
+  access_token: string | null;
+  refresh_token?: string;
+  expires_in?: number;
+}
+
 async function refreshKakaoToken(
-  _refreshToken: string
-): Promise<string | null> {
+  refreshToken: string
+): Promise<TokenRefreshResult> {
   try {
-    const refreshResponse = await fetch(
-      `${process.env.NEXT_PUBLIC_SITE_URL}/api/kakao/refresh-token`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ provider: 'kakao' }),
-      }
-    );
+    // 카카오 토큰 갱신 API 직접 호출
+    const response = await fetch('https://kauth.kakao.com/oauth/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        grant_type: 'refresh_token',
+        client_id: process.env.KAKAO_REST_API_KEY!,
+        client_secret: process.env.KAKAO_CLIENT_SECRET!,
+        refresh_token: refreshToken,
+      }),
+    });
 
-    if (!refreshResponse.ok) {
-      console.error('토큰 갱신 실패:', refreshResponse.status);
-      return null;
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('카카오 토큰 갱신 실패:', errorData);
+      return { access_token: null };
     }
 
-    const refreshData = await refreshResponse.json();
-    if (refreshData.success && refreshData.data) {
-      return refreshData.data.accessToken;
-    }
+    const data = await response.json();
+    console.log('카카오 토큰 갱신 성공:', {
+      access_token: data.access_token ? '갱신됨' : '없음',
+      refresh_token: data.refresh_token ? '갱신됨' : '없음',
+      expires_in: data.expires_in,
+    });
 
-    return null;
+    // 토큰 정보 전체 반환
+    return {
+      access_token: data.access_token || null,
+      refresh_token: data.refresh_token,
+      expires_in: data.expires_in,
+    };
   } catch (error) {
-    console.error('토큰 갱신 중 오류:', error);
-    return null;
+    console.error('카카오 토큰 갱신 오류:', error);
+    return { access_token: null };
   }
 }
 
@@ -267,21 +284,56 @@ export async function GET(request: Request) {
           console.log(`토큰 만료됨, 갱신 시도: 사용자 ${notification.user_id}`);
 
           if (oauthConnection.refresh_token) {
-            const newAccessToken = await refreshKakaoToken(
+            const tokenResult = await refreshKakaoToken(
               oauthConnection.refresh_token
             );
-            if (newAccessToken) {
-              accessToken = newAccessToken;
+            if (tokenResult.access_token) {
+              accessToken = tokenResult.access_token;
               console.log(`토큰 갱신 성공: 사용자 ${notification.user_id}`);
 
               // DB에 새로운 토큰 정보 업데이트
-              await supabase
+              const updateData: Record<string, unknown> = {
+                access_token: tokenResult.access_token,
+                updated_at: new Date().toISOString(),
+              };
+
+              // 새로운 refresh_token이 있다면 함께 업데이트
+              if (tokenResult.refresh_token) {
+                updateData.refresh_token = tokenResult.refresh_token;
+                console.log(
+                  `새로운 refresh_token도 업데이트됨: 사용자 ${notification.user_id}`
+                );
+              }
+
+              // expires_at 업데이트 (현재 시간 + expires_in)
+              if (tokenResult.expires_in) {
+                const newExpiresAt = new Date(
+                  Date.now() + tokenResult.expires_in * 1000
+                );
+                updateData.expires_at = newExpiresAt.toISOString();
+                console.log(
+                  `새로운 expires_at 설정: ${newExpiresAt.toISOString()}`
+                );
+              }
+
+              const { error: updateError } = await supabase
                 .from('oauth_connections')
                 .update({
-                  access_token: newAccessToken,
+                  ...updateData,
                   updated_at: new Date().toISOString(),
                 })
                 .eq('id', oauthConnection.id);
+
+              if (updateError) {
+                console.error(
+                  `토큰 정보 DB 업데이트 실패: 사용자 ${notification.user_id}`,
+                  updateError
+                );
+              } else {
+                console.log(
+                  `토큰 정보 DB 업데이트 성공: 사용자 ${notification.user_id}`
+                );
+              }
             } else {
               console.error(`토큰 갱신 실패: 사용자 ${notification.user_id}`);
 
