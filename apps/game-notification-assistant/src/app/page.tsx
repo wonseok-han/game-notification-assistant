@@ -1,5 +1,6 @@
 'use client';
 
+import { AppHeader } from '@components';
 import { useAuthStore } from '@store';
 import { useRouter } from 'next/navigation';
 
@@ -36,47 +37,14 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* 헤더 */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-white/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">
-                🎮 게임 알림 어시스턴트
-              </h1>
-            </div>
-
-            {user ? (
-              <div className="flex items-center space-x-4">
-                <span className="text-gray-700">
-                  안녕하세요, {user.username}님!
-                </span>
-                <button
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer"
-                  onClick={handleGoToDashboard}
-                >
-                  대시보드로 이동
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-3">
-                <button
-                  className="text-gray-700 hover:text-gray-900 px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer hover:underline"
-                  onClick={handleGoToLogin}
-                >
-                  로그인
-                </button>
-                <button
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer"
-                  onClick={handleGoToRegister}
-                >
-                  회원가입
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+      <AppHeader
+        onGoDashboard={user ? handleGoToDashboard : undefined}
+        onLogin={!user ? handleGoToLogin : undefined}
+        onRegister={!user ? handleGoToRegister : undefined}
+        title="게임 알림 어시스턴트"
+        username={user?.username ?? null}
+        variant="translucent"
+      />
 
       {/* 메인 콘텐츠 */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

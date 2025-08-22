@@ -1,57 +1,34 @@
 'use client';
 
 import {
+  AppHeader,
   KakaoConnection,
   NotificationForm,
   NotificationList,
 } from '@components';
-import { ActionButton } from '@repo/ui';
 import { logoutUser } from '@services/auth';
-
-import { useAuthStore } from '@/store/auth-store';
+import { useAuthStore } from '@store';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 상단 헤더 */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">
-                🎮 게임 알림 어시스턴트
-              </h1>
-            </div>
-
-            {/* 사용자 프로필 및 로그아웃 */}
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">
-                안녕하세요, {user?.username || '사용자'}님!
-              </span>
-              <ActionButton
-                onClick={async () => {
-                  try {
-                    // 로그아웃 API 호출
-                    await logoutUser();
-                  } catch (error) {
-                    console.error('로그아웃 오류:', error);
-                  } finally {
-                    // 홈페이지로 이동
-                    useAuthStore.getState().reset();
-                    window.location.href = '/';
-                  }
-                }}
-                size="lg"
-                variant="danger"
-              >
-                로그아웃
-              </ActionButton>
-            </div>
-          </div>
-        </div>
-      </header>
+      <AppHeader
+        onLogout={async () => {
+          try {
+            await logoutUser();
+          } catch (error) {
+            console.error('로그아웃 오류:', error);
+          } finally {
+            useAuthStore.getState().reset();
+            window.location.href = '/';
+          }
+        }}
+        title="게임 알림 어시스턴트"
+        username={user?.username ?? null}
+        variant="solid"
+      />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 페이지 헤더 */}
