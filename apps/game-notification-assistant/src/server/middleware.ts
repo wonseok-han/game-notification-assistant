@@ -38,6 +38,7 @@ const WHITE_LIST = [
   '/api/auth/logout', // 로그아웃
   '/api/auth/register', // 회원가입
   '/api/auth/verify', // 토큰 검증
+  '/api/cron/notifications', // 알림 전송
 ];
 
 /**
