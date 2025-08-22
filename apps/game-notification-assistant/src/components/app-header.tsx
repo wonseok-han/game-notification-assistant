@@ -1,5 +1,6 @@
 'use client';
 
+import { IconLogo } from '@assets/icons';
 import { ActionButton } from '@repo/ui';
 import Link from 'next/link';
 import React from 'react';
@@ -41,7 +42,10 @@ export function AppHeader({
         <div className="py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <Link href={isAuthenticated ? '/dashboard' : '/'}>
-              <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+              <div className="flex items-center gap-3">
+                <IconLogo />
+                <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+              </div>
             </Link>
 
             {/* 우측 액션 영역 */}
