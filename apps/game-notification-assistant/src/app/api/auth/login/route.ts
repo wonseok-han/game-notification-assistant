@@ -1,6 +1,4 @@
-import type { NextRequest } from 'next/server';
-
-import { createClientServer } from '@utils/supabase/server';
+import { MiddlewareWithPOST } from '@server/custom-method';
 import { NextResponse } from 'next/server';
 
 // ===== 로그인 요청 타입 =====
@@ -21,7 +19,7 @@ interface LoginResponse {
 }
 
 // ===== POST 메서드 - 로그인 처리 =====
-export async function POST(request: NextRequest) {
+export const POST = MiddlewareWithPOST(async (request) => {
   try {
     const { email, password }: LoginRequest = await request.json();
 
@@ -33,12 +31,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Supabase 클라이언트 생성
-    const supabase = await createClientServer();
-
-    // 사용자 인증
+    // 사용자 인증 (인증은 미들웨어에서 처리됨)
     const { data: authData, error: authError } =
-      await supabase.auth.signInWithPassword({
+      await request.auth.supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -62,7 +57,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 사용자 정보 조회
-    const { data: userData, error: userError } = await supabase
+    const { data: userData, error: userError } = await request.auth.supabase
       .from('users')
       .select('id, email, username')
       .eq('id', authData.user.id)
@@ -124,4 +119,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

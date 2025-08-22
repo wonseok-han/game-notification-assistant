@@ -1,6 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+
+  // 서버 fetch 로깅 완전 차단 (브라우저에는 영향 없음)
+  logging: {
+    fetches: {
+      fullUrl: false,
+    },
+  },
+
   turbopack: {
     rules: {
       '*.svg': {

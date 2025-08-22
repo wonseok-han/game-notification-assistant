@@ -1,6 +1,7 @@
+import { MiddlewareWithGET } from '@server/custom-method';
 import { NextResponse } from 'next/server';
 
-export async function GET() {
+export const GET = MiddlewareWithGET(async (_request) => {
   try {
     const clientId = process.env.KAKAO_REST_API_KEY;
     const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL}/api/kakao/callback`;
@@ -32,4 +33,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

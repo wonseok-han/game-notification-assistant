@@ -1,7 +1,6 @@
+import { MiddlewareWithPOST } from '@server/custom-method';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-
-import { createClientServer } from '@/utils/supabase/server';
 
 interface NotificationTime {
   id: string;
@@ -21,8 +20,9 @@ interface GameNotification {
   notification_times: NotificationTime[] | null;
 }
 
-export async function POST() {
+export const POST = MiddlewareWithPOST(async (request) => {
   try {
+    const { supabase, user } = request.auth;
     const cookieStore = await cookies();
     let accessToken = cookieStore.get('kakao_access_token');
     const expiresAt = cookieStore.get('kakao_expires_at');
@@ -94,21 +94,7 @@ export async function POST() {
       );
     }
 
-    // Supabase 클라이언트 생성
-    const supabase = await createClientServer();
-
-    // 현재 사용자 정보 가져오기
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      return NextResponse.json(
-        { success: false, message: '사용자 인증이 필요합니다.' },
-        { status: 401 }
-      );
-    }
+    // 사용자 인증은 이미 미들웨어에서 처리됨
 
     // 사용자의 게임 알림 데이터 조회
     const { data: notifications, error: notificationsError } = await supabase
@@ -281,4 +267,4 @@ export async function POST() {
       { status: 500 }
     );
   }
-}
+});

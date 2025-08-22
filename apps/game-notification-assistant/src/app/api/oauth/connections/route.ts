@@ -1,25 +1,10 @@
+import { MiddlewareWithPOST, MiddlewareWithGET } from '@server/custom-method';
 import { NextResponse } from 'next/server';
 
-import { createClientServer } from '@/utils/supabase/server';
-
 // ===== OAuth 연결 생성 =====
-export async function POST(request: Request) {
+export const POST = MiddlewareWithPOST(async (request) => {
   try {
-    const supabase = await createClientServer();
-
-    // 현재 인증된 사용자 확인
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { success: false, message: '인증이 필요합니다.' },
-        { status: 401 }
-      );
-    }
-
+    const { supabase, user } = request.auth;
     const { accessToken, expiresAt, provider, providerUserId, refreshToken } =
       await request.json();
 
@@ -73,26 +58,12 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-}
+});
 
 // ===== OAuth 연결 조회 =====
-export async function GET(request: Request) {
+export const GET = MiddlewareWithGET(async (request) => {
   try {
-    const supabase = await createClientServer();
-
-    // 현재 인증된 사용자 확인
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { success: false, message: '인증이 필요합니다.' },
-        { status: 401 }
-      );
-    }
-
+    const { supabase, user } = request.auth;
     const { searchParams } = new URL(request.url);
     const provider = searchParams.get('provider');
 
@@ -126,4 +97,4 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
-}
+});

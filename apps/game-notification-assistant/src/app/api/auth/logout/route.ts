@@ -1,6 +1,4 @@
-import type { NextRequest } from 'next/server';
-
-import { createClientServer } from '@utils/supabase/server';
+import { MiddlewareWithPOST } from '@server/custom-method';
 import { NextResponse } from 'next/server';
 
 // ===== 로그아웃 응답 타입 =====
@@ -10,12 +8,10 @@ interface LogoutResponse {
 }
 
 // ===== POST 메서드 - 로그아웃 처리 =====
-export async function POST(_request: NextRequest) {
+export const POST = MiddlewareWithPOST(async (request) => {
   try {
-    // Supabase 클라이언트 생성
-    const supabase = await createClientServer();
-
-    // Supabase 로그아웃 처리
+    const { supabase } = request.auth;
+    // Supabase 로그아웃 처리 (인증은 미들웨어에서 처리됨)
     const { error } = await supabase.auth.signOut();
 
     if (error) {
@@ -42,4 +38,4 @@ export async function POST(_request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

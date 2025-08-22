@@ -1,6 +1,4 @@
-import type { NextRequest } from 'next/server';
-
-import { createClientServer } from '@utils/supabase/server';
+import { MiddlewareWithGET, MiddlewareWithPOST } from '@server/custom-method';
 import { NextResponse } from 'next/server';
 
 // ===== 게임 알림 생성 요청 타입 =====
@@ -18,21 +16,9 @@ interface CreateNotificationRequest {
 }
 
 // ===== POST 메서드 - 알림 생성 =====
-export async function POST(request: NextRequest) {
+export const POST = MiddlewareWithPOST(async (request) => {
   try {
-    const supabase = await createClientServer();
-
-    // 세션 확인
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      return NextResponse.json(
-        { success: false, message: '로그인이 필요합니다.' },
-        { status: 401 }
-      );
-    }
-
+    const { supabase, user } = request.auth;
     const notificationData: CreateNotificationRequest = await request.json();
 
     // 입력 검증
@@ -47,7 +33,7 @@ export async function POST(request: NextRequest) {
     const { data: notification, error } = await supabase
       .from('game_notifications')
       .insert({
-        user_id: session.user.id,
+        user_id: user.id,
         title: notificationData.title,
         description: notificationData.description,
         game_name: notificationData.gameName,
@@ -109,23 +95,12 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
 // ===== GET 메서드 - 사용자의 알림 목록 조회 =====
-export async function GET() {
+export const GET = MiddlewareWithGET(async (request) => {
   try {
-    const supabase = await createClientServer();
-
-    // 세션 확인
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      return NextResponse.json(
-        { success: false, message: '로그인이 필요합니다.' },
-        { status: 401 }
-      );
-    }
+    const { supabase, user } = request.auth;
 
     // 사용자의 게임 알림 목록 조회 (notification_times 포함)
     const { data: notifications, error } = await supabase
@@ -147,7 +122,7 @@ export async function GET() {
         )
       `
       )
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -170,4 +145,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

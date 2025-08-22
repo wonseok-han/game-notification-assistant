@@ -1,8 +1,10 @@
+import { MiddlewareWithGET } from '@server/custom-method';
 import { NextResponse } from 'next/server';
 
 import { createClientServer } from '@/utils/supabase/server';
 
-export async function GET(request: Request) {
+// Cron job용 API - 인증 없이 실행
+export const GET = MiddlewareWithGET(async (request) => {
   try {
     // Vercel Cron에서 호출하는 경우 Authorization 헤더 확인
     const authHeader = request.headers.get('authorization');
@@ -103,4 +105,4 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
-}
+});

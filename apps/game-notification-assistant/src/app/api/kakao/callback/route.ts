@@ -1,11 +1,8 @@
-import type { NextRequest } from 'next/server';
-
+import { MiddlewareWithGET } from '@server/custom-method';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
-import { createClientServer } from '@/utils/supabase/server';
-
-export async function GET(request: NextRequest) {
+export const GET = MiddlewareWithGET(async (request) => {
   try {
     const url = new URL(request.url);
     const code = url.searchParams.get('code');
@@ -70,31 +67,24 @@ export async function GET(request: NextRequest) {
 
     // 3. OAuth 연결 정보를 DB에 저장
     try {
-      const supabase = await createClientServer();
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser();
+      const { supabase, user } = request.auth;
+      await supabase.from('oauth_connections').upsert(
+        {
+          user_id: user.id,
+          provider: 'kakao',
+          provider_user_id: kakaoUserId,
+          access_token: tokenData.access_token,
+          refresh_token: tokenData.refresh_token,
+          expires_at: expiresAt.toISOString(),
+          is_connected: true,
+          connected_at: new Date().toISOString(),
+        },
+        {
+          onConflict: 'user_id,provider',
+        }
+      );
 
-      if (!authError && user) {
-        await supabase.from('oauth_connections').upsert(
-          {
-            user_id: user.id,
-            provider: 'kakao',
-            provider_user_id: kakaoUserId,
-            access_token: tokenData.access_token,
-            refresh_token: tokenData.refresh_token,
-            expires_at: expiresAt.toISOString(),
-            is_connected: true,
-            connected_at: new Date().toISOString(),
-          },
-          {
-            onConflict: 'user_id,provider',
-          }
-        );
-
-        console.log('OAuth 연결 정보 저장 완료');
-      }
+      console.log('OAuth 연결 정보 저장 완료');
     } catch (error) {
       console.error('OAuth 연결 정보 저장 실패:', error);
       // OAuth 연결 저장 실패해도 토큰은 정상적으로 저장
@@ -160,4 +150,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

@@ -1,7 +1,8 @@
+import { MiddlewareWithGET } from '@server/custom-method';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
-export async function GET() {
+export const GET = MiddlewareWithGET(async (_request) => {
   try {
     const cookieStore = await cookies();
 
@@ -24,4 +25,4 @@ export async function GET() {
     console.error('Kakao status check error:', error);
     return NextResponse.json({ connected: false }, { status: 500 });
   }
-}
+});

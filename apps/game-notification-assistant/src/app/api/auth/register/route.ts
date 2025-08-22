@@ -1,6 +1,4 @@
-import type { NextRequest } from 'next/server';
-
-import { createClientServer } from '@utils/supabase/server';
+import { MiddlewareWithPOST } from '@server/custom-method';
 import { NextResponse } from 'next/server';
 
 // ===== 회원가입 요청 타입 =====
@@ -22,7 +20,7 @@ interface RegisterResponse {
 }
 
 // ===== POST 메서드 - 회원가입 처리 =====
-export async function POST(request: NextRequest) {
+export const POST = MiddlewareWithPOST(async (request) => {
   try {
     const { email, password, username }: RegisterRequest = await request.json();
 
@@ -62,11 +60,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Supabase 클라이언트 생성
-    const supabase = await createClientServer();
-
-    // 기존 사용자 확인
-    const { data: existingUser } = await supabase
+    // 기존 사용자 확인 (인증은 미들웨어에서 처리됨)
+    const { data: existingUser } = await request.auth.supabase
       .from('users')
       .select('id')
       .or(`email.eq.${email},username.eq.${username}`)
@@ -83,15 +78,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Supabase Auth를 통한 사용자 생성
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          username,
+    const { data: authData, error: authError } =
+      await request.auth.supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username,
+          },
         },
-      },
-    });
+      });
 
     if (authError) {
       console.error('Supabase Auth 오류:', authError);
@@ -109,7 +105,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 사용자 정보를 users 테이블에 저장
-    const { data: userData, error: userError } = await supabase
+    const { data: userData, error: userError } = await request.auth.supabase
       .from('users')
       .insert({
         id: authData.user.id,
@@ -152,4 +148,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

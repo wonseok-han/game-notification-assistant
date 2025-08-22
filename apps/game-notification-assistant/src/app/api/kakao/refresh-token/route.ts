@@ -1,26 +1,12 @@
+import { MiddlewareWithPOST } from '@server/custom-method';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
-import { createClientServer } from '@/utils/supabase/server';
-
 // ===== 카카오 토큰 재갱신 API =====
-export async function POST() {
+export const POST = MiddlewareWithPOST(async (request) => {
   try {
+    const { supabase, user } = request.auth;
     const cookieStore = await cookies();
-    const supabase = await createClientServer();
-
-    // 현재 인증된 사용자 확인
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { success: false, message: '인증이 필요합니다.' },
-        { status: 401 }
-      );
-    }
 
     // DB에서 카카오 OAuth 연결 정보 조회
     const { data: oauthData, error: oauthError } = await supabase
@@ -144,4 +130,4 @@ export async function POST() {
       { status: 500 }
     );
   }
-}
+});

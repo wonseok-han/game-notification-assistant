@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 
+import { MiddlewareWithPOST } from '@server/custom-method';
 import { NextResponse } from 'next/server';
 
 /**
@@ -7,7 +8,7 @@ import { NextResponse } from 'next/server';
  * @param {NextRequest} request - 요청 객체
  * @returns {NextResponse} 응답 객체
  */
-export async function POST(request: NextRequest) {
+export const POST = MiddlewareWithPOST(async (request: NextRequest) => {
   try {
     const { image } = await request.json();
 
@@ -120,7 +121,7 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
 // 허용 문자 비율 계산 함수
 function calculateAllowedCharRatio(line: string): number {
