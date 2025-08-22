@@ -5,10 +5,10 @@ import {
 import { NextResponse } from 'next/server';
 
 // ===== PATCH 메서드 - 알림 수정 =====
-export const PATCH = MiddlewareWithPATCH<{ params: { id: string } }>(
+export const PATCH = MiddlewareWithPATCH<{ params: Promise<{ id: string }> }>(
   async (request, { params }) => {
     try {
-      const { id } = params;
+      const { id } = await params;
       const { supabase, user } = request.auth;
       const updateData = await request.json();
 
@@ -115,10 +115,10 @@ export const PATCH = MiddlewareWithPATCH<{ params: { id: string } }>(
 );
 
 // ===== DELETE 메서드 - 알림 삭제 =====
-export const DELETE = MiddlewareWithDELETE<{ params: { id: string } }>(
+export const DELETE = MiddlewareWithDELETE<{ params: Promise<{ id: string }> }>(
   async (request, { params }) => {
     try {
-      const { id } = params;
+      const { id } = await params;
       const { supabase, user } = request.auth;
 
       // 알림이 사용자 소유인지 확인
