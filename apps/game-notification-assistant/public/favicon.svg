@@ -1,42 +1,69 @@
 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
   <!-- 그라데이션 정의 -->
   <defs>
-    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#FFFFFF"/>
-      <stop offset="50%" style="stop-color:#F9FAFB"/>
-      <stop offset="100%" style="stop-color:#F3F4F6"/>
+    <linearGradient id="gamepadGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#374151"/>
+      <stop offset="100%" style="stop-color:#1f2937"/>
     </linearGradient>
-    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1F2937"/>
-      <stop offset="100%" style="stop-color:#000000"/>
+    <linearGradient id="joystickGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6b7280"/>
+      <stop offset="100%" style="stop-color:#4b5563"/>
     </linearGradient>
-    <linearGradient id="borderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#D1D5DB"/>
-      <stop offset="100%" style="stop-color:#E5E7EB"/>
+    <linearGradient id="buttonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f59e0b"/>
+      <stop offset="100%" style="stop-color:#d97706"/>
     </linearGradient>
+    <linearGradient id="clockGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6"/>
+      <stop offset="100%" style="stop-color:#1d4ed8"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="1" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
   </defs>
 
-  <!-- 완전한 원형 배경 -->
-  <circle cx="16" cy="16" r="15" fill="url(#bgGradient)" stroke="url(#borderGradient)" stroke-width="1"/>
+  <!-- 왼쪽 그립 (게임기 손잡이) - 불투명하게 -->
+  <rect x="1.5" y="13" width="6" height="16" rx="3" fill="url(#gamepadGradient)" filter="url(#shadow)"/>
+  <rect x="2" y="13" width="6" height="16" rx="3" fill="url(#gamepadGradient)"/>
 
-      <!-- 곡선 경로 정의 (아래쪽으로 휘는 호) -->
-  <path id="textCurve" d="M 6 22 Q 16 26 26 22" fill="none" stroke="none"/>
+  <!-- 오른쪽 그립 (게임기 손잡이) - 불투명하게 -->
+  <rect x="24.5" y="13" width="6" height="16" rx="3" fill="url(#gamepadGradient)" filter="url(#shadow)"/>
+  <rect x="24.5" y="13" width="6" height="16" rx="3" fill="url(#gamepadGradient)"/>
 
-    <!-- 소문자 텍스트 "hws" - 곡선을 따라 배치 -->
-  <text
-    font-family="'Inter', 'SF Pro', system-ui, sans-serif"
-    font-size="11"
-    font-weight="700"
-    text-anchor="middle"
-    fill="url(#textGradient)"
-    letter-spacing="1.8px">
-    <textPath href="#textCurve" startOffset="50%">hws</textPath>
-  </text>
+  <!-- 게임기 본체 (플레이스테이션 스타일) -->
+  <rect x="2" y="6" width="28" height="20" rx="10" fill="url(#gamepadGradient)" filter="url(#shadow)"/>
 
-  <!-- 미묘한 내부 하이라이트 원 -->
-  <circle cx="16" cy="16" r="14" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+  <!-- 게임기 테두리 -->
+  <rect x="2" y="6" width="28" height="20" rx="10" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
 
-  <!-- w의 상단 꼭지점 양쪽에 포인트 2개 -->
-  <circle cx="12.5" cy="11.5" r="2.0" fill="#000000" opacity="0.7"/>
-  <circle cx="19.5" cy="11.5" r="2.0" fill="#000000" opacity="0.7"/>
+  <!-- 왼쪽 조이스틱 -->
+  <circle cx="8" cy="16" r="3" fill="url(#joystickGradient)" filter="url(#shadow)"/>
+  <circle cx="8" cy="16" r="2" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+  <circle cx="8" cy="16" r="1" fill="url(#joystickGradient)" filter="url(#shadow)"/>
+
+  <!-- 오른쪽 방향키 (크로스 패드) -->
+  <rect x="22" y="14" width="2" height="2" fill="url(#buttonGradient)" filter="url(#shadow)"/>
+  <rect x="24" y="16" width="2" height="2" fill="url(#buttonGradient)" filter="url(#shadow)"/>
+  <rect x="22" y="18" width="2" height="2" fill="url(#buttonGradient)" filter="url(#shadow)"/>
+  <rect x="20" y="16" width="2" height="2" fill="url(#buttonGradient)" filter="url(#shadow)"/>
+
+  <!-- 중앙 시계 (게임기 화면 역할) -->
+  <circle cx="16" cy="16" r="6" fill="url(#clockGradient)" filter="url(#shadow)"/>
+
+  <!-- 시계 테두리 -->
+  <circle cx="16" cy="16" r="6" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+
+  <!-- 시계 바늘들 -->
+  <!-- 시침 (짧은 바늘) - 2시 방향 -->
+  <line x1="16" y1="16" x2="19" y2="13" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" opacity="0.9"/>
+  <!-- 분침 (긴 바늘) - 6시 방향 -->
+  <line x1="16" y1="16" x2="16" y2="19" stroke="#ffffff" stroke-width="0.8" stroke-linecap="round" opacity="0.9"/>
+  <!-- 초침 (가장 긴 바늘) - 10시 방향 -->
+  <line x1="16" y1="16" x2="13" y2="13" stroke="#e53e3e" stroke-width="0.6" stroke-linecap="round" opacity="0.8"/>
+
+  <!-- 시계 중앙 점 -->
+  <circle cx="16" cy="16" r="0.6" fill="#ffffff" opacity="0.9"/>
+
+  <!-- 게임기 내부 하이라이트 -->
+  <rect x="4" y="8" width="24" height="16" rx="8" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
 </svg>
