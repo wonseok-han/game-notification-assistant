@@ -1,11 +1,8 @@
 'use client';
 
-import {
-  AppHeader,
-  KakaoConnection,
-  NotificationForm,
-  NotificationList,
-} from '@components';
+import { AppHeader, KakaoConnection } from '@components';
+import { NotificationForm } from '@components/notifications/notification-form';
+import { NotificationList } from '@components/notifications/notification-list';
 import { logoutUser } from '@services/auth';
 import { useAuthStore } from '@store';
 

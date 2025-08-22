@@ -3,7 +3,6 @@ import { NextResponse } from 'next/server';
 
 // ===== 상수 정의 =====
 const CRON_LOOKBACK_MINUTES = 10; // 10분 전부터 조회
-const CRON_LOOKBACK_MESSAGE = '까지 10분 남았어요!!'; // 알림 메시지
 
 // ===== 카카오 토큰 갱신 함수 =====
 async function refreshKakaoToken(
@@ -71,7 +70,30 @@ async function sendKakaoNotification(
     } else {
       message += `"알림"`;
     }
-    message += `${CRON_LOOKBACK_MESSAGE}\n\n`;
+
+    // 실제 남은 시간 계산
+    const scheduledTime = new Date(notificationTime.scheduled_time);
+    const now = new Date();
+    const timeDiffMs = scheduledTime.getTime() - now.getTime();
+    const timeDiffMinutes = Math.max(0, Math.round(timeDiffMs / (1000 * 60)));
+
+    // 남은 시간에 따른 메시지 생성
+    let timeMessage = '';
+    if (timeDiffMinutes === 0) {
+      timeMessage = '지금이에요!!';
+    } else if (timeDiffMinutes < 60) {
+      timeMessage = `까지 ${timeDiffMinutes}분 남았어요!!`;
+    } else {
+      const hours = Math.floor(timeDiffMinutes / 60);
+      const minutes = timeDiffMinutes % 60;
+      if (minutes === 0) {
+        timeMessage = `까지 ${hours}시간 남았어요!!`;
+      } else {
+        timeMessage = `까지 ${hours}시간 ${minutes}분 남았어요!!`;
+      }
+    }
+
+    message += `${timeMessage}\n\n`;
 
     // 시간 정보
     message += `시간: ${new Date(
@@ -82,6 +104,7 @@ async function sendKakaoNotification(
       day: '2-digit',
       hour: '2-digit',
       minute: '2-digit',
+      second: '2-digit',
       hour12: false,
     })}`;
 
@@ -114,7 +137,17 @@ async function sendKakaoNotification(
       return false;
     }
 
-    return true;
+    const responseData = await response.json();
+    console.log('카카오톡 API 응답:', responseData);
+
+    // 응답에서 성공 여부 확인
+    if (responseData.result_code === 0) {
+      console.log('카카오톡 메시지 전송 성공');
+      return true;
+    }
+
+    console.error('카카오톡 메시지 전송 실패:', responseData);
+    return false;
   } catch (error) {
     console.error('카카오톡 메시지 전송 오류:', error);
     return false;
@@ -295,7 +328,9 @@ export async function GET(request: Request) {
 
         if (isNotificationSent) {
           // 알림 시간 상태를 sent로 업데이트
-          await supabase
+          console.log(`상태 업데이트 시도: ${notificationTime.id} -> sent`);
+
+          const { error: updateError } = await supabase
             .from('notification_times')
             .update({
               status: 'sent',
@@ -304,11 +339,22 @@ export async function GET(request: Request) {
             })
             .eq('id', notificationTime.id);
 
+          if (updateError) {
+            console.error(
+              `상태 업데이트 실패: ${notificationTime.id}`,
+              updateError
+            );
+          } else {
+            console.log(`상태 업데이트 성공: ${notificationTime.id} -> sent`);
+          }
+
           successCount++;
           console.log(`알림 발송 성공: ${notificationTime.id}`);
         } else {
           // 발송 실패 시 상태를 failed로 업데이트
-          await supabase
+          console.log(`상태 업데이트 시도: ${notificationTime.id} -> failed`);
+
+          const { error: updateError } = await supabase
             .from('notification_times')
             .update({
               status: 'failed',
@@ -316,6 +362,15 @@ export async function GET(request: Request) {
               updated_at: new Date().toISOString(),
             })
             .eq('id', notificationTime.id);
+
+          if (updateError) {
+            console.error(
+              `상태 업데이트 실패: ${notificationTime.id}`,
+              updateError
+            );
+          } else {
+            console.log(`상태 업데이트 성공: ${notificationTime.id} -> failed`);
+          }
 
           failCount++;
           console.log(`알림 발송 실패: ${notificationTime.id}`);

@@ -12,6 +12,9 @@ export const PATCH = MiddlewareWithPATCH<{ params: Promise<{ id: string }> }>(
       const { supabase, user } = request.auth;
       const updateData = await request.json();
 
+      // 디버깅: 받은 데이터 확인
+      console.log('PATCH 요청 데이터:', { id, updateData, userId: user.id });
+
       // 알림이 사용자 소유인지 확인
       const { data: existingNotification, error: fetchError } = await supabase
         .from('game_notifications')
@@ -28,11 +31,41 @@ export const PATCH = MiddlewareWithPATCH<{ params: Promise<{ id: string }> }>(
       }
 
       // 트랜잭션 시작: 알림과 알림 시간을 함께 업데이트
+      const updateFields: Record<string, unknown> = {
+        updated_at: new Date().toISOString(),
+      };
+
+      // title이 제공된 경우 업데이트
+      if (updateData.title !== undefined) {
+        updateFields.title = updateData.title;
+      }
+
+      // is_active가 제공된 경우 업데이트
+      if (updateData.is_active !== undefined) {
+        updateFields.is_active = updateData.is_active;
+      }
+
+      // description이 제공된 경우 업데이트
+      if (updateData.description !== undefined) {
+        updateFields.description = updateData.description;
+      }
+
+      // gameName이 제공된 경우 업데이트
+      if (updateData.gameName !== undefined) {
+        updateFields.game_name = updateData.gameName;
+      }
+
+      // imageUrl이 제공된 경우 업데이트
+      if (updateData.imageUrl !== undefined) {
+        updateFields.image_url = updateData.imageUrl;
+      }
+
+      // 디버깅: 업데이트할 필드들 확인
+      console.log('업데이트할 필드들:', updateFields);
+
       const { data: updatedNotification, error: updateError } = await supabase
         .from('game_notifications')
-        .update({
-          updated_at: new Date().toISOString(),
-        })
+        .update(updateFields)
         .eq('id', id)
         .eq('user_id', user.id)
         .select()
