@@ -45,10 +45,16 @@ export function NotificationEditModal({
 
       // notification_times 초기화
       if (notification.notification_times) {
+        console.log(
+          'notification.notification_times',
+          notification.notification_times
+        );
         setEditingTimes(
           notification.notification_times.map((time) => ({
             id: time.id,
-            scheduledTime: time.scheduled_time,
+            scheduledTime: new Date(time.scheduled_time)
+              .toLocaleString('sv-SE')
+              .slice(0, 16),
             isEnabled: time.is_enabled,
             rawText: time.raw_text || '',
             label: time.label || '',

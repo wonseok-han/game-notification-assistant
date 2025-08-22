@@ -141,7 +141,7 @@ export function NotificationList() {
           // notification_times를 UpdateNotificationRequest 형식으로 변환
           const notificationTimes = editingTimes.map((time) => ({
             id: time.id,
-            scheduledTime: time.scheduledTime,
+            scheduledTime: new Date(time.scheduledTime).toISOString(),
             isEnabled: time.isEnabled,
             rawText: time.rawText,
             label: time.label,
