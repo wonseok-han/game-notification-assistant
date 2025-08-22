@@ -1,6 +1,10 @@
 import { createAdminServer } from '@utils/supabase/server';
 import { NextResponse } from 'next/server';
 
+// ===== 상수 정의 =====
+const CRON_LOOKBACK_MINUTES = 10; // 10분 전부터 조회
+const CRON_LOOKBACK_MESSAGE = '까지 10분 남았어요!!'; // 알림 메시지
+
 // ===== 카카오 토큰 갱신 함수 =====
 async function refreshKakaoToken(
   _refreshToken: string
@@ -67,7 +71,7 @@ async function sendKakaoNotification(
     } else {
       message += `"알림"`;
     }
-    message += `시간이 도래했어요!!\n\n`;
+    message += `${CRON_LOOKBACK_MESSAGE}\n\n`;
 
     // 시간 정보
     message += `시간: ${new Date(
@@ -131,16 +135,22 @@ export async function GET(request: Request) {
 
     const supabase = await createAdminServer();
 
-    // 현재 시간 기준으로 전송할 알림 시간 조회
+    // 현재 시간 기준으로 처리할 알림 시간 조회 (10분 전부터)
     const now = new Date();
+    const tenMinutesAgo = new Date(
+      now.getTime() - CRON_LOOKBACK_MINUTES * 60 * 1000
+    );
     console.log(`[CRON] 현재 시간: ${now.toISOString()}`);
+    console.log(
+      `[CRON] ${CRON_LOOKBACK_MINUTES}분 전: ${tenMinutesAgo.toISOString()}`
+    );
 
     const { data: notificationTimes, error } = await supabase
       .from('notification_times')
       .select(
         `
         *,
-        game_notifications (
+        game_notifications!inner (
           id,
           title,
           description,
@@ -152,7 +162,9 @@ export async function GET(request: Request) {
       )
       .eq('status', 'pending')
       .eq('is_enabled', true)
-      .gte('scheduled_time', now.toISOString())
+      .eq('game_notifications.is_active', true)
+      .lte('scheduled_time', now.toISOString()) // 현재 시간 이하
+      .gte('scheduled_time', tenMinutesAgo.toISOString()) // 10분 전 이상
       .order('scheduled_time', { ascending: true });
 
     if (error) {
@@ -164,15 +176,15 @@ export async function GET(request: Request) {
     }
 
     if (!notificationTimes || notificationTimes.length === 0) {
-      console.log('[CRON] 전송할 알림이 없습니다.');
+      console.log('[CRON] 처리할 알림이 없습니다.');
       return NextResponse.json({
         success: true,
-        message: '전송할 알림이 없습니다.',
+        message: '처리할 알림이 없습니다.',
         count: 0,
       });
     }
 
-    console.log(`[CRON] 전송할 알림 ${notificationTimes.length}개 발견`);
+    console.log(`[CRON] 처리할 알림 ${notificationTimes.length}개 발견`);
 
     let successCount = 0;
     let failCount = 0;
@@ -270,9 +282,9 @@ export async function GET(request: Request) {
           }
         }
 
-        // 카카오톡 알림 전송
+        // 카카오톡 알림 발송
         console.log(
-          `카카오톡 알림 전송 시도: ${notification.title} - ${notificationTime.scheduled_time}`
+          `카카오톡 알림 발송 시도: ${notification.title} - ${notificationTime.scheduled_time}`
         );
 
         const isNotificationSent = await sendKakaoNotification(
@@ -293,23 +305,23 @@ export async function GET(request: Request) {
             .eq('id', notificationTime.id);
 
           successCount++;
-          console.log(`알림 전송 성공: ${notificationTime.id}`);
+          console.log(`알림 발송 성공: ${notificationTime.id}`);
         } else {
-          // 전송 실패 시 상태를 failed로 업데이트
+          // 발송 실패 시 상태를 failed로 업데이트
           await supabase
             .from('notification_times')
             .update({
               status: 'failed',
-              error_message: '카카오톡 메시지 전송에 실패했습니다.',
+              error_message: '카카오톡 메시지 발송에 실패했습니다.',
               updated_at: new Date().toISOString(),
             })
             .eq('id', notificationTime.id);
 
           failCount++;
-          console.log(`알림 전송 실패: ${notificationTime.id}`);
+          console.log(`알림 발송 실패: ${notificationTime.id}`);
         }
       } catch (error) {
-        console.error(`알림 전송 실패: ${notificationTime.id}`, error);
+        console.error(`알림 발송 실패: ${notificationTime.id}`, error);
         failCount++;
 
         // 실패한 알림 시간 상태 업데이트

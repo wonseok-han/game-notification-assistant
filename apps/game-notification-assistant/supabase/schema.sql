@@ -11,16 +11,16 @@ DROP POLICY IF EXISTS "Users can view own profile" ON public.users;
 DROP POLICY IF EXISTS "Users can update own profile" ON public.users;
 DROP POLICY IF EXISTS "Users can insert own profile" ON public.users;
 
-DROP POLICY IF EXISTS "Users can view own notifications" ON public.game_notifications;
-DROP POLICY IF EXISTS "Users can create own notifications" ON public.game_notifications;
-DROP POLICY IF EXISTS "Users can update own notifications" ON public.game_notifications;
-DROP POLICY IF EXISTS "Users can delete own notifications" ON public.game_notifications;
-
 DROP POLICY IF EXISTS "OAuth connections can be created" ON public.oauth_connections;
 DROP POLICY IF EXISTS "OAuth connections can be updated" ON public.oauth_connections;
 DROP POLICY IF EXISTS "OAuth connections can be deleted" ON public.oauth_connections;
 DROP POLICY IF EXISTS "OAuth connections can be viewed" ON public.oauth_connections;
 DROP POLICY IF EXISTS "OAuth connections can be all" ON public.oauth_connections;
+
+DROP POLICY IF EXISTS "Users can view own notifications" ON public.game_notifications;
+DROP POLICY IF EXISTS "Users can create own notifications" ON public.game_notifications;
+DROP POLICY IF EXISTS "Users can update own notifications" ON public.game_notifications;
+DROP POLICY IF EXISTS "Users can delete own notifications" ON public.game_notifications;
 
 DROP POLICY IF EXISTS "Users can view own notification times" ON public.notification_times;
 DROP POLICY IF EXISTS "Users can create own notification times" ON public.notification_times;
@@ -31,14 +31,14 @@ DROP POLICY IF EXISTS "Users can delete own notification times" ON public.notifi
 DROP INDEX IF EXISTS idx_users_email;
 DROP INDEX IF EXISTS idx_users_username;
 
+-- oauth_connections 인덱스 삭제
+DROP INDEX IF EXISTS idx_oauth_connections_user_id;
+DROP INDEX IF EXISTS idx_oauth_connections_provider;
+
 -- game_notifications 인덱스 삭제
 DROP INDEX IF EXISTS idx_game_notifications_user_id;
 DROP INDEX IF EXISTS idx_game_notifications_status;
 DROP INDEX IF EXISTS idx_game_notifications_scheduled_time;
-
--- oauth_connections 인덱스 삭제
-DROP INDEX IF EXISTS idx_oauth_connections_user_id;
-DROP INDEX IF EXISTS idx_oauth_connections_provider;
 
 -- notification_times 인덱스 삭제
 DROP INDEX IF EXISTS idx_notification_times_notification_id;
@@ -46,10 +46,10 @@ DROP INDEX IF EXISTS idx_notification_times_scheduled_time;
 DROP INDEX IF EXISTS idx_notification_times_status;
 
 -- 기존 테이블 삭제
-DROP TABLE IF EXISTS public.game_notifications CASCADE;
-DROP TABLE IF EXISTS public.users CASCADE;
-DROP TABLE IF EXISTS public.oauth_connections CASCADE;
 DROP TABLE IF EXISTS public.notification_times CASCADE;
+DROP TABLE IF EXISTS public.game_notifications CASCADE;
+DROP TABLE IF EXISTS public.oauth_connections CASCADE;
+DROP TABLE IF EXISTS public.users CASCADE;
 
 -- auth.users 테이블의 데이터 삭제
 DELETE FROM auth.users;
@@ -63,19 +63,6 @@ CREATE TABLE IF NOT EXISTS public.users (
     email VARCHAR(255) UNIQUE NOT NULL,
     username VARCHAR(50) UNIQUE NOT NULL,
     avatar_url TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- ===== 게임 알림 테이블 =====
-CREATE TABLE IF NOT EXISTS public.game_notifications (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    game_name VARCHAR(255) NOT NULL,
-    image_url TEXT NOT NULL,
-    status VARCHAR(50) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'active', 'completed', 'cancelled')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -94,6 +81,19 @@ CREATE TABLE IF NOT EXISTS public.oauth_connections (
     disconnected_at TIMESTAMP WITH TIME ZONE,
 
     UNIQUE(user_id, provider)
+);
+
+-- ===== 게임 알림 테이블 =====
+CREATE TABLE IF NOT EXISTS public.game_notifications (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    game_name VARCHAR(255) NOT NULL,
+    image_url TEXT NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- ===== 알림 시간 테이블 =====
@@ -117,13 +117,13 @@ CREATE TABLE IF NOT EXISTS public.notification_times (
 CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
 CREATE INDEX IF NOT EXISTS idx_users_username ON public.users(username);
 
--- 게임 알림 조회 성능 향상
-CREATE INDEX IF NOT EXISTS idx_game_notifications_user_id ON public.game_notifications(user_id);
-CREATE INDEX IF NOT EXISTS idx_game_notifications_status ON public.game_notifications(status);
-
 -- OAuth 연결 인덱스
 CREATE INDEX IF NOT EXISTS idx_oauth_connections_user_id ON public.oauth_connections(user_id);
 CREATE INDEX IF NOT EXISTS idx_oauth_connections_provider ON public.oauth_connections(provider);
+
+-- 게임 알림 조회 성능 향상
+CREATE INDEX IF NOT EXISTS idx_game_notifications_user_id ON public.game_notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_game_notifications_is_active ON public.game_notifications(is_active);
 
 -- 알림 시간 테이블 인덱스
 CREATE INDEX IF NOT EXISTS idx_notification_times_notification_id ON public.notification_times(notification_id);
@@ -141,17 +141,6 @@ CREATE POLICY "Users can update own profile" ON public.users
 CREATE POLICY "Users can insert own profile" ON public.users
     FOR INSERT WITH CHECK (auth.uid() = id);
 
--- ===== 게임 알림 테이블 RLS 활성화 =====
-ALTER TABLE public.game_notifications ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can view own notifications" ON public.game_notifications
-    FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can create own notifications" ON public.game_notifications
-    FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update own notifications" ON public.game_notifications
-    FOR UPDATE USING (auth.uid() = user_id);
-CREATE POLICY "Users can delete own notifications" ON public.game_notifications
-    FOR DELETE USING (auth.uid() = user_id);
-
 -- ===== OAuth 연결 테이블 RLS 활성화 =====
 ALTER TABLE public.oauth_connections ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "OAuth connections can be created" ON public.oauth_connections
@@ -164,6 +153,17 @@ CREATE POLICY "OAuth connections can be viewed" ON public.oauth_connections
     FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "OAuth connections can be all" ON public.oauth_connections
     FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+-- ===== 게임 알림 테이블 RLS 활성화 =====
+ALTER TABLE public.game_notifications ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can view own notifications" ON public.game_notifications
+    FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can create own notifications" ON public.game_notifications
+    FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own notifications" ON public.game_notifications
+    FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own notifications" ON public.game_notifications
+    FOR DELETE USING (auth.uid() = user_id);
 
 -- ===== 알림 시간 테이블 RLS 활성화 =====
 ALTER TABLE public.notification_times ENABLE ROW LEVEL SECURITY;

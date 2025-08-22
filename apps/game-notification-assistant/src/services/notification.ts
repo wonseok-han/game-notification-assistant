@@ -37,8 +37,7 @@ export interface GameNotification {
   description?: string;
   game_name: string;
   image_url: string;
-  scheduled_time: string;
-  status: string;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
   notification_times?: NotificationTime[];
@@ -50,7 +49,7 @@ export type UpdateNotificationRequest = Partial<{
   description: string;
   gameName: string;
   imageUrl: string;
-  status: string;
+  is_active: boolean;
   notificationTimes?: Array<{
     id?: string;
     scheduledTime: string;

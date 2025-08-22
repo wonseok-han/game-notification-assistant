@@ -10,38 +10,26 @@ import {
 import Image from 'next/image';
 import { Fragment, useEffect, useState } from 'react';
 
-type StatusOptionType = {
-  value: NotificationStatusType;
+type ActiveOptionType = {
+  value: boolean;
   label: string;
   color: string;
   bgColor: string;
 };
 
-// ===== 상태 옵션 =====
-const STATUS_OPTIONS: StatusOptionType[] = [
+// ===== 활성 상태 옵션 =====
+const ACTIVE_OPTIONS: ActiveOptionType[] = [
   {
-    value: 'pending',
-    label: '대기중',
-    color: 'text-blue-700',
-    bgColor: 'bg-blue-100',
-  },
-  {
-    value: 'active',
+    value: true,
     label: '활성',
     color: 'text-green-700',
     bgColor: 'bg-green-100',
   },
   {
-    value: 'completed',
-    label: '완료',
+    value: false,
+    label: '비활성',
     color: 'text-gray-700',
     bgColor: 'bg-gray-100',
-  },
-  {
-    value: 'cancelled',
-    label: '취소',
-    color: 'text-red-700',
-    bgColor: 'bg-red-100',
   },
 ];
 
@@ -52,8 +40,7 @@ export function NotificationList() {
   const [isLoading, setIsLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState<string>('');
-  const [editStatus, setEditStatus] =
-    useState<NotificationStatusType>('pending');
+  const [isEditActive, setIsEditActive] = useState<boolean>(true);
 
   // 카드 펼침/접기, 밀도 제어
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -141,7 +128,7 @@ export function NotificationList() {
   const startEdit = (n: GameNotification) => {
     setEditingId(n.id);
     setEditTitle(n.title);
-    setEditStatus(n.status as NotificationStatusType);
+    setIsEditActive(n.is_active);
 
     // notification_times가 있는 경우 편집 상태로 설정
     if (n.notification_times && n.notification_times.length > 0) {
@@ -158,7 +145,10 @@ export function NotificationList() {
       setEditingTimes([
         {
           id: '1',
-          scheduledTime: toInputDateTime(n.scheduled_time),
+          scheduledTime: toInputDateTime(
+            n.notification_times?.[0]?.scheduled_time ||
+              new Date().toISOString()
+          ),
           isEnabled: true,
         },
       ]);
@@ -167,6 +157,9 @@ export function NotificationList() {
 
   const cancelEdit = () => {
     setEditingId(null);
+    setEditTitle('');
+    setIsEditActive(true);
+    setEditingTimes([]);
   };
 
   const saveEdit = async (id: string) => {
@@ -182,9 +175,9 @@ export function NotificationList() {
         label: time.label,
       }));
 
-      const updated = await updateNotification(id, {
+      await updateNotification(id, {
         title: editTitle.trim(),
-        status: editStatus,
+        is_active: isEditActive,
         notificationTimes: utcNotificationTimes,
       });
 
@@ -195,10 +188,12 @@ export function NotificationList() {
         autoHideDuration: 6000,
       });
 
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, ...updated } : n))
-      );
+      // 수정 완료 후 최신 데이터로 목록 새로고침
+      const freshNotifications = await getNotifications();
+      setNotifications(freshNotifications || []);
       setEditingId(null);
+      setEditTitle('');
+      setIsEditActive(true);
     } catch (error) {
       console.error('알림 수정 오류:', error);
       showSnackbar({
@@ -213,14 +208,15 @@ export function NotificationList() {
   };
   // ===== 상태 관리 =====
   const [selectedStatus, setSelectedStatus] = useState<
-    NotificationStatusType | 'all'
+    'all' | 'true' | 'false'
   >('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   // ===== 필터링된 알림 목록 =====
   const filteredNotifications = notifications.filter((notification) => {
     const isStatusMatch =
-      selectedStatus === 'all' || notification.status === selectedStatus;
+      selectedStatus === 'all' ||
+      notification.is_active.toString() === selectedStatus;
     const isSearchMatch =
       searchQuery === '' ||
       notification.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -276,12 +272,12 @@ export function NotificationList() {
       .map((t) => new Date(t.scheduled_time))
       .sort((a, b) => a.getTime() - b.getTime());
     const upcoming = list.find((d) => d.getTime() >= now.getTime());
-    return upcoming || list[0] || new Date(n.scheduled_time);
+    return upcoming || list[0] || new Date();
   };
 
-  // ===== 상태 배지 컴포넌트 =====
-  const StatusBadge = ({ status }: { status: NotificationStatusType }) => {
-    const option = STATUS_OPTIONS.find((opt) => opt.value === status);
+  // ===== 활성 상태 배지 컴포넌트 =====
+  const ActiveBadge = ({ isActive }: { isActive: boolean }) => {
+    const option = ACTIVE_OPTIONS.find((opt) => opt.value === isActive);
     if (!option) return null;
 
     return (
@@ -289,6 +285,48 @@ export function NotificationList() {
         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${option.bgColor} ${option.color}`}
       >
         {option.label}
+      </span>
+    );
+  };
+
+  // ===== 알림 시간 상태 배지 컴포넌트 =====
+  const NotificationTimeStatusBadge = ({ status }: { status: string }) => {
+    const getStatusConfig = (status: string) => {
+      switch (status) {
+        case 'pending':
+          return {
+            label: '대기중',
+            color: 'text-blue-700',
+            bgColor: 'bg-blue-100',
+          };
+        case 'sent':
+          return {
+            label: '전송됨',
+            color: 'text-green-700',
+            bgColor: 'bg-green-100',
+          };
+        case 'failed':
+          return {
+            label: '실패',
+            color: 'text-red-700',
+            bgColor: 'bg-red-100',
+          };
+        default:
+          return {
+            label: status,
+            color: 'text-gray-700',
+            bgColor: 'bg-gray-100',
+          };
+      }
+    };
+
+    const config = getStatusConfig(status);
+
+    return (
+      <span
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.bgColor} ${config.color}`}
+      >
+        {config.label}
       </span>
     );
   };
@@ -328,21 +366,22 @@ export function NotificationList() {
             />
           </div>
 
-          {/* 상태 필터 */}
+          {/* 활성 상태 필터 */}
           <div>
             <select
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               onChange={(e) =>
-                setSelectedStatus(
-                  e.target.value as NotificationStatusType | 'all'
-                )
+                setSelectedStatus(e.target.value as 'all' | 'true' | 'false')
               }
               value={selectedStatus}
             >
               <option value="all">모든 상태</option>
-              {STATUS_OPTIONS.map((status) => (
-                <option key={status.value} value={status.value}>
-                  {status.label}
+              {ACTIVE_OPTIONS.map((option) => (
+                <option
+                  key={option.value.toString()}
+                  value={option.value.toString()}
+                >
+                  {option.label}
                 </option>
               ))}
             </select>
@@ -425,9 +464,7 @@ export function NotificationList() {
                       {n.game_name}
                     </td>
                     <td className="px-3 py-2 align-middle hidden md:table-cell">
-                      <StatusBadge
-                        status={n.status as NotificationStatusType}
-                      />
+                      <ActiveBadge isActive={n.is_active} />
                     </td>
                     <td className="px-3 py-2 align-middle text-gray-800">
                       {formatScheduledTime(getNextTime(n))}
@@ -572,6 +609,12 @@ export function NotificationList() {
                                     className="text-left px-3 py-2"
                                     scope="col"
                                   >
+                                    사용여부
+                                  </th>
+                                  <th
+                                    className="text-left px-3 py-2"
+                                    scope="col"
+                                  >
                                     상태
                                   </th>
                                   <th
@@ -613,6 +656,11 @@ export function NotificationList() {
                                         className={`inline-block w-2 h-2 rounded-full mr-2 ${time.is_enabled ? 'bg-green-500' : 'bg-gray-300'}`}
                                       />
                                       {time.is_enabled ? '활성' : '비활성'}
+                                    </td>
+                                    <td className="px-3 py-2 align-middle">
+                                      <NotificationTimeStatusBadge
+                                        status={time.status}
+                                      />
                                     </td>
                                     <td
                                       className={`px-3 py-2 align-middle ${time.is_enabled ? 'text-gray-900 font-semibold' : 'text-gray-400 line-through'}`}

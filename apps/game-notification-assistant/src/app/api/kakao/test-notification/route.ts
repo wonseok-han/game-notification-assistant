@@ -102,7 +102,7 @@ export const POST = MiddlewareWithPOST(async (request) => {
       .select(
         `
         *,
-        notification_times (
+        notification_times!inner (
           id,
           scheduled_time,
           status,
@@ -113,8 +113,10 @@ export const POST = MiddlewareWithPOST(async (request) => {
       `
       )
       .eq('user_id', user.id)
+      .eq('is_active', true)
+      .eq('notification_times.is_enabled', true)
       .order('created_at', { ascending: false })
-      .limit(5); // 최근 5개 알림만 조회
+      .limit(5); // 최근 5개 활성 알림만 조회 (활성 시간 포함)
 
     if (notificationsError) {
       console.error('알림 데이터 조회 오류:', notificationsError);
@@ -137,10 +139,7 @@ export const POST = MiddlewareWithPOST(async (request) => {
 
     // 테스트용으로 첫 번째 알림을 선택하여 메시지 생성
     const testNotification = notifications[0] as GameNotification;
-    const enabledTimes =
-      testNotification.notification_times?.filter(
-        (time: NotificationTime) => time.is_enabled
-      ) || [];
+    const enabledTimes = testNotification.notification_times || [];
 
     // 메시지 구성
     let message = '';

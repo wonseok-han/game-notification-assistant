@@ -38,7 +38,7 @@ export const POST = MiddlewareWithPOST(async (request) => {
         description: notificationData.description,
         game_name: notificationData.gameName,
         image_url: notificationData.imageUrl,
-        status: 'pending',
+        is_active: true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
