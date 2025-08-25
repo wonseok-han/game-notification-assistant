@@ -79,6 +79,8 @@ CREATE TABLE IF NOT EXISTS public.oauth_connections (
     is_connected BOOLEAN DEFAULT true,
     connected_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     disconnected_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 
     UNIQUE(user_id, provider)
 );
