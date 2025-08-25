@@ -1,4 +1,9 @@
-import { type ActiveOptionType } from './types';
+export type ActiveOptionType = {
+  value: boolean;
+  label: string;
+  color: string;
+  bgColor: string;
+};
 
 interface ActiveBadgeProps {
   isActive: boolean;

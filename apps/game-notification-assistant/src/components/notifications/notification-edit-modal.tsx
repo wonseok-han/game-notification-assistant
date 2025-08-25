@@ -1,11 +1,16 @@
 import { ActionButton, ActiveSwitch } from '@repo/ui';
-import { type GameNotification } from '@services/notification';
 import { useEffect, useState } from 'react';
 
-import { type EditingTimeType } from './types';
+export type EditingTimeType = {
+  id: string;
+  scheduledTime: string;
+  isEnabled: boolean;
+  rawText?: string;
+  label?: string;
+};
 
 interface NotificationEditModalProps {
-  notification: GameNotification | null;
+  notification: GameNotificationType | null;
   isOpen: boolean;
   onClose: () => void;
   onSave: (

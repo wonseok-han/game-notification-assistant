@@ -1,6 +1,7 @@
 'use client';
 
 import { useSnackbar, ActionButton } from '@repo/ui';
+import { auth, disconnect, status } from '@services/kakao';
 import { useState, useEffect } from 'react';
 
 // ===== 카카오톡 연결 컴포넌트 =====
@@ -31,19 +32,11 @@ export function KakaoConnection() {
     };
   }, []);
 
-  const refreshToken = async () => {
-    const response = await fetch('/api/kakao/status', {
-      method: 'POST',
-    });
-    const data = await response.json();
-    return data;
-  };
-
   const checkConnectionStatus = async () => {
     try {
-      const data = await refreshToken();
+      const data = await status();
 
-      if (data.success) {
+      if (data.accessToken) {
         setIsConnected(true);
       } else {
         setIsConnected(false);
@@ -60,10 +53,9 @@ export function KakaoConnection() {
 
     try {
       // 서버에서 카카오 OAuth URL 생성
-      const response = await fetch('/api/kakao/auth');
-      const data = await response.json();
+      const data = await auth();
 
-      if (data.success && data.authUrl) {
+      if (data.authUrl) {
         // 팝업 창 열기
         const popup = window.open(
           data.authUrl,
@@ -134,18 +126,9 @@ export function KakaoConnection() {
     if (!confirm('카카오톡 연결을 해제하시겠습니까?')) return;
 
     try {
-      const response = await fetch('/api/kakao/disconnect', { method: 'POST' });
+      await disconnect();
 
-      if (response.ok) {
-        setIsConnected(false);
-      } else {
-        showSnackbar({
-          message: '연결 해제에 실패했습니다.',
-          type: 'error',
-          position: 'bottom-right',
-          autoHideDuration: 6000,
-        });
-      }
+      setIsConnected(false);
     } catch (error) {
       console.error('연결 해제 오류:', error);
       showSnackbar({

@@ -56,7 +56,6 @@ export const POST = MiddlewareWithPOST(async (request: NextRequest) => {
         {
           success: false,
           message: 'Google Vision API 호출에 실패했습니다.',
-          error: errorData,
         },
         { status: visionResponse.status }
       );
@@ -105,8 +104,10 @@ export const POST = MiddlewareWithPOST(async (request: NextRequest) => {
 
     return NextResponse.json({
       success: true,
-      text: fullText,
-      individualTexts,
+      data: {
+        text: fullText,
+        individualTexts,
+      },
       message: '텍스트 추출이 성공했습니다.',
     });
   } catch (error) {
@@ -116,7 +117,6 @@ export const POST = MiddlewareWithPOST(async (request: NextRequest) => {
       {
         success: false,
         message: '서버 오류가 발생했습니다.',
-        error: error instanceof Error ? error.message : '알 수 없는 오류',
       },
       { status: 500 }
     );

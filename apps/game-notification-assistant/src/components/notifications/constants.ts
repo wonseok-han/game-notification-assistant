@@ -1,4 +1,4 @@
-import { type ActiveOptionType } from './types';
+import type { ActiveOptionType } from './active-badge';
 
 // ===== 활성 상태 옵션 =====
 export const ACTIVE_OPTIONS: ActiveOptionType[] = [

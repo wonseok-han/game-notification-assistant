@@ -1,12 +1,11 @@
 import { ActionButton, ActiveSwitch } from '@repo/ui';
-import { type GameNotification } from '@services/notification';
 import Image from 'next/image';
 
 import { NotificationTimeStatusBadge } from './notification-time-status-badge';
 
 interface NotificationTableProps {
-  notifications: GameNotification[];
-  onEdit: (notification: GameNotification) => void;
+  notifications: GameNotificationType[];
+  onEdit: (notification: GameNotificationType) => void;
   onDelete: (id: string) => void;
   onActiveChange: (id: string, isActive: boolean) => void;
 }

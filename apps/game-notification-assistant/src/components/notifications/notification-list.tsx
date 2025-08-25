@@ -1,30 +1,32 @@
 'use client';
 
+import type { EditingTimeType } from './notification-edit-modal';
+
 import { useSnackbar } from '@repo/ui';
 import {
   deleteNotification,
   getNotifications,
   updateNotification,
-  type GameNotification,
 } from '@services/notification';
 import { useEffect, useState } from 'react';
 
 import { NotificationEditModal } from './notification-edit-modal';
 import { NotificationFilters } from './notification-filters';
 import { NotificationTable } from './notification-table';
-import { type EditingTimeType } from './types';
 
 // ===== 알림 목록 컴포넌트 =====
 export function NotificationList() {
   // ===== 상태 관리 =====
-  const [notifications, setNotifications] = useState<GameNotification[]>([]);
+  const [notifications, setNotifications] = useState<GameNotificationType[]>(
+    []
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState<
     'all' | 'true' | 'false'
   >('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [editingNotification, setEditingNotification] =
-    useState<GameNotification | null>(null);
+    useState<GameNotificationType | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const { showSnackbar } = useSnackbar();
@@ -107,7 +109,7 @@ export function NotificationList() {
   };
 
   // ===== 알림 수정 핸들러 =====
-  const handleEdit = (notification: GameNotification) => {
+  const handleEdit = (notification: GameNotificationType) => {
     setEditingNotification(notification);
     setIsEditModalOpen(true);
   };

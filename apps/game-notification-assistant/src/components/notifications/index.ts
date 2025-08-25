@@ -7,4 +7,3 @@ export * from './notification-form';
 export * from './notification-list';
 export * from './notification-table';
 export * from './notification-time-status-badge';
-export * from './types';

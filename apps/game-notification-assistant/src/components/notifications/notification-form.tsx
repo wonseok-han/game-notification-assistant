@@ -1,10 +1,7 @@
 'use client';
 
 import { useSnackbar, ActionButton } from '@repo/ui';
-import {
-  createNotification,
-  type CreateNotificationRequest,
-} from '@services/notification';
+import { createNotification } from '@services/notification';
 import { extractMultipleTimesFromImage } from '@utils/time-extractor';
 import Image from 'next/image';
 import { useState, useRef } from 'react';
@@ -222,7 +219,7 @@ export function NotificationForm() {
       // 활성화된 알림 시간들 가져오기
       const enabledTimes = notificationTimes.filter((time) => time.isEnabled);
 
-      const formData: CreateNotificationRequest = {
+      const formData: CreateNotificationRequestType = {
         title: title.trim() || `${gameName} 알림`,
         description: description.trim(),
         gameName: gameName.trim(),

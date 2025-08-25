@@ -1,11 +1,10 @@
 import { ActiveSwitch } from '@repo/ui';
-import { type GameNotification } from '@services/notification';
 import Image from 'next/image';
 
 import { ActiveBadge } from './active-badge';
 
 interface NotificationCardProps {
-  notification: GameNotification;
+  notification: GameNotificationType;
   isExpanded: boolean;
   onToggleExpand: () => void;
   onEdit: () => void;

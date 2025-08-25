@@ -4,6 +4,8 @@
  * - 내부 API는 Vision API를 호출해 텍스트를 추출
  */
 
+import { googleVision } from '@services/ocr';
+
 /**
  * File을 base64 문자열로 변환
  */
@@ -34,28 +36,7 @@ export async function extractTextWithGoogleVision(
   // base64 변환
   const base64Image = await fileToBase64(imageFile);
 
-  const response = await fetch('/api/ocr/google-vision', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ image: base64Image }),
-  });
+  const response = await googleVision(base64Image);
 
-  if (!response.ok) {
-    const err = await response.text();
-    throw new Error(`Google Vision API 호출 실패: ${response.status} ${err}`);
-  }
-
-  const result = (await response.json()) as {
-    success: boolean;
-    text?: string;
-    message?: string;
-  };
-
-  console.log('Google Vision API 응답:', result);
-
-  if (!result.success || !result.text) {
-    throw new Error(result.message || '텍스트 추출에 실패했습니다.');
-  }
-
-  return result.text;
+  return response.text;
 }

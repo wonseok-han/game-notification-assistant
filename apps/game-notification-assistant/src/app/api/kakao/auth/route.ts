@@ -8,7 +8,11 @@ export const GET = MiddlewareWithGET(async (_request) => {
 
     if (!clientId) {
       return NextResponse.json(
-        { success: false, error: '카카오 API 키가 설정되지 않았습니다.' },
+        {
+          success: false,
+          message: '카카오 API 키가 설정되지 않았습니다.',
+          aaa: 'bbb',
+        },
         { status: 500 }
       );
     }
@@ -24,12 +28,15 @@ export const GET = MiddlewareWithGET(async (_request) => {
 
     return NextResponse.json({
       success: true,
-      authUrl,
+      message: '카카오 OAuth URL 생성 완료',
+      data: {
+        authUrl,
+      },
     });
   } catch (error) {
     console.error('카카오 OAuth URL 생성 오류:', error);
     return NextResponse.json(
-      { success: false, error: '서버 오류가 발생했습니다.' },
+      { success: false, message: '서버 오류가 발생했습니다.' },
       { status: 500 }
     );
   }

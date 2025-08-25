@@ -1,77 +1,24 @@
-import { apiFetch, createApiUrl, parseApiResponse } from '@utils/api-client';
+import {
+  apiPost,
+  apiGet,
+  apiPatch,
+  apiDelete,
+  parseApiResponse,
+} from '@utils/api-client';
 
-// ===== 게임 알림 생성 요청 타입 =====
-export interface CreateNotificationRequest {
-  title: string;
-  description?: string;
-  gameName: string;
-  imageUrl: string;
-  notificationTimes?: Array<{
-    scheduledTime: string;
-    isEnabled: boolean;
-    rawText?: string;
-    label?: string;
-  }>;
-}
-
-// ===== 알림 시간 타입 =====
-export interface NotificationTime {
-  id: string;
-  notification_id: string;
-  scheduled_time: string;
-  status: string;
-  is_enabled: boolean;
-  raw_text?: string;
-  label?: string;
-  sent_at?: string;
-  error_message?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-// ===== 게임 알림 타입 =====
-export interface GameNotification {
-  id: string;
-  user_id: string;
-  title: string;
-  description?: string;
-  game_name: string;
-  image_url: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-  notification_times?: NotificationTime[];
-}
-
-// ===== 알림 수정 요청 타입 =====
-export type UpdateNotificationRequest = Partial<{
-  title: string;
-  description: string;
-  gameName: string;
-  imageUrl: string;
-  is_active: boolean;
-  notificationTimes?: Array<{
-    id?: string;
-    scheduledTime: string;
-    isEnabled: boolean;
-    rawText?: string;
-    label?: string;
-  }>;
-}>;
-
-// ===== 게임 알림 생성 =====
+/**
+ * 게임 알림 생성
+ * @param {CreateNotificationRequestType} notificationData 알림 데이터
+ * @returns {GameNotificationType} 알림 데이터
+ */
 export async function createNotification(
-  notificationData: CreateNotificationRequest
-): Promise<GameNotification> {
+  notificationData: CreateNotificationRequestType
+): Promise<GameNotificationType> {
   try {
-    const url = createApiUrl('/api/notifications');
-    const response = await apiFetch(url, {
-      method: 'POST',
-      body: JSON.stringify(notificationData),
-    });
+    const response = await apiPost('/api/notifications', notificationData);
 
     const result =
-      await parseApiResponse<ApiResponseType<GameNotification>>(response);
+      await parseApiResponse<ApiResponseType<GameNotificationType>>(response);
 
     if (!result.success || !result.data) {
       throw new Error(result.message || '알림 생성에 실패했습니다.');
@@ -84,16 +31,16 @@ export async function createNotification(
   }
 }
 
-// ===== 게임 알림 목록 조회 =====
-export async function getNotifications(): Promise<GameNotification[]> {
+/**
+ * 게임 알림 목록 조회
+ * @returns {GameNotificationType[]} 알림 목록
+ */
+export async function getNotifications(): Promise<GameNotificationType[]> {
   try {
-    const url = createApiUrl('/api/notifications');
-    const response = await apiFetch(url, {
-      method: 'GET',
-    });
+    const response = await apiGet('/api/notifications');
 
     const result =
-      await parseApiResponse<ApiResponseType<GameNotification[]>>(response);
+      await parseApiResponse<ApiResponseType<GameNotificationType[]>>(response);
 
     if (!result.success || !result.data) {
       throw new Error(result.message || '알림 목록을 가져올 수 없습니다.');
@@ -106,13 +53,14 @@ export async function getNotifications(): Promise<GameNotification[]> {
   }
 }
 
-// ===== 게임 알림 삭제 =====
+/**
+ * 게임 알림 삭제
+ * @param {string} id 알림 ID
+ * @returns {ApiResponseType} 알림 삭제 결과
+ */
 export async function deleteNotification(id: string): Promise<ApiResponseType> {
   try {
-    const url = createApiUrl(`/api/notifications/${id}`);
-    const response = await apiFetch(url, {
-      method: 'DELETE',
-    });
+    const response = await apiDelete(`/api/notifications/${id}`);
 
     const result = await parseApiResponse<ApiResponseType>(response);
 
@@ -127,20 +75,21 @@ export async function deleteNotification(id: string): Promise<ApiResponseType> {
   }
 }
 
-// ===== 게임 알림 상태 업데이트 =====
+/**
+ * 게임 알림 상태 업데이트
+ * @param {string} id 알림 ID
+ * @param {string} status 알림 상태
+ * @returns {GameNotificationType} 알림 상태 업데이트 결과
+ */
 export async function updateNotificationStatus(
   id: string,
   status: string
-): Promise<GameNotification> {
+): Promise<GameNotificationType> {
   try {
-    const url = createApiUrl(`/api/notifications/${id}`);
-    const response = await apiFetch(url, {
-      method: 'PATCH',
-      body: JSON.stringify({ status }),
-    });
+    const response = await apiPatch(`/api/notifications/${id}`, { status });
 
     const result =
-      await parseApiResponse<ApiResponseType<GameNotification>>(response);
+      await parseApiResponse<ApiResponseType<GameNotificationType>>(response);
 
     if (!result.success || !result.data) {
       throw new Error(result.message || '알림 상태 업데이트에 실패했습니다.');
@@ -153,20 +102,21 @@ export async function updateNotificationStatus(
   }
 }
 
-// ===== 게임 알림 수정 =====
+/**
+ * 게임 알림 수정
+ * @param {string} id 알림 ID
+ * @param {UpdateNotificationRequest} body 알림 수정 데이터
+ * @returns {GameNotificationType} 알림 수정 결과
+ */
 export async function updateNotification(
   id: string,
   body: UpdateNotificationRequest
-): Promise<GameNotification> {
+): Promise<GameNotificationType> {
   try {
-    const url = createApiUrl(`/api/notifications/${id}`);
-    const response = await apiFetch(url, {
-      method: 'PATCH',
-      body: JSON.stringify(body),
-    });
+    const response = await apiPatch(`/api/notifications/${id}`, body);
 
     const result =
-      await parseApiResponse<ApiResponseType<GameNotification>>(response);
+      await parseApiResponse<ApiResponseType<GameNotificationType>>(response);
 
     if (!result.success || !result.data) {
       throw new Error(result.message || '알림 수정에 실패했습니다.');
