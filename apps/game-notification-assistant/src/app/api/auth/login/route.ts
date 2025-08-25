@@ -1,27 +1,14 @@
 import { MiddlewareWithPOST } from '@server/custom-method';
 import { NextResponse } from 'next/server';
 
-// ===== 로그인 요청 타입 =====
-interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-// ===== 로그인 응답 타입 =====
-interface LoginResponse {
-  success: boolean;
-  message: string;
-  data?: {
-    id: string;
-    email: string;
-    username: string;
-  };
-}
-
-// ===== POST 메서드 - 로그인 처리 =====
+/**
+ * 로그인
+ * @param request - 요청 객체
+ * @returns {UserType} 로그인 응답 데이터
+ */
 export const POST = MiddlewareWithPOST(async (request) => {
   try {
-    const { email, password }: LoginRequest = await request.json();
+    const { email, password } = await request.json();
 
     // 입력 검증
     if (!email || !password) {
@@ -71,8 +58,8 @@ export const POST = MiddlewareWithPOST(async (request) => {
       );
     }
 
-    // 응답 생성
-    const response: LoginResponse = {
+    // 세션 쿠키 설정 (Next.js 15 호환 방식)
+    const responseObj = NextResponse.json({
       success: true,
       message: '로그인에 성공했습니다.',
       data: {
@@ -80,10 +67,7 @@ export const POST = MiddlewareWithPOST(async (request) => {
         email: userData.email,
         username: userData.username,
       },
-    };
-
-    // 세션 쿠키 설정 (Next.js 15 호환 방식)
-    const responseObj = NextResponse.json(response);
+    });
 
     if (authData.session) {
       responseObj.cookies.set(

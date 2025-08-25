@@ -44,7 +44,11 @@ export function NotificationForm() {
 
   const { showSnackbar } = useSnackbar();
 
-  // ===== 이미지 선택 핸들러 =====
+  /**
+   * 이미지 선택 핸들러
+   * @param event - 이벤트 객체
+   * @returns {Promise<void>} 이미지 선택 핸들러 결과
+   */
   const handleImageSelect = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -117,7 +121,9 @@ export function NotificationForm() {
     }
   };
 
-  // ===== 시간 관리 함수들 =====
+  /**
+   * 알림 시간 추가
+   */
   const addNotificationTime = () => {
     const newTime = {
       id: Date.now().toString(),
@@ -129,12 +135,22 @@ export function NotificationForm() {
     setNotificationTimes([...notificationTimes, newTime]);
   };
 
+  /**
+   * 알림 시간 제거
+   * @param {string} id - 알림 시간 ID
+   */
   const removeNotificationTime = (id: string) => {
     if (notificationTimes.length > 1) {
       setNotificationTimes(notificationTimes.filter((time) => time.id !== id));
     }
   };
 
+  /**
+   * 알림 시간 업데이트
+   * @param {string} id - 알림 시간 ID
+   * @param {string} field - 업데이트할 필드
+   * @param {string | boolean} value - 업데이트할 값
+   */
   const updateNotificationTime = (
     id: string,
     field: 'scheduledTime' | 'isEnabled' | 'rawText' | 'label',
@@ -147,10 +163,16 @@ export function NotificationForm() {
     );
   };
 
+  /**
+   * 이미지 기반 시간 추출 토글
+   */
   const toggleImageTimeExtraction = () => {
     setUseImageTimeExtraction(!useImageTimeExtraction);
   };
 
+  /**
+   * 폼 초기화
+   */
   const clearForm = () => {
     setTitle('');
     setDescription('');
@@ -170,7 +192,9 @@ export function NotificationForm() {
     }
   };
 
-  // ===== 이미지 제거 핸들러 =====
+  /**
+   * 이미지 제거 핸들러
+   */
   const handleRemoveImage = () => {
     setSelectedImage(null);
     setImagePreview('');
@@ -179,7 +203,11 @@ export function NotificationForm() {
     }
   };
 
-  // ===== 폼 제출 핸들러 =====
+  /**
+   * 폼 제출 핸들러
+   * @param event - 이벤트 객체
+   * @returns {Promise<void>} 폼 제출 핸들러 결과
+   */
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -264,7 +292,10 @@ export function NotificationForm() {
     }
   };
 
-  // ===== 현재 시간으로부터 1시간 후 기본값 설정 =====
+  /**
+   * 현재 시간으로부터 1시간 후 기본값 설정
+   * @returns {string} 기본 알림 시간
+   */
   function getDefaultScheduledTime() {
     const d = new Date();
     d.setMinutes(0, 0, 0); // 분/초/밀리초 0

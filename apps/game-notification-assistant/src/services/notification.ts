@@ -105,12 +105,12 @@ export async function updateNotificationStatus(
 /**
  * 게임 알림 수정
  * @param {string} id 알림 ID
- * @param {UpdateNotificationRequest} body 알림 수정 데이터
+ * @param {UpdateNotificationRequestType} body 알림 수정 데이터
  * @returns {GameNotificationType} 알림 수정 결과
  */
 export async function updateNotification(
   id: string,
-  body: UpdateNotificationRequest
+  body: UpdateNotificationRequestType
 ): Promise<GameNotificationType> {
   try {
     const response = await apiPatch(`/api/notifications/${id}`, body);

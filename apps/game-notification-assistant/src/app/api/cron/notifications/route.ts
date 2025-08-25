@@ -28,6 +28,11 @@ type NotificationTimesResponseType = {
   };
 }[];
 
+/**
+ * 카카오 토큰 갱신
+ * @param refreshToken
+ * @returns {TokenRefreshResultType} 토큰 갱신 결과
+ */
 async function refreshKakaoToken(
   refreshToken: string
 ): Promise<TokenRefreshResultType> {
@@ -71,7 +76,13 @@ async function refreshKakaoToken(
   }
 }
 
-// ===== 카카오톡 메시지 전송 함수 =====
+/**
+ * 카카오톡 메시지 전송
+ * @param accessToken
+ * @param notification
+ * @param notificationTime
+ * @returns {boolean} 메시지 전송 결과
+ */
 async function sendKakaoNotification(
   accessToken: string,
   notification: {
@@ -205,7 +216,11 @@ async function sendKakaoNotification(
   }
 }
 
-// Cron job용 API - 인증 없이 실행
+/**
+ * Cron job용 API - 인증 없이 실행
+ * @param request - 요청 객체
+ * @returns {ApiResponseType} 알림 처리 결과
+ */
 export async function GET(request: Request) {
   try {
     // Cron-job.org에서 호출하는 경우 Authorization 헤더 확인

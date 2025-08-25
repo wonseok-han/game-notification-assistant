@@ -6,7 +6,6 @@ import { useAuthStore } from '@store/auth-store';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-// ===== 로그인 폼 컴포넌트 =====
 export function LoginForm() {
   const router = useRouter();
   // ===== 상태 관리 =====
@@ -19,7 +18,10 @@ export function LoginForm() {
 
   const { showSnackbar } = useSnackbar();
 
-  // ===== 폼 제출 핸들러 =====
+  /**
+   * 로그인 폼 제출 핸들러
+   * @param event - 이벤트 객체
+   */
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 

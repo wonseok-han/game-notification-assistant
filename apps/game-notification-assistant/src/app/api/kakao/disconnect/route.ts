@@ -2,6 +2,11 @@ import { MiddlewareWithPOST } from '@server/custom-method';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
+/**
+ * 카카오 연결 해제
+ * @param request - 요청 객체
+ * @returns {ApiResponseType} 카카오 연결 해제 응답 데이터
+ */
 export const POST = MiddlewareWithPOST(async (request) => {
   try {
     const { supabase, user } = request.auth;

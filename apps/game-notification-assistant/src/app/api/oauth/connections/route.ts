@@ -1,7 +1,11 @@
 import { MiddlewareWithPOST, MiddlewareWithGET } from '@server/custom-method';
 import { NextResponse } from 'next/server';
 
-// ===== OAuth 연결 생성 =====
+/**
+ * OAuth 연결 생성
+ * @param request - 요청 객체
+ * @returns {ApiResponseType} OAuth 연결 생성 응답 데이터
+ */
 export const POST = MiddlewareWithPOST(async (request) => {
   try {
     const { supabase, user } = request.auth;
@@ -60,7 +64,11 @@ export const POST = MiddlewareWithPOST(async (request) => {
   }
 });
 
-// ===== OAuth 연결 조회 =====
+/**
+ * OAuth 연결 조회
+ * @param request - 요청 객체
+ * @returns {ApiResponseType} OAuth 연결 조회 응답 데이터
+ */
 export const GET = MiddlewareWithGET(async (request) => {
   try {
     const { supabase, user } = request.auth;

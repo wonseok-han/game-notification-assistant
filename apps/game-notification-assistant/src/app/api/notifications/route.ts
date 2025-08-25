@@ -1,25 +1,16 @@
 import { MiddlewareWithGET, MiddlewareWithPOST } from '@server/custom-method';
 import { NextResponse } from 'next/server';
 
-// ===== 게임 알림 생성 요청 타입 =====
-interface CreateNotificationRequest {
-  title: string;
-  description?: string;
-  gameName: string;
-  imageUrl: string;
-  notificationTimes?: Array<{
-    scheduledTime: string;
-    isEnabled: boolean;
-    rawText?: string;
-    label?: string;
-  }>;
-}
-
-// ===== POST 메서드 - 알림 생성 =====
+/**
+ * 알림 생성
+ * @param request - 요청 객체
+ * @returns {UpdateNotificationRequest} 알림 생성 응답 데이터
+ */
 export const POST = MiddlewareWithPOST(async (request) => {
   try {
     const { supabase, user } = request.auth;
-    const notificationData: CreateNotificationRequest = await request.json();
+    const notificationData: UpdateNotificationRequestType =
+      await request.json();
 
     // 입력 검증
     if (!notificationData.title || !notificationData.gameName) {
@@ -97,7 +88,11 @@ export const POST = MiddlewareWithPOST(async (request) => {
   }
 });
 
-// ===== GET 메서드 - 사용자의 알림 목록 조회 =====
+/**
+ * 사용자의 알림 목록 조회
+ * @param request - 요청 객체
+ * @returns {GameNotificationType} 알림 목록 조회 응답 데이터
+ */
 export const GET = MiddlewareWithGET(async (request) => {
   try {
     const { supabase, user } = request.auth;

@@ -68,6 +68,10 @@ export function NotificationEditModal({
     }
   }, [notification]);
 
+  /**
+   * 알림 수정 저장
+   * @returns {Promise<void>} 알림 수정 저장 결과
+   */
   const handleSave = async () => {
     if (!notification) return;
 

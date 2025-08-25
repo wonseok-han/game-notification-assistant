@@ -1,13 +1,11 @@
 import { MiddlewareWithPOST } from '@server/custom-method';
 import { NextResponse } from 'next/server';
 
-// ===== 로그아웃 응답 타입 =====
-interface LogoutResponse {
-  success: boolean;
-  message: string;
-}
-
-// ===== POST 메서드 - 로그아웃 처리 =====
+/**
+ * 로그아웃
+ * @param request - 요청 객체
+ * @returns {ApiResponseType} 로그아웃 응답 데이터
+ */
 export const POST = MiddlewareWithPOST(async (request) => {
   try {
     const { supabase } = request.auth;
@@ -20,7 +18,7 @@ export const POST = MiddlewareWithPOST(async (request) => {
     }
 
     // 응답 생성
-    const response: LogoutResponse = {
+    const response = {
       success: true,
       message: '로그아웃이 완료되었습니다.',
     };

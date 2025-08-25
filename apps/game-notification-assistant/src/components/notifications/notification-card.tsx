@@ -20,6 +20,10 @@ export function NotificationCard({
   onEdit,
   onToggleExpand,
 }: NotificationCardProps) {
+  /**
+   * 다음 알림 시간 계산
+   * @returns {Date} 다음 알림 시간
+   */
   const getNextTime = () => {
     if (
       !notification.notification_times ||

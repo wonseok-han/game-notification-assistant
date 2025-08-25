@@ -2,7 +2,10 @@ import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 
-// ===== 서버용 Supabase 클라이언트 =====
+/**
+ * 서버용 Supabase 클라이언트 생성
+ * @returns {SupabaseClient} 서버용 Supabase 클라이언트
+ */
 export async function createClientServer() {
   const cookieStore = await cookies();
 
@@ -38,6 +41,10 @@ export async function createClientServer() {
   return supabase;
 }
 
+/**
+ * 관리자용 Supabase 클라이언트 생성
+ * @returns {SupabaseClient} 관리자용 Supabase 클라이언트
+ */
 export async function createAdminServer() {
   console.log(process.env.NEXT_PUBLIC_SUPABASE_URL);
   console.log(process.env.SUPABASE_SECRET_KEY);

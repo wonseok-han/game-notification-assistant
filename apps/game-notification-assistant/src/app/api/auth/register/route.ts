@@ -1,28 +1,14 @@
 import { MiddlewareWithPOST } from '@server/custom-method';
 import { NextResponse } from 'next/server';
 
-// ===== 회원가입 요청 타입 =====
-interface RegisterRequest {
-  email: string;
-  password: string;
-  username: string;
-}
-
-// ===== 회원가입 응답 타입 =====
-interface RegisterResponse {
-  success: boolean;
-  message: string;
-  data?: {
-    id: string;
-    email: string;
-    username: string;
-  };
-}
-
-// ===== POST 메서드 - 회원가입 처리 =====
+/**
+ * 회원가입
+ * @param request - 요청 객체
+ * @returns {ApiResponseType} 회원가입 응답 데이터
+ */
 export const POST = MiddlewareWithPOST(async (request) => {
   try {
-    const { email, password, username }: RegisterRequest = await request.json();
+    const { email, password, username } = await request.json();
 
     // 입력 검증
     if (!email || !password || !username) {
@@ -129,18 +115,18 @@ export const POST = MiddlewareWithPOST(async (request) => {
       );
     }
 
-    // 응답 반환
-    const response: RegisterResponse = {
-      success: true,
-      message: '회원가입이 완료되었습니다.',
-      data: {
-        id: userData.id,
-        email: userData.email,
-        username: userData.username,
+    return NextResponse.json(
+      {
+        success: true,
+        message: '회원가입이 완료되었습니다.',
+        data: {
+          id: userData.id,
+          email: userData.email,
+          username: userData.username,
+        },
       },
-    };
-
-    return NextResponse.json(response, { status: 201 });
+      { status: 201 }
+    );
   } catch (error) {
     console.error('회원가입 처리 오류:', error);
     return NextResponse.json(

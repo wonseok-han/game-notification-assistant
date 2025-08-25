@@ -2,7 +2,11 @@ import { MiddlewareWithPOST } from '@server/custom-method';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
-// ===== 카카오 토큰 재갱신 API =====
+/**
+ * 카카오 토큰 상태 확인
+ * @param request - 요청 객체
+ * @returns {KakaoStatusResponseType} 카카오 토큰 상태 확인 응답 데이터
+ */
 export const POST = MiddlewareWithPOST(async (request) => {
   try {
     const { supabase, user } = request.auth;

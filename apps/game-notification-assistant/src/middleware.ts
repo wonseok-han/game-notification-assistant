@@ -1,12 +1,7 @@
+import { AUTH_ROUTES, PROTECTED_ROUTES } from '@constants/paths';
 import { NextResponse, type NextRequest } from 'next/server';
 
 import { checkAuthStatus } from '@/utils/supabase/middleware';
-
-// 보호된 라우트 (로그인 필요)
-const PROTECTED_ROUTES = ['/dashboard'];
-
-// 인증 페이지 (이미 로그인된 경우 접근 불가)
-const AUTH_ROUTES = ['/auth/login', '/auth/register'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

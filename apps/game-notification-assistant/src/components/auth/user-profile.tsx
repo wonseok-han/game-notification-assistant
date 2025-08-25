@@ -18,7 +18,9 @@ export function UserProfile({ onLogout }: UserProfileProps) {
   // ===== Store 사용 =====
   const { reset, user } = useAuthStore();
 
-  // ===== 로그아웃 핸들러 =====
+  /**
+   * 로그아웃 핸들러
+   */
   const handleLogout = async () => {
     setIsLoggingOut(true);
 

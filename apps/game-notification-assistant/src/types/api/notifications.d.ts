@@ -47,7 +47,7 @@ type CreateNotificationRequestType = {
 };
 
 // ===== 알림 수정 요청 타입 =====
-type UpdateNotificationRequest = Partial<{
+type UpdateNotificationRequestType = Partial<{
   title: string;
   description: string;
   gameName: string;

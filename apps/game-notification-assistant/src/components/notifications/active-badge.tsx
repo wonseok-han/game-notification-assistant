@@ -10,6 +10,11 @@ interface ActiveBadgeProps {
 }
 
 export function ActiveBadge({ isActive }: ActiveBadgeProps) {
+  /**
+   * 활성 상태 설정
+   * @param {boolean} isActive - 활성 상태
+   * @returns {ActiveOptionType} 활성 상태 설정
+   */
   const getActiveConfig = (isActive: boolean): ActiveOptionType => {
     return isActive
       ? {

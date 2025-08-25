@@ -1,6 +1,11 @@
 import { MiddlewareWithGET } from '@server/custom-method';
 import { NextResponse } from 'next/server';
 
+/**
+ * 카카오 OAuth URL 생성
+ * @param request - 요청 객체
+ * @returns {KakaoAuthResponseType} 카카오 OAuth URL 생성 응답 데이터
+ */
 export const GET = MiddlewareWithGET(async (_request) => {
   try {
     const clientId = process.env.KAKAO_REST_API_KEY;
@@ -11,7 +16,6 @@ export const GET = MiddlewareWithGET(async (_request) => {
         {
           success: false,
           message: '카카오 API 키가 설정되지 않았습니다.',
-          aaa: 'bbb',
         },
         { status: 500 }
       );

@@ -8,6 +8,8 @@ import { googleVision } from '@services/ocr';
 
 /**
  * File을 base64 문자열로 변환
+ * @param {File} file - 파일 객체
+ * @returns {Promise<string>} base64 문자열
  */
 export async function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -29,6 +31,8 @@ export async function fileToBase64(file: File): Promise<string> {
 
 /**
  * Google Vision API로 텍스트 추출
+ * @param {File} imageFile - 이미지 파일
+ * @returns {Promise<string>} 텍스트 추출 결과
  */
 export async function extractTextWithGoogleVision(
   imageFile: File

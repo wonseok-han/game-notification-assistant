@@ -5,6 +5,11 @@ interface NotificationTimeStatusBadgeProps {
 export function NotificationTimeStatusBadge({
   status,
 }: NotificationTimeStatusBadgeProps) {
+  /**
+   * 알림 시간 상태 설정
+   * @param {string} status - 알림 시간 상태
+   * @returns {NotificationTimeStatusType} 알림 시간 상태 설정
+   */
   const getStatusConfig = (status: string) => {
     switch (status) {
       case 'pending':

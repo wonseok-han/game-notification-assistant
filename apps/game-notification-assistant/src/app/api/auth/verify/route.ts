@@ -1,18 +1,11 @@
 import { MiddlewareWithGET } from '@server/custom-method';
 import { NextResponse } from 'next/server';
 
-// ===== 세션 검증 응답 타입 =====
-interface VerifyResponse {
-  success: boolean;
-  message: string;
-  data?: {
-    id: string;
-    email: string;
-    username: string;
-  };
-}
-
-// ===== GET 메서드 - 세션 검증 =====
+/**
+ * 세션 검증
+ * @param request - 요청 객체
+ * @returns {UserType} 사용자 정보
+ */
 export const GET = MiddlewareWithGET(async (request) => {
   try {
     // 인증은 미들웨어에서 처리됨
@@ -32,8 +25,7 @@ export const GET = MiddlewareWithGET(async (request) => {
       );
     }
 
-    // 응답 반환
-    const response: VerifyResponse = {
+    return NextResponse.json({
       success: true,
       message: '세션이 유효합니다.',
       data: {
@@ -41,9 +33,7 @@ export const GET = MiddlewareWithGET(async (request) => {
         email: userData.email,
         username: userData.username,
       },
-    };
-
-    return NextResponse.json(response);
+    });
   } catch (error) {
     console.error('세션 검증 오류:', error);
     return NextResponse.json(

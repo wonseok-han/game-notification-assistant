@@ -3,6 +3,11 @@ import type { NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 
+/**
+ * 세션 업데이트
+ * @param {NextRequest} request - 요청 객체
+ * @returns {Promise<{supabase: SupabaseClient, response: NextResponse}>} 세션 업데이트 결과
+ */
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -34,6 +39,11 @@ export async function updateSession(request: NextRequest) {
   return { supabase, response: supabaseResponse };
 }
 
+/**
+ * 인증 상태 확인
+ * @param {NextRequest} request - 요청 객체
+ * @returns {Promise<{user: UserType | null, supabase: SupabaseClient}>} 인증 상태 확인 결과
+ */
 export async function checkAuthStatus(request: NextRequest) {
   const { supabase } = await updateSession(request);
 

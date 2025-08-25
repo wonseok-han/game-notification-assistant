@@ -22,7 +22,10 @@ export function RegisterForm() {
   // ===== Store 사용 =====
   const { setLoading, setUser } = useAuthStore();
 
-  // ===== 폼 제출 핸들러 =====
+  /**
+   * 회원가입 폼 제출 핸들러
+   * @param event - 이벤트 객체
+   */
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 

@@ -2,6 +2,11 @@ import { MiddlewareWithGET } from '@server/custom-method';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
+/**
+ * 카카오 콜백
+ * @param request - 요청 객체
+ * @returns {ApiResponseType} 카카오 콜백 응답 데이터
+ */
 export const GET = MiddlewareWithGET(async (request) => {
   try {
     const url = new URL(request.url);

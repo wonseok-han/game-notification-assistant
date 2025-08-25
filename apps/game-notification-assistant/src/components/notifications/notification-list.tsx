@@ -77,7 +77,11 @@ export function NotificationList() {
     return true;
   });
 
-  // ===== 알림 삭제 핸들러 =====
+  /**
+   * 알림 삭제 핸들러
+   * @param {string} id - 알림 ID
+   * @returns {Promise<void>} 알림 삭제 핸들러 결과
+   */
   const handleDelete = async (id: string) => {
     if (!confirm('정말로 이 알림을 삭제하시겠습니까?')) {
       return;
@@ -108,13 +112,24 @@ export function NotificationList() {
     }
   };
 
-  // ===== 알림 수정 핸들러 =====
+  /**
+   * 알림 수정 핸들러
+   * @param {GameNotificationType} notification - 알림 정보
+   */
   const handleEdit = (notification: GameNotificationType) => {
     setEditingNotification(notification);
     setIsEditModalOpen(true);
   };
 
-  // ===== 알림 저장 핸들러 =====
+  /**
+   * 알림 저장 핸들러
+   * @param {string} id - 알림 ID
+   * @param {string} title - 알림 제목
+   * @param {string} description - 알림 설명
+   * @param {boolean} isActive - 활성 상태
+   * @param {EditingTimeType[]} editingTimes - 알림 시간 정보
+   * @returns {Promise<void>} 알림 저장 핸들러 결과
+   */
   const handleSave = async (
     id: string,
     title: string,
@@ -184,7 +199,12 @@ export function NotificationList() {
     }
   };
 
-  // ===== 활성 상태 변경 핸들러 =====
+  /**
+   * 활성 상태 변경 핸들러
+   * @param {string} id - 알림 ID
+   * @param {boolean} isActive - 활성 상태
+   * @returns {Promise<void>} 활성 상태 변경 핸들러 결과
+   */
   const handleActiveChange = async (id: string, isActive: boolean) => {
     try {
       const notification = notifications.find((n) => n.id === id);
@@ -218,13 +238,14 @@ export function NotificationList() {
     }
   };
 
-  // ===== 모달 닫기 =====
+  /**
+   * 모달 닫기
+   */
   const handleCloseModal = () => {
     setIsEditModalOpen(false);
     setEditingNotification(null);
   };
 
-  // ===== 로딩 상태 =====
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">

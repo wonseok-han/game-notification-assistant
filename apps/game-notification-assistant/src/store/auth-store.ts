@@ -38,6 +38,7 @@ export const useAuthStore = create<AuthState>()(
 
       /**
        * 사용자 정보 설정
+       * @param {UserType | null} user - 사용자 정보
        */
       setUser: (user) => {
         set({ user, isAuthenticated: !!user });
@@ -45,6 +46,7 @@ export const useAuthStore = create<AuthState>()(
 
       /**
        * 인증 상태 설정
+       * @param {boolean} authenticated - 인증 상태
        */
       setAuthenticated: (authenticated) => {
         set({ isAuthenticated: authenticated });
@@ -52,6 +54,7 @@ export const useAuthStore = create<AuthState>()(
 
       /**
        * 로딩 상태 설정
+       * @param {boolean} loading - 로딩 상태
        */
       setLoading: (loading) => {
         set({ isLoading: loading });
@@ -59,6 +62,7 @@ export const useAuthStore = create<AuthState>()(
 
       /**
        * Hydration 상태 설정
+       * @param {boolean} hydrated - Hydration 상태
        */
       setHasHydrated: (hydrated) => {
         set({ hasHydrated: hydrated });

@@ -32,6 +32,9 @@ export function KakaoConnection() {
     };
   }, []);
 
+  /**
+   * 카카오톡 연결 상태 확인
+   */
   const checkConnectionStatus = async () => {
     try {
       const data = await status();
@@ -47,7 +50,10 @@ export function KakaoConnection() {
     }
   };
 
-  // ===== 카카오톡 로그인 핸들러 =====
+  /**
+   * 카카오톡 로그인 핸들러
+   * @returns {Promise<void>} 카카오톡 로그인 핸들러 결과
+   */
   const handleKakaoLogin = async () => {
     setIsLoading(true);
 
@@ -121,7 +127,10 @@ export function KakaoConnection() {
     }
   };
 
-  // ===== 카카오톡 연결 해제 핸들러 =====
+  /**
+   * 카카오톡 연결 해제 핸들러
+   * @returns {Promise<void>} 카카오톡 연결 해제 핸들러 결과
+   */
   const handleDisconnect = async () => {
     if (!confirm('카카오톡 연결을 해제하시겠습니까?')) return;
 
