@@ -5,15 +5,32 @@ import { NextResponse } from 'next/server';
 const CRON_LOOKBACK_MINUTES = 10; // 10분 전부터 조회
 
 // ===== 카카오 토큰 갱신 함수 =====
-interface TokenRefreshResult {
+type TokenRefreshResultType = {
   access_token: string | null;
   refresh_token?: string;
   expires_in?: number;
-}
+};
+
+type NotificationTimesResponseType = {
+  id: string;
+  scheduled_time: string;
+  status: string;
+  is_enabled: boolean;
+  raw_text: string | null;
+  label: string | null;
+  notification_id: string;
+  game_notifications: {
+    id: string;
+    title: string;
+    description: string;
+    game_name: string;
+    user_id: string;
+  };
+}[];
 
 async function refreshKakaoToken(
   refreshToken: string
-): Promise<TokenRefreshResult> {
+): Promise<TokenRefreshResultType> {
   try {
     // 카카오 토큰 갱신 API 직접 호출
     const response = await fetch('https://kauth.kakao.com/oauth/token', {
@@ -80,10 +97,10 @@ async function sendKakaoNotification(
     }
 
     // 설정된 시간 알림 설명/컨텍스트
-    if (notificationTime.raw_text) {
-      message += `"${notificationTime.raw_text}"`;
-    } else if (notificationTime.label) {
+    if (notificationTime.label) {
       message += `"${notificationTime.label}"`;
+    } else if (notificationTime.raw_text) {
+      message += `"${notificationTime.raw_text}"`;
     } else {
       message += `"알림"`;
     }
@@ -91,16 +108,33 @@ async function sendKakaoNotification(
     // 실제 남은 시간 계산
     const scheduledTime = new Date(notificationTime.scheduled_time);
     const now = new Date();
-    const timeDiffMs = scheduledTime.getTime() - now.getTime();
-    const timeDiffMinutes = Math.max(0, Math.round(timeDiffMs / (1000 * 60)));
+    const timeDiffMs = now.getTime() - scheduledTime.getTime();
+    const timeDiffMinutes = Math.round(timeDiffMs / (1000 * 60));
 
-    // 남은 시간에 따른 메시지 생성
+    // 시간 차이에 따른 메시지 생성
     let timeMessage = '';
-    if (timeDiffMinutes === 0) {
+    if (timeDiffMinutes < 0) {
+      // 이미 지난 시간
+      const absMinutes = Math.abs(timeDiffMinutes);
+      if (absMinutes < 60) {
+        timeMessage = `${absMinutes}분 전에 지났어요`;
+      } else {
+        const hours = Math.floor(absMinutes / 60);
+        const minutes = absMinutes % 60;
+        if (minutes === 0) {
+          timeMessage = `${hours}시간 전에 지났어요`;
+        } else {
+          timeMessage = `${hours}시간 ${minutes}분 전에 지났어요`;
+        }
+      }
+    } else if (timeDiffMinutes === 0) {
+      // 정확히 지금
       timeMessage = '지금이에요!!';
     } else if (timeDiffMinutes < 60) {
+      // 1시간 미만 남음
       timeMessage = `까지 ${timeDiffMinutes}분 남았어요!!`;
     } else {
+      // 1시간 이상 남음
       const hours = Math.floor(timeDiffMinutes / 60);
       const minutes = timeDiffMinutes % 60;
       if (minutes === 0) {
@@ -199,13 +233,18 @@ export async function GET(request: Request) {
       .from('notification_times')
       .select(
         `
-        *,
-        game_notifications!inner (
+        id,
+        scheduled_time,
+        status,
+        is_enabled,
+        raw_text,
+        label,
+        notification_id,
+        game_notifications (
           id,
           title,
           description,
           game_name,
-          image_url,
           user_id
         )
       `
@@ -240,7 +279,7 @@ export async function GET(request: Request) {
     let failCount = 0;
 
     // 각 알림 시간에 대해 카카오톡 전송
-    for (const notificationTime of notificationTimes) {
+    for (const notificationTime of notificationTimes as unknown as NotificationTimesResponseType) {
       try {
         const notification = notificationTime.game_notifications;
         if (!notification) {

@@ -129,6 +129,15 @@ CREATE INDEX IF NOT EXISTS idx_game_notifications_is_active ON public.game_notif
 CREATE INDEX IF NOT EXISTS idx_notification_times_notification_id ON public.notification_times(notification_id);
 CREATE INDEX IF NOT EXISTS idx_notification_times_scheduled_time ON public.notification_times(scheduled_time);
 CREATE INDEX IF NOT EXISTS idx_notification_times_status ON public.notification_times(status);
+CREATE INDEX IF NOT EXISTS idx_notification_times_is_enabled ON public.notification_times(is_enabled);
+
+-- notification_times 테이블에 복합 인덱스 추가
+CREATE INDEX IF NOT EXISTS idx_notification_times_composite
+ON public.notification_times(status, is_enabled, scheduled_time);
+
+-- JOIN 성능 향상을 위한 인덱스
+CREATE INDEX IF NOT EXISTS idx_notification_times_notification_id_scheduled
+ON public.notification_times(notification_id, scheduled_time);
 
 -- ===== RLS (Row Level Security) 정책 =====
 
@@ -169,34 +178,30 @@ CREATE POLICY "Users can delete own notifications" ON public.game_notifications
 ALTER TABLE public.notification_times ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view own notification times" ON public.notification_times
     FOR SELECT USING (
-        EXISTS (
-            SELECT 1 FROM public.game_notifications
-            WHERE id = notification_times.notification_id
-            AND user_id = auth.uid()
+        notification_id IN (
+            SELECT id FROM public.game_notifications
+            WHERE user_id = auth.uid()
         )
     );
 CREATE POLICY "Users can create own notification times" ON public.notification_times
     FOR INSERT WITH CHECK (
-        EXISTS (
-            SELECT 1 FROM public.game_notifications
-            WHERE id = notification_times.notification_id
-            AND user_id = auth.uid()
+        notification_id IN (
+            SELECT id FROM public.game_notifications
+            WHERE user_id = auth.uid()
         )
     );
 CREATE POLICY "Users can update own notification times" ON public.notification_times
     FOR UPDATE USING (
-        EXISTS (
-            SELECT 1 FROM public.game_notifications
-            WHERE id = notification_times.notification_id
-            AND user_id = auth.uid()
+        notification_id IN (
+            SELECT id FROM public.game_notifications
+            WHERE user_id = auth.uid()
         )
     );
 CREATE POLICY "Users can delete own notification times" ON public.notification_times
     FOR DELETE USING (
-        EXISTS (
-            SELECT 1 FROM public.game_notifications
-            WHERE id = notification_times.notification_id
-            AND user_id = auth.uid()
+        notification_id IN (
+            SELECT id FROM public.game_notifications
+            WHERE user_id = auth.uid()
         )
     );
 
