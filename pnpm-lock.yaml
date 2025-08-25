@@ -245,6 +245,9 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0(react@19.1.0)
     devDependencies:
+      '@repo/auto-index':
+        specifier: workspace:*
+        version: link:../auto-index
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config

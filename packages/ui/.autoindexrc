@@ -1,0 +1,15 @@
+{
+  "targets": [
+    {
+      "paths": [
+        "src/components/**"
+      ],
+      "fileExtensions": [
+        ".tsx",
+        ".ts"
+      ],
+      "outputFile": "index.ts",
+      "exportStyle": "mixed"
+    }
+  ]
+}

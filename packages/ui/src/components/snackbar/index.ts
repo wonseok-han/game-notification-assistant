@@ -1,2 +1,2 @@
-export { Snackbar } from './snackbar';
 export { SnackbarManager, useSnackbar } from './snackbar-manager';
+export { Snackbar } from './snackbar';

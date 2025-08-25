@@ -4,6 +4,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    passWithNoTests: true, // 테스트 파일이 없을 때도 성공
     reporters: ['verbose', 'json', 'html'],
     outputFile: {
       json: './reports/report.json',

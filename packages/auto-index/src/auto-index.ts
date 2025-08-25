@@ -165,19 +165,56 @@ export function findTargetConfig(
 ): TargetConfig {
   let targetConfig: TargetConfig | undefined;
 
+  log(`🔍 findTargetConfig 호출: folderPath=${folderPath}`);
+
   // targets 설정이 있는지 확인
   if (config?.targets && Array.isArray(config.targets)) {
     if (folderPath) {
       // folderPath가 있는 경우: 경로 매칭
       const relativePath = path.relative(process.cwd(), folderPath);
+      log(`🔍 상대 경로: ${relativePath}`);
 
       for (const target of config.targets) {
+        log(`🔍 target 검사:`, {
+          paths: target.paths,
+          exportStyle: target.exportStyle,
+        });
         if (target.paths && Array.isArray(target.paths)) {
           for (const watchPath of target.paths) {
-            // glob 패턴 매칭 (간단한 구현)
+            log(`🔍 watchPath 검사: ${watchPath}`);
+            // glob 패턴 매칭 개선
             if (watchPath.includes('**')) {
-              const parts = watchPath.split('**/');
-              if (parts.length === 2) {
+              const parts = watchPath.split('**');
+              log(`🔍 glob 패턴 분할:`, parts);
+
+              // src/components/** 패턴 처리
+              if (watchPath.endsWith('**')) {
+                const basePath = watchPath
+                  .replace(/\*\*$/, '')
+                  .replace(/\/$/, '');
+                log(
+                  `🔍 **로 끝나는 패턴: basePath=${basePath}, relativePath=${relativePath}`
+                );
+                if (
+                  relativePath === basePath ||
+                  relativePath.startsWith(basePath + '/')
+                ) {
+                  log(`🔍 **로 끝나는 패턴 매칭 성공`);
+                  targetConfig = { ...DEFAULT_TARGETS_CONFIG, ...target };
+                  break;
+                }
+              } else if (watchPath.startsWith('**/')) {
+                // **/components 패턴 처리
+                const targetFolder = watchPath.replace(/^\*\*\//, '');
+                log(
+                  `🔍 **/로 시작하는 패턴: targetFolder=${targetFolder}, relativePath=${relativePath}`
+                );
+                if (relativePath.includes(targetFolder)) {
+                  log(`🔍 **/로 시작하는 패턴 매칭 성공`);
+                  targetConfig = { ...DEFAULT_TARGETS_CONFIG, ...target };
+                  break;
+                }
+              } else if (parts.length === 2) {
                 const basePath = parts[0];
                 const targetFolder = parts[1];
 
@@ -187,7 +224,23 @@ export function findTargetConfig(
                   relativePath.startsWith(basePath) &&
                   relativePath.includes(targetFolder)
                 ) {
+                  log(`🔍 2개 부분 패턴 매칭 성공`);
                   // 해당 target에 기본값 병합
+                  targetConfig = { ...DEFAULT_TARGETS_CONFIG, ...target };
+                  break;
+                }
+              } else if (parts.length === 1) {
+                // **/components/** 패턴 또는 components/** 패턴
+                const basePath = parts[0];
+                log(
+                  `🔍 1개 부분 패턴 검사: basePath=${basePath}, relativePath=${relativePath}`
+                );
+                if (
+                  basePath !== undefined &&
+                  (relativePath === basePath ||
+                    relativePath.startsWith(basePath + '/'))
+                ) {
+                  log(`🔍 1개 부분 패턴 매칭 성공`);
                   targetConfig = { ...DEFAULT_TARGETS_CONFIG, ...target };
                   break;
                 }
@@ -195,6 +248,7 @@ export function findTargetConfig(
             } else {
               // 정확한 경로 매칭
               if (relativePath === watchPath) {
+                log(`🔍 정확한 경로 매칭 성공`);
                 // 해당 target에 기본값 병합
                 targetConfig = { ...DEFAULT_TARGETS_CONFIG, ...target };
                 break;
@@ -207,6 +261,7 @@ export function findTargetConfig(
     } else {
       // folderPath가 없는 경우: 첫 번째 설정 사용
       if (config.targets.length > 0) {
+        log(`🔍 첫 번째 설정 사용`);
         targetConfig = {
           ...DEFAULT_TARGETS_CONFIG,
           ...config.targets[0],
@@ -217,8 +272,11 @@ export function findTargetConfig(
 
   // 매칭되는 설정이 없으면 기본값 사용
   if (!targetConfig) {
+    log(`🔍 기본값 사용`);
     targetConfig = { ...DEFAULT_TARGETS_CONFIG };
   }
+
+  log(`🔍 최종 targetConfig:`, { exportStyle: targetConfig.exportStyle });
 
   // CLI 오버라이드 적용 (최우선)
   if (cliOverrides) {
@@ -241,11 +299,19 @@ function generateIndex(
     const config = getConfig();
 
     if (folderPath) {
+      // glob 패턴을 실제 경로로 변환
+      let actualFolderPath = folderPath;
+      if (folderPath.includes('**')) {
+        // ** 패턴을 제거하고 기본 경로만 사용
+        actualFolderPath = folderPath.replace(/\*\*/g, '').replace(/\/$/, '');
+        log(`🔍 glob 패턴 변환: ${folderPath} → ${actualFolderPath}`);
+      }
+
       // folderPath가 있는 경우: 특정 폴더 처리
-      const fullPath = path.resolve(folderPath);
+      const fullPath = path.resolve(actualFolderPath);
 
       if (!fs.existsSync(fullPath)) {
-        error(`폴더가 존재하지 않습니다: ${folderPath}`);
+        error(`폴더가 존재하지 않습니다: ${actualFolderPath}`);
         return;
       }
 
@@ -255,160 +321,24 @@ function generateIndex(
         return;
       }
 
-      const targetConfig = findTargetConfig(folderPath, config, cliOverrides);
+      const targetConfig = findTargetConfig(
+        actualFolderPath,
+        config,
+        cliOverrides
+      );
 
-      const files = fs.readdirSync(fullPath);
-      const componentFiles = files.filter((file: string) => {
-        const filePath = path.join(fullPath, file);
-        const stat = fs.statSync(filePath);
+      // glob 패턴이 있는지 확인하고 하위 폴더까지 처리
+      const hasGlobPattern = config.targets?.some((target) =>
+        target.paths?.some((p) => p.includes('**'))
+      );
 
-        // 디렉토리는 제외
-        if (stat.isDirectory()) {
-          return false;
-        }
-
-        // excludes 패턴에 맞는 파일은 제외
-        if (targetConfig.excludes && targetConfig.excludes.length > 0) {
-          for (const excludePattern of targetConfig.excludes) {
-            if (excludePattern.startsWith('*.')) {
-              // *.ext 패턴 매칭
-              const ext = excludePattern.substring(1);
-              if (file.endsWith(ext)) {
-                return false;
-              }
-            } else if (excludePattern.startsWith('*')) {
-              // *filename 패턴 매칭
-              const suffix = excludePattern.substring(1);
-              if (file.endsWith(suffix)) {
-                return false;
-              }
-            } else if (file === excludePattern) {
-              // 정확한 파일명 매칭
-              return false;
-            }
-          }
-        }
-
-        // outputFile 자체는 제외 (무한 루프 방지)
-        const outputFileName = targetConfig.outputFile || 'index.ts';
-        if (file === outputFileName) {
-          return false;
-        }
-
-        // 설정된 확장자와 일치하는지 확인
-        const fileExt = path.extname(file);
-        return targetConfig.fileExtensions.includes(fileExt);
-      });
-
-      if (componentFiles.length === 0) {
-        log(`📁 ${folderPath}에 처리할 파일이 없습니다.`);
-        return;
+      if (hasGlobPattern) {
+        // glob 패턴이 있으면 하위 폴더까지 재귀적으로 처리
+        processDirectoryRecursively(fullPath, targetConfig);
+      } else {
+        // 일반적인 단일 폴더 처리
+        processSingleDirectory(fullPath, targetConfig);
       }
-
-      // export 문 생성
-      const exportStatements: string[] = [];
-      const outputFileName = targetConfig.outputFile || 'index.ts';
-
-      componentFiles.forEach((file) => {
-        const fileName = path.basename(file, path.extname(file));
-        const transformedName = transformFileName(
-          fileName,
-          targetConfig.namingConvention
-        );
-        const filePath = path.join(fullPath, file);
-        const fromPath = targetConfig.fromWithExtension ? file : fileName;
-
-        switch (targetConfig.exportStyle) {
-          case 'named':
-            exportStatements.push(
-              `export { default as ${transformedName} } from './${fromPath}';`
-            );
-            break;
-          case 'default':
-            exportStatements.push(`export { default } from './${fromPath}';`);
-            break;
-          case 'star':
-            exportStatements.push(`export * from './${fromPath}';`);
-            break;
-          case 'star-as':
-            exportStatements.push(
-              `export * as ${transformedName} from './${fromPath}';`
-            );
-            break;
-          case 'mixed':
-            // 파일 내용을 분석하여 export 문 생성
-            const exportInfo = analyzeFileExports(filePath);
-            info(`🔍 파일 분석 결과:`, {
-              file: file,
-              hasDefaultExport: exportInfo.hasDefaultExport,
-              hasNamedExports: exportInfo.hasNamedExports,
-              namedExports: exportInfo.namedExports,
-              defaultExports: exportInfo.defaultExports,
-            });
-
-            // 유효한 식별자만 사용하도록 필터링
-            const identifierRegex = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
-
-            // 한 라인으로 합쳐서 생성
-            const combinedExports: string[] = [];
-            if (exportInfo.hasDefaultExport) {
-              const defaultAliasCandidate =
-                exportInfo.defaultExports[0] || transformedName;
-              const defaultAlias = identifierRegex.test(defaultAliasCandidate)
-                ? defaultAliasCandidate
-                : transformedName;
-              combinedExports.push(`default as ${defaultAlias}`);
-            }
-            if (
-              exportInfo.hasNamedExports &&
-              exportInfo.namedExports.length > 0
-            ) {
-              const uniqueNamed = Array.from(
-                new Set(exportInfo.namedExports)
-              ).filter((name) => identifierRegex.test(name));
-              if (uniqueNamed.length > 0) {
-                combinedExports.push(...uniqueNamed);
-              }
-            }
-            if (combinedExports.length > 0) {
-              exportStatements.push(
-                `export { ${combinedExports.join(', ')} } from './${fromPath}';`
-              );
-            }
-            break;
-          case 'auto':
-          default:
-            // 파일 내용을 확인하여 default export가 있는지 확인
-            const content = fs.readFileSync(filePath, 'utf-8');
-            const hasDefaultExport =
-              content.includes('export default') ||
-              content.includes('export { default }');
-
-            if (hasDefaultExport) {
-              exportStatements.push(
-                `export { default as ${transformedName} } from './${fromPath}';`
-              );
-            } else {
-              exportStatements.push(`export * from './${fromPath}';`);
-            }
-            break;
-        }
-      });
-
-      // index.ts 파일 생성
-      const indexPath = path.join(fullPath, outputFileName);
-
-      // outputFileName에 폴더가 포함되어 있는지 확인하고 필요한 폴더 생성
-      const outputDir = path.dirname(indexPath);
-      if (outputDir !== fullPath && !fs.existsSync(outputDir)) {
-        log(`📁 폴더 생성: ${outputDir}`);
-        fs.mkdirSync(outputDir, { recursive: true });
-      }
-
-      const indexContent = exportStatements.join('\n') + '\n';
-
-      fs.writeFileSync(indexPath, indexContent, 'utf-8');
-      log(`✅ ${indexPath} 생성 완료 (${componentFiles.length}개 파일)`);
     } else {
       // folderPath가 없는 경우: 설정 파일의 targets 설정 사용
       if (!config || !config.targets || config.targets.length === 0) {
@@ -422,7 +352,15 @@ function generateIndex(
         if (target.paths && Array.isArray(target.paths)) {
           target.paths.forEach((watchPath) => {
             log(`📁 처리 중: ${watchPath}`);
-            generateIndex(watchPath, cliOverrides);
+
+            // glob 패턴을 실제 경로로 변환
+            let actualPath = watchPath;
+            if (watchPath.includes('**')) {
+              // ** 패턴을 제거하고 기본 경로만 사용
+              actualPath = watchPath.replace(/\*\*/g, '').replace(/\/$/, '');
+            }
+
+            generateIndex(actualPath, cliOverrides);
           });
         }
       });
@@ -431,6 +369,366 @@ function generateIndex(
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
     error('인덱스 생성 오류:', errorMessage);
   }
+}
+
+/**
+ * 단일 디렉토리를 처리하여 index 파일을 생성합니다
+ * @param fullPath - 처리할 디렉토리 전체 경로
+ * @param targetConfig - 타겟 설정
+ */
+function processSingleDirectory(
+  fullPath: string,
+  targetConfig: TargetConfig
+): void {
+  const files = fs.readdirSync(fullPath);
+  const componentFiles = files.filter((file: string) => {
+    const filePath = path.join(fullPath, file);
+    const stat = fs.statSync(filePath);
+
+    // 디렉토리는 제외
+    if (stat.isDirectory()) {
+      return false;
+    }
+
+    // excludes 패턴에 맞는 파일은 제외
+    if (targetConfig.excludes && targetConfig.excludes.length > 0) {
+      for (const excludePattern of targetConfig.excludes) {
+        if (excludePattern.startsWith('*.')) {
+          // *.ext 패턴 매칭
+          const ext = excludePattern.substring(1);
+          if (file.endsWith(ext)) {
+            return false;
+          }
+        } else if (excludePattern.startsWith('*')) {
+          // *filename 패턴 매칭
+          const suffix = excludePattern.substring(1);
+          if (file.endsWith(suffix)) {
+            return false;
+          }
+        } else if (file === excludePattern) {
+          // 정확한 파일명 매칭
+          return false;
+        }
+      }
+    }
+
+    // outputFile 자체는 제외 (무한 루프 방지)
+    const outputFileName = targetConfig.outputFile || 'index.ts';
+    if (file === outputFileName) {
+      return false;
+    }
+
+    // 설정된 확장자와 일치하는지 확인
+    const fileExt = path.extname(file);
+    return targetConfig.fileExtensions.includes(fileExt);
+  });
+
+  if (componentFiles.length === 0) {
+    log(`📁 ${fullPath}에 처리할 파일이 없습니다.`);
+    return;
+  }
+
+  // export 문 생성
+  const exportStatements: string[] = [];
+  const outputFileName = targetConfig.outputFile || 'index.ts';
+
+  componentFiles.forEach((file) => {
+    const fileName = path.basename(file, path.extname(file));
+    const transformedName = transformFileName(
+      fileName,
+      targetConfig.namingConvention
+    );
+    const filePath = path.join(fullPath, file);
+    const fromPath = targetConfig.fromWithExtension ? file : fileName;
+
+    exportStatements.push(
+      ...generateExportStatements(
+        file,
+        filePath,
+        fromPath,
+        transformedName,
+        targetConfig
+      )
+    );
+  });
+
+  // index.ts 파일 생성
+  const indexPath = path.join(fullPath, outputFileName);
+
+  // outputFileName에 폴더가 포함되어 있는지 확인하고 필요한 폴더 생성
+  const outputDir = path.dirname(indexPath);
+  if (outputDir !== fullPath && !fs.existsSync(outputDir)) {
+    log(`📁 폴더 생성: ${outputDir}`);
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  const indexContent = exportStatements.join('\n') + '\n';
+
+  fs.writeFileSync(indexPath, indexContent, 'utf-8');
+  log(`✅ ${indexPath} 생성 완료 (${componentFiles.length}개 파일)`);
+}
+
+/**
+ * 디렉토리를 재귀적으로 처리하여 모든 하위 폴더에 index 파일을 생성합니다
+ * @param fullPath - 처리할 디렉토리 전체 경로
+ * @param targetConfig - 타겟 설정
+ */
+function processDirectoryRecursively(
+  fullPath: string,
+  targetConfig: TargetConfig
+): void {
+  const processDirectory = (dirPath: string) => {
+    try {
+      const files = fs.readdirSync(dirPath);
+
+      // 하위 디렉토리 먼저 재귀 처리
+      files.forEach((file: string) => {
+        const filePath = path.join(dirPath, file);
+        const stat = fs.statSync(filePath);
+
+        if (stat.isDirectory()) {
+          // node_modules, .git 등 특수 폴더 제외
+          if (!file.startsWith('.') && file !== 'node_modules') {
+            processDirectory(filePath);
+          }
+        }
+      });
+
+      // 하위 폴더 처리 완료 후 현재 디렉토리에 index 파일 생성
+      processDirectoryWithSubfolders(dirPath, targetConfig);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      error(`디렉토리 처리 오류 (${dirPath}):`, errorMessage);
+    }
+  };
+
+  processDirectory(fullPath);
+}
+
+/**
+ * 디렉토리와 하위 폴더를 함께 처리하여 index 파일을 생성합니다
+ * @param fullPath - 처리할 디렉토리 전체 경로
+ * @param targetConfig - 타겟 설정
+ */
+function processDirectoryWithSubfolders(
+  fullPath: string,
+  targetConfig: TargetConfig
+): void {
+  const files = fs.readdirSync(fullPath);
+
+  // 파일과 폴더 분리
+  const componentFiles = files.filter((file: string) => {
+    const filePath = path.join(fullPath, file);
+    const stat = fs.statSync(filePath);
+
+    // 디렉토리는 제외 (별도로 처리)
+    if (stat.isDirectory()) {
+      return false;
+    }
+
+    // excludes 패턴에 맞는 파일은 제외
+    if (targetConfig.excludes && targetConfig.excludes.length > 0) {
+      for (const excludePattern of targetConfig.excludes) {
+        if (excludePattern.startsWith('*.')) {
+          // *.ext 패턴 매칭
+          const ext = excludePattern.substring(1);
+          if (file.endsWith(ext)) {
+            return false;
+          }
+        } else if (excludePattern.startsWith('*')) {
+          // *filename 패턴 매칭
+          const suffix = excludePattern.substring(1);
+          if (file.endsWith(suffix)) {
+            return false;
+          }
+        } else if (file === excludePattern) {
+          // 정확한 파일명 매칭
+          return false;
+        }
+      }
+    }
+
+    // outputFile 자체는 제외 (무한 루프 방지)
+    const outputFileName = targetConfig.outputFile || 'index.ts';
+    if (file === outputFileName) {
+      return false;
+    }
+
+    // 설정된 확장자와 일치하는지 확인
+    const fileExt = path.extname(file);
+    return targetConfig.fileExtensions.includes(fileExt);
+  });
+
+  // 하위 폴더 찾기 (index.ts가 있는 폴더만)
+  const subfolders = files.filter((file: string) => {
+    const filePath = path.join(fullPath, file);
+    const stat = fs.statSync(filePath);
+
+    if (stat.isDirectory()) {
+      // node_modules, .git 등 특수 폴더 제외
+      if (!file.startsWith('.') && file !== 'node_modules') {
+        const indexPath = path.join(
+          filePath,
+          targetConfig.outputFile || 'index.ts'
+        );
+        return fs.existsSync(indexPath);
+      }
+    }
+    return false;
+  });
+
+  // 처리할 항목이 없으면 종료
+  if (componentFiles.length === 0 && subfolders.length === 0) {
+    log(`📁 ${fullPath}에 처리할 파일이나 폴더가 없습니다.`);
+    return;
+  }
+
+  // export 문 생성
+  const exportStatements: string[] = [];
+  const outputFileName = targetConfig.outputFile || 'index.ts';
+
+  // 파일 export 문 생성
+  componentFiles.forEach((file) => {
+    const fileName = path.basename(file, path.extname(file));
+    const transformedName = transformFileName(
+      fileName,
+      targetConfig.namingConvention
+    );
+    const filePath = path.join(fullPath, file);
+    const fromPath = targetConfig.fromWithExtension ? file : fileName;
+
+    log(`🔍 파일 처리 중: ${file} (exportStyle: ${targetConfig.exportStyle})`);
+
+    exportStatements.push(
+      ...generateExportStatements(
+        file,
+        filePath,
+        fromPath,
+        transformedName,
+        targetConfig
+      )
+    );
+  });
+
+  // 하위 폴더 export 문 생성
+  subfolders.forEach((folder) => {
+    exportStatements.push(`export * from './${folder}';`);
+  });
+
+  // index.ts 파일 생성
+  const indexPath = path.join(fullPath, outputFileName);
+
+  // outputFileName에 폴더가 포함되어 있는지 확인하고 필요한 폴더 생성
+  const outputDir = path.dirname(indexPath);
+  if (outputDir !== fullPath && !fs.existsSync(outputDir)) {
+    log(`📁 폴더 생성: ${outputDir}`);
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  const indexContent = exportStatements.join('\n') + '\n';
+
+  fs.writeFileSync(indexPath, indexContent, 'utf-8');
+  log(
+    `✅ ${indexPath} 생성 완료 (${componentFiles.length}개 파일, ${subfolders.length}개 폴더)`
+  );
+}
+
+/**
+ * exportStyle에 따라 export 문을 생성합니다
+ * @param file - 파일명
+ * @param filePath - 파일 전체 경로
+ * @param fromPath - import 경로
+ * @param transformedName - 변환된 파일명
+ * @param targetConfig - 타겟 설정
+ * @returns 생성된 export 문 배열
+ */
+function generateExportStatements(
+  file: string,
+  filePath: string,
+  fromPath: string,
+  transformedName: string,
+  targetConfig: TargetConfig
+): string[] {
+  const exportStatements: string[] = [];
+
+  switch (targetConfig.exportStyle) {
+    case 'named':
+      exportStatements.push(
+        `export { default as ${transformedName} } from './${fromPath}';`
+      );
+      break;
+    case 'default':
+      exportStatements.push(`export { default } from './${fromPath}';`);
+      break;
+    case 'star':
+      exportStatements.push(`export * from './${fromPath}';`);
+      break;
+    case 'star-as':
+      exportStatements.push(
+        `export * as ${transformedName} from './${fromPath}';`
+      );
+      break;
+    case 'mixed':
+      log(`🔍 mixed 스타일로 처리 중: ${file}`);
+      // 파일 내용을 분석하여 export 문 생성
+      const exportInfo = analyzeFileExports(filePath);
+      info(`🔍 파일 분석 결과:`, {
+        file: file,
+        hasDefaultExport: exportInfo.hasDefaultExport,
+        hasNamedExports: exportInfo.hasNamedExports,
+        namedExports: exportInfo.namedExports,
+        defaultExports: exportInfo.defaultExports,
+      });
+
+      // 유효한 식별자만 사용하도록 필터링
+      const identifierRegex = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
+
+      // 한 라인으로 합쳐서 생성
+      const combinedExports: string[] = [];
+      if (exportInfo.hasDefaultExport) {
+        const defaultAliasCandidate =
+          exportInfo.defaultExports[0] || transformedName;
+        const defaultAlias = identifierRegex.test(defaultAliasCandidate)
+          ? defaultAliasCandidate
+          : transformedName;
+        combinedExports.push(`default as ${defaultAlias}`);
+      }
+      if (exportInfo.hasNamedExports && exportInfo.namedExports.length > 0) {
+        const uniqueNamed = Array.from(new Set(exportInfo.namedExports)).filter(
+          (name) => identifierRegex.test(name)
+        );
+        if (uniqueNamed.length > 0) {
+          combinedExports.push(...uniqueNamed);
+        }
+      }
+      if (combinedExports.length > 0) {
+        exportStatements.push(
+          `export { ${combinedExports.join(', ')} } from './${fromPath}';`
+        );
+      } else {
+        // export할 내용이 없으면 star export 사용
+        exportStatements.push(`export * from './${fromPath}';`);
+      }
+      break;
+    case 'auto':
+    default:
+      // 파일 내용을 확인하여 default export가 있는지 확인
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const hasDefaultExport =
+        content.includes('export default') ||
+        content.includes('export { default }');
+
+      if (hasDefaultExport) {
+        exportStatements.push(
+          `export { default as ${transformedName} } from './${fromPath}';`
+        );
+      } else {
+        exportStatements.push(`export * from './${fromPath}';`);
+      }
+      break;
+  }
+
+  return exportStatements;
 }
 
 /**
