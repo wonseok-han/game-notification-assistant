@@ -31,12 +31,19 @@ export function KakaoConnection() {
     };
   }, []);
 
+  const refreshToken = async () => {
+    const response = await fetch('/api/kakao/status', {
+      method: 'POST',
+    });
+    const data = await response.json();
+    return data;
+  };
+
   const checkConnectionStatus = async () => {
     try {
-      const response = await fetch('/api/kakao/status');
-      const data = await response.json();
+      const data = await refreshToken();
 
-      if (data.connected) {
+      if (data.success) {
         setIsConnected(true);
       } else {
         setIsConnected(false);
