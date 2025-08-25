@@ -1,8 +1,7 @@
-import { ActionButton } from '@repo/ui';
+import { ActionButton, ActiveSwitch } from '@repo/ui';
 import { type GameNotification } from '@services/notification';
 import Image from 'next/image';
 
-import { ActiveSwitch } from './active-switch';
 import { NotificationTimeStatusBadge } from './notification-time-status-badge';
 
 interface NotificationTableProps {

@@ -1,8 +1,7 @@
-import { ActionButton } from '@repo/ui';
+import { ActionButton, ActiveSwitch } from '@repo/ui';
 import { type GameNotification } from '@services/notification';
 import { useEffect, useState } from 'react';
 
-import { ActiveSwitch } from './active-switch';
 import { type EditingTimeType } from './types';
 
 interface NotificationEditModalProps {

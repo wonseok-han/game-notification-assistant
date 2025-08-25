@@ -122,48 +122,6 @@ export function KakaoConnection() {
     }
   };
 
-  // ===== 테스트 알림 전송 핸들러 =====
-  const handleTestNotification = async () => {
-    try {
-      const currentTime = new Date().toLocaleString('ko-KR');
-      const response = await fetch('/api/kakao/test-notification', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: `게임 알림 테스트입니다!\n\n현재 시간: ${currentTime}`,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        showSnackbar({
-          message: '테스트 알림이 전송되었습니다! 카카오톡을 확인해보세요.',
-          type: 'success',
-          position: 'bottom-right',
-          autoHideDuration: 6000,
-        });
-      } else {
-        showSnackbar({
-          message: `테스트 알림 전송 실패: ${data.message}`,
-          type: 'error',
-          position: 'bottom-right',
-          autoHideDuration: 6000,
-        });
-      }
-    } catch (error) {
-      console.error('테스트 알림 전송 오류:', error);
-      showSnackbar({
-        message: '테스트 알림 전송 중 오류가 발생했습니다.',
-        type: 'error',
-        position: 'bottom-right',
-        autoHideDuration: 6000,
-      });
-    }
-  };
-
   // ===== 카카오톡 연결 해제 핸들러 =====
   const handleDisconnect = async () => {
     if (!confirm('카카오톡 연결을 해제하시겠습니까?')) return;
@@ -221,17 +179,6 @@ export function KakaoConnection() {
             카카오톡 알림이 활성화되어 있습니다. 게임 알림을 설정하면 지정된
             시간에 카카오톡으로 알림을 받을 수 있습니다.
           </p>
-        </div>
-
-        {/* 테스트 버튼 추가 */}
-        <div className="mt-4 flex gap-2">
-          <ActionButton
-            onClick={handleTestNotification}
-            size="lg"
-            variant="primary"
-          >
-            테스트 알림 전송
-          </ActionButton>
         </div>
       </div>
     );

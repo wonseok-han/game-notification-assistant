@@ -1,8 +1,8 @@
+import { ActiveSwitch } from '@repo/ui';
 import { type GameNotification } from '@services/notification';
 import Image from 'next/image';
 
 import { ActiveBadge } from './active-badge';
-import { ActiveSwitch } from './active-switch';
 
 interface NotificationCardProps {
   notification: GameNotification;

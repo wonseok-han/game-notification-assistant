@@ -1,3 +1,3 @@
-export { LoginForm } from './login-form';
-export { RegisterForm } from './register-form';
-export { UserProfile } from './user-profile';
+export * from './login-form';
+export * from './register-form';
+export * from './user-profile';
