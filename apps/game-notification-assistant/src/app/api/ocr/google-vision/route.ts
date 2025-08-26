@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 
-import { MiddlewareWithPOST } from '@server/custom-method';
+import { MiddlewareWithPOST } from '@shared/lib/api/server/custom-method';
 import { NextResponse } from 'next/server';
 
 /**

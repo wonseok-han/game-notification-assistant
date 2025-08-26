@@ -1,4 +1,4 @@
-import { MiddlewareWithPOST } from '@server/custom-method';
+import { MiddlewareWithPOST } from '@shared/lib/api/server/custom-method';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 

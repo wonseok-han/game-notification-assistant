@@ -1,10 +1,11 @@
 'use client';
 
-import { AppHeader, KakaoConnection } from '@components';
-import { NotificationForm } from '@components/notifications/notification-form';
-import { NotificationList } from '@components/notifications/notification-list';
-import { logoutUser } from '@services/auth';
-import { useAuthStore } from '@store';
+import { useAuthStore } from '@entities/auth/model/auth-store';
+import { logoutUser } from '@entities/user/api/user-api';
+import { KakaoConnection } from '@features/connect-kakao/ui/kakao-connection';
+import { NotificationForm } from '@features/create-notification/ui/notification-form';
+import { NotificationList } from '@features/list-notification/ui/notification-list';
+import { AppHeader } from '@widgets/layout/app-header';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();

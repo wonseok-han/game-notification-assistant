@@ -1,7 +1,6 @@
-import { AUTH_ROUTES, PROTECTED_ROUTES } from '@constants/paths';
+import AUTH_CONFIG from '@shared/config/auth';
+import { checkAuthStatus } from '@shared/lib/supabase/middleware';
 import { NextResponse, type NextRequest } from 'next/server';
-
-import { checkAuthStatus } from '@/utils/supabase/middleware';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -10,15 +9,19 @@ export async function middleware(request: NextRequest) {
   const { user } = await checkAuthStatus(request);
 
   // 보호된 라우트에 접근하려는 경우
-  if (PROTECTED_ROUTES.some((route) => pathname.startsWith(route))) {
+  if (
+    AUTH_CONFIG.PROTECTED_ROUTES.some((route) => pathname.startsWith(route))
+  ) {
     if (!user) {
       // 로그인되지 않은 경우 로그인 페이지로 리다이렉트
-      return NextResponse.redirect(new URL('/auth/login', request.url));
+      return NextResponse.redirect(new URL('/user/login', request.url));
     }
   }
 
   // 인증 페이지에 접근하려는 경우 (이미 로그인된 경우)
-  if (AUTH_ROUTES.some((route) => pathname.startsWith(route))) {
+  if (
+    AUTH_CONFIG.USER_AUTH_ROUTES.some((route) => pathname.startsWith(route))
+  ) {
     if (user) {
       // 이미 로그인된 경우 대시보드로 리다이렉트
       return NextResponse.redirect(new URL('/dashboard', request.url));

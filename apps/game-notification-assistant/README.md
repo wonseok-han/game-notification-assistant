@@ -1,20 +1,21 @@
-# 🎮 게임 알림 어시스턴트
+# 게임 알림 어시스턴트
 
 게임 이용자가 게임에서 이미지를 캡처해 해당 시간이 도래하면 카카오톡 알림을 받을 수 있도록 하는 AI 어시스턴트입니다.
 
-## ✨ 주요 기능
+## 주요 기능
 
-- **🖼️ 이미지 기반 시간 추출**: Google Cloud Vision API를 사용한 고정밀 OCR로 게임 스크린샷에서 시간 정보 자동 추출
-- **⏰ 스마트 알림 시스템**: 다중 알림 시간 설정, 상대/절대 시간 자동 계산, UTC/Local 시간 처리
-- **💬 카카오톡 연동**: OAuth 2.0 인증, 자동 토큰 갱신, "나에게 보내기" 알림 전송
-- **🎮 게임 알림 관리**: CRUD 기능, 이미지 미리보기, 시간별 상세 정보 관리
-- **🔒 보안 인증**: 서버 사이드 전용 Supabase Auth 시스템
-- **🗄️ 데이터베이스**: Supabase를 활용한 데이터 영구 저장
+- **이미지 기반 시간 추출**: Google Cloud Vision API를 사용한 고정밀 OCR로 게임 스크린샷에서 시간 정보 자동 추출
+- **스마트 알림 시스템**: 다중 알림 시간 설정, 상대/절대 시간 자동 계산, UTC/Local 시간 처리
+- **카카오톡 연동**: OAuth 2.0 인증, 자동 토큰 갱신, "나에게 보내기" 알림 전송
+- **게임 알림 관리**: CRUD 기능, 이미지 미리보기, 시간별 상세 정보 관리
+- **보안 인증**: 서버 사이드 전용 Supabase Auth 시스템
+- **데이터베이스**: Supabase를 활용한 데이터 영구 저장
 
-## 🚀 기술 스택
+## 기술 스택
 
+- **아키텍처**: Feature-Sliced Design (FSD)
 - **프론트엔드**: Next.js 15.3.0, React 19.1.0
-- **상태 관리**: Zustand 5.0.6
+- **상태 관리**: Zustand 5.0.6 + persist
 - **스타일링**: Tailwind CSS 4.1.11
 - **데이터베이스**: Supabase (PostgreSQL)
 - **인증**: Supabase Auth + 서버 전용 처리
@@ -24,7 +25,7 @@
 - **메시징**: KakaoTalk API
 - **배포**: Vercel
 
-## 📋 요구사항
+## 요구사항
 
 - Node.js 22.18.0 이상
 - pnpm 9.0.0 이상
@@ -33,7 +34,7 @@
 - cron-job 계정 및 설정
 - Kakao Developers 앱 설정
 
-## 🛠️ 설치 및 설정
+## 설치 및 설정
 
 ### 1. 의존성 설치
 
@@ -87,7 +88,7 @@ pnpm dev
 
 브라우저에서 `http://localhost:3000`으로 접속하세요.
 
-## 📱 카카오톡 연동
+## 카카오톡 연동
 
 ### 설정 방법
 
@@ -104,7 +105,7 @@ pnpm dev
 - "나에게 보내기" API를 통한 개인 알림
 - 자동 토큰 갱신 및 연결 상태 관리
 
-## ⏰ Cron Job 설정
+## Cron Job 설정
 
 ### cron-job.org 설정
 
@@ -133,7 +134,7 @@ pnpm dev
 - **알림 전송**: 카카오톡 "나에게 보내기" API 사용
 - **상태 업데이트**: 성공 시 `sent`, 실패 시 `failed`로 자동 업데이트
 
-## 🖼️ OCR 및 시간 추출
+## OCR 및 시간 추출
 
 ### Google Cloud Vision API
 
@@ -148,7 +149,7 @@ pnpm dev
 - **컨텍스트 인식**: 게임 이벤트와 연관된 시간 정보 추출
 - **UTC/Local 변환**: 서버와 클라이언트 간 시간대 일관성 유지
 
-## 🎯 사용법
+## 사용법
 
 ### 1. 회원가입/로그인
 
@@ -178,45 +179,88 @@ pnpm dev
 - 이미지 미리보기
 - 시간별 상세 정보 (아코디언 형태)
 
-## 🔧 개발 가이드
+## 개발 가이드
+
+### 아키텍처: Feature-Sliced Design (FSD)
+
+본 프로젝트는 **Feature-Sliced Design** 패턴을 적용하여 확장 가능하고 유지보수하기 쉬운 구조로 설계되었습니다.
+
+**자세한 FSD 가이드**: [../../docs/fsd.md](../../docs/fsd.md)
 
 ### 프로젝트 구조
 
 ```
 src/
-├── app/                    # Next.js App Router
-│   ├── api/               # API 라우트 (서버 전용)
-│   │   ├── auth/          # 인증 관련 API
-│   │   ├── kakao/         # 카카오 연동 API
-│   │   ├── notifications/ # 알림 관리 API
-│   │   └── ocr/           # OCR 처리 API
-│   ├── auth/              # 인증 페이지
-│   ├── dashboard/         # 대시보드
-│   ├── layout.tsx         # 루트 레이아웃
-│   └── page.tsx           # 메인 페이지
-├── components/             # React 컴포넌트
-│   ├── auth/              # 인증 관련 컴포넌트
-│   ├── notification-form.tsx    # 알림 생성 폼
-│   ├── notification-list.tsx    # 알림 목록
-│   └── kakao-connection.tsx     # 카카오톡 연결
-├── store/                  # Zustand 상태 관리
-│   ├── auth-store.ts      # 인증 상태
-│   └── notification-store.ts # 알림 상태
-├── services/               # API 서비스
-│   ├── auth.ts            # 인증 서비스
-│   └── notification.ts    # 알림 서비스
-├── utils/                  # 유틸리티 함수
-│   ├── time-extractor.ts  # 시간 추출 로직
-│   ├── google-vision.ts   # Google Vision API
-│   └── supabase.ts        # Supabase 설정
-└── types/                  # TypeScript 타입 정의
-    └── game-notification.d.ts
+├── app/                          # App Layer - Next.js App Router
+│   ├── api/                      # API Routes
+│   │   ├── user/                 # 사용자 인증 API
+│   │   ├── kakao/                # 카카오 연동 API
+│   │   ├── notifications/        # 알림 관리 API
+│   │   ├── ocr/                  # OCR 처리 API
+│   │   └── cron/                 # 크론 작업 API
+│   ├── dashboard/                # 대시보드 페이지
+│   ├── user/                     # 사용자 관련 페이지
+│   ├── layout.tsx                # 루트 레이아웃
+│   └── page.tsx                  # 메인 페이지
+├── widgets/                      # Widgets Layer - 복합 UI 블록
+│   └── layout/
+│       └── app-header.tsx        # 앱 헤더
+├── features/                     # Features Layer - 비즈니스 기능
+│   ├── create-notification/      # 알림 생성 기능
+│   ├── edit-notification/        # 알림 수정 기능
+│   ├── list-notification/        # 알림 목록 기능
+│   ├── connect-kakao/            # 카카오 연결 기능
+│   ├── sign-in-user/             # 로그인 기능
+│   └── sign-up-user/             # 회원가입 기능
+├── entities/                     # Entities Layer - 비즈니스 엔티티
+│   ├── auth/                     # 인증 엔티티
+│   │   └── model/                # 인증 상태 관리
+│   ├── user/                     # 사용자 엔티티
+│   │   ├── api/                  # 사용자 API
+│   │   ├── model/                # 사용자 데이터 모델
+│   │   └── ui/                   # 사용자 UI 컴포넌트
+│   ├── notification/             # 알림 엔티티
+│   │   ├── api/                  # 알림 API
+│   │   ├── config/               # 알림 설정
+│   │   ├── lib/                  # OCR, 시간 추출 로직
+│   │   ├── model/                # 알림 데이터 모델
+│   │   └── ui/                   # 알림 UI 컴포넌트
+│   └── kakao/                    # 카카오 엔티티
+│       ├── api/                  # 카카오 API
+│       └── model/                # 카카오 데이터 모델
+└── shared/                       # Shared Layer - 공통 코드
+    ├── config/                   # 공통 설정
+    ├── lib/                      # 공통 라이브러리
+    │   ├── api/                  # API 클라이언트
+    │   └── supabase/             # Supabase 클라이언트
+    └── types/                    # 공통 타입 정의
 ```
+
+### FSD 레이어별 역할
+
+| 레이어       | 역할                   | 예시                                  |
+| ------------ | ---------------------- | ------------------------------------- |
+| **App**      | Next.js 페이지, 라우팅 | `dashboard/page.tsx`, `layout.tsx`    |
+| **Widgets**  | 복합 UI 블록           | `app-header.tsx`                      |
+| **Features** | 사용자 기능            | `create-notification`, `sign-in-user` |
+| **Entities** | 비즈니스 엔티티        | `user`, `notification`, `auth`        |
+| **Shared**   | 공통 코드              | API 클라이언트, 유틸리티, 타입        |
+
+### 네이밍 규칙
+
+- **기본**: kebab-case + 도메인-명사
+- **설정**: `도메인-config.ts` (예: `auth-config.ts`)
+- **DTO**: `도메인-dto.ts` (예: `user-dto.ts`)
+- **API**: `도메인-api.ts` (예: `notification-api.ts`)
+- **Features**: `동사-도메인` (예: `create-notification`)
 
 ### 상태 관리
 
-- **auth-store**: 사용자 인증 상태 (API 라우트 기반)
-- **notification-store**: 게임 알림 데이터 및 시간 관리
+FSD 패턴에 따라 각 엔티티별로 상태를 관리합니다:
+
+- **`entities/auth/model/auth-store.ts`**: 사용자 인증 상태
+- **`entities/notification/model/notification-store.ts`**: 알림 데이터 및 시간 관리
+- **상태 관리 도구**: Zustand 5.0.6 + persist 미들웨어
 
 ### 보안 원칙
 
@@ -225,7 +269,7 @@ src/
 3. **쿠키 보안**: HTTP 전용, Secure, SameSite 설정으로 쿠키 보안 강화
 4. **토큰 검증**: 서버에서 모든 토큰 유효성 검증
 
-## 🚀 배포
+## 배포
 
 ### Vercel 배포
 

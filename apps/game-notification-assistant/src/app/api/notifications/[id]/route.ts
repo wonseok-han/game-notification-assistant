@@ -1,7 +1,7 @@
 import {
   MiddlewareWithPATCH,
   MiddlewareWithDELETE,
-} from '@server/custom-method';
+} from '@shared/lib/api/server/custom-method';
 import { NextResponse } from 'next/server';
 
 // ===== PATCH 메서드 - 알림 수정 =====

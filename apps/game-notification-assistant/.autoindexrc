@@ -2,20 +2,8 @@
   "targets": [
     {
       "paths": [
-        "src/components",
-        "src/app/**/components"
-      ],
-      "fileExtensions": [
-        ".tsx",
-        ".ts"
-      ],
-      "outputFile": "index.ts",
-      "exportStyle": "auto"
-    },
-    {
-      "paths": [
-        "src/hooks",
-        "src/store"
+        "src/entities/**/ui",
+        "src/features/**/ui"
       ],
       "fileExtensions": [
         ".tsx",

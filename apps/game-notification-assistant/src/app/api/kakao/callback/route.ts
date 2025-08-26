@@ -1,4 +1,4 @@
-import { MiddlewareWithGET } from '@server/custom-method';
+import { MiddlewareWithGET } from '@shared/lib/api/server/custom-method';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 

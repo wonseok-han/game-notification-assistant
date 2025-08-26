@@ -1,6 +1,9 @@
 export { Accordion } from './accordion';
-export { ActionButton, ActionButtonProps } from './action-button';
+export { ActionButton } from './action-button';
+export type { ActionButtonProps } from './action-button';
 export { ActiveSwitch } from './active-switch';
-export { Tabs, TabItem, TabsProps } from './tabs';
-export { ToolCard, ToolCardProps } from './tool-card';
+export { Tabs } from './tabs';
+export type { TabItem, TabsProps } from './tabs';
+export { ToolCard } from './tool-card';
+export type { ToolCardProps } from './tool-card';
 export * from './snackbar';

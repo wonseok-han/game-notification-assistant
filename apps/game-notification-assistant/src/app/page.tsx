@@ -1,13 +1,12 @@
 'use client';
 
-import { AppHeader } from '@components';
-import { useAuthStore } from '@store';
+import { useAuthStore } from '@entities/auth/model/auth-store';
+import { AppHeader } from '@widgets/layout/app-header';
 import { useRouter } from 'next/navigation';
 
 export default function HomePage() {
   const router = useRouter();
   const { hasHydrated, user } = useAuthStore();
-
   // 로그인 후 대시보드로 이동
   const handleGoToDashboard = () => {
     router.push('/dashboard');
@@ -15,12 +14,12 @@ export default function HomePage() {
 
   // 로그인 페이지로 이동
   const handleGoToLogin = () => {
-    router.push('/auth/login');
+    router.push('/user/sign-in');
   };
 
   // 회원가입 페이지로 이동
   const handleGoToRegister = () => {
-    router.push('/auth/register');
+    router.push('/user/sign-up');
   };
 
   // 로딩 중

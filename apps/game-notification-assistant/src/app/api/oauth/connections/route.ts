@@ -1,4 +1,7 @@
-import { MiddlewareWithPOST, MiddlewareWithGET } from '@server/custom-method';
+import {
+  MiddlewareWithPOST,
+  MiddlewareWithGET,
+} from '@shared/lib/api/server/custom-method';
 import { NextResponse } from 'next/server';
 
 /**

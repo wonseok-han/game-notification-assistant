@@ -1,4 +1,4 @@
-import { createAdminServer } from '@utils/supabase/server';
+import { createAdminServer } from '@shared/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
 // ===== 상수 정의 =====
