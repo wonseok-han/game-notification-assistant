@@ -1,3 +1,5 @@
+import type { UpdateNotificationRequestDto } from '@entities/notification/model/notification-dto';
+
 import {
   MiddlewareWithGET,
   MiddlewareWithPOST,
@@ -12,8 +14,7 @@ import { NextResponse } from 'next/server';
 export const POST = MiddlewareWithPOST(async (request) => {
   try {
     const { supabase, user } = request.auth;
-    const notificationData: UpdateNotificationRequestType =
-      await request.json();
+    const notificationData: UpdateNotificationRequestDto = await request.json();
 
     // 입력 검증
     if (!notificationData.title || !notificationData.gameName) {
