@@ -196,6 +196,7 @@ export function analyzeFileExports(filePath: string): {
   hasDefaultExport: boolean;
   hasNamedExports: boolean;
   namedExports: string[];
+  typeExports: string[];
   defaultExports: string[];
 } {
   try {
@@ -243,23 +244,37 @@ export function analyzeFileExports(filePath: string): {
 
     // 모든 export 타입 찾기
     const namedExports: string[] = [];
+    const typeExports: string[] = [];
     const defaultExports: string[] = [];
 
-    // 1. export function/const/class/interface/type/enum
-    const exportPatterns = [
+    // 1. export function/const/class/enum (value exports)
+    const valueExportPatterns = [
       /export\s+function\s+(\w+)/g,
       /export\s+const\s+(\w+)/g,
       /export\s+class\s+(\w+)/g,
-      /export\s+interface\s+(\w+)/g,
-      /export\s+type\s+(\w+)/g,
       /export\s+enum\s+(\w+)/g,
     ];
 
-    exportPatterns.forEach((pattern) => {
+    valueExportPatterns.forEach((pattern) => {
       let match;
       while ((match = pattern.exec(codeWithoutStrings)) !== null) {
         if (match[1] && !namedExports.includes(match[1])) {
           namedExports.push(match[1]);
+        }
+      }
+    });
+
+    // 2. export interface/type (type-only exports)
+    const typeExportPatterns = [
+      /export\s+interface\s+(\w+)/g,
+      /export\s+type\s+(\w+)/g,
+    ];
+
+    typeExportPatterns.forEach((pattern) => {
+      let match;
+      while ((match = pattern.exec(codeWithoutStrings)) !== null) {
+        if (match[1] && !typeExports.includes(match[1])) {
+          typeExports.push(match[1]);
         }
       }
     });
@@ -329,6 +344,7 @@ export function analyzeFileExports(filePath: string): {
       hasDefaultExport,
       hasNamedExports,
       namedExports,
+      typeExports,
       defaultExports,
     });
 
@@ -336,6 +352,7 @@ export function analyzeFileExports(filePath: string): {
       hasDefaultExport,
       hasNamedExports,
       namedExports,
+      typeExports,
       defaultExports,
     };
   } catch (err) {
@@ -344,6 +361,7 @@ export function analyzeFileExports(filePath: string): {
       hasDefaultExport: false,
       hasNamedExports: false,
       namedExports: [],
+      typeExports: [],
       defaultExports: [],
     };
   }

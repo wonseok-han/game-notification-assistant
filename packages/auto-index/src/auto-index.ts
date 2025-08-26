@@ -745,36 +745,53 @@ function generateExportStatements(
         hasDefaultExport: exportInfo.hasDefaultExport,
         hasNamedExports: exportInfo.hasNamedExports,
         namedExports: exportInfo.namedExports,
+        typeExports: exportInfo.typeExports,
         defaultExports: exportInfo.defaultExports,
       });
 
       // 유효한 식별자만 사용하도록 필터링
       const identifierRegex = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 
-      // 한 라인으로 합쳐서 생성
-      const combinedExports: string[] = [];
+      // Value exports (default + named)
+      const valueExports: string[] = [];
       if (exportInfo.hasDefaultExport) {
         const defaultAliasCandidate =
           exportInfo.defaultExports[0] || transformedName;
         const defaultAlias = identifierRegex.test(defaultAliasCandidate)
           ? defaultAliasCandidate
           : transformedName;
-        combinedExports.push(`default as ${defaultAlias}`);
+        valueExports.push(`default as ${defaultAlias}`);
       }
       if (exportInfo.hasNamedExports && exportInfo.namedExports.length > 0) {
         const uniqueNamed = Array.from(new Set(exportInfo.namedExports)).filter(
           (name) => identifierRegex.test(name)
         );
         if (uniqueNamed.length > 0) {
-          combinedExports.push(...uniqueNamed);
+          valueExports.push(...uniqueNamed);
         }
       }
-      if (combinedExports.length > 0) {
+
+      // Type-only exports
+      const uniqueTypeExports = Array.from(
+        new Set(exportInfo.typeExports)
+      ).filter((name) => identifierRegex.test(name));
+
+      // Value exports 생성
+      if (valueExports.length > 0) {
         exportStatements.push(
-          `export { ${combinedExports.join(', ')} } from './${fromPath}';`
+          `export { ${valueExports.join(', ')} } from './${fromPath}';`
         );
-      } else {
-        // export할 내용이 없으면 star export 사용
+      }
+
+      // Type exports 생성 (isolatedModules 지원)
+      if (uniqueTypeExports.length > 0) {
+        exportStatements.push(
+          `export type { ${uniqueTypeExports.join(', ')} } from './${fromPath}';`
+        );
+      }
+
+      // export할 내용이 없으면 star export 사용
+      if (valueExports.length === 0 && uniqueTypeExports.length === 0) {
         exportStatements.push(`export * from './${fromPath}';`);
       }
       break;
