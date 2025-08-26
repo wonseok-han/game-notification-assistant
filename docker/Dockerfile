@@ -1,5 +1,5 @@
 # ===== 기본 스테이지 =====
-FROM --platform=$BUILDPLATFORM node:22.17.0-alpine AS base
+FROM --platform=$BUILDPLATFORM node:22.18.0-alpine AS base
 
 # pnpm 설치 및 설정
 RUN corepack enable
@@ -19,6 +19,17 @@ RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # ===== 빌드 스테이지 =====
 FROM base AS builder
+
+# 빌드 시 필요한 환경 변수를 ARG로 받기
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+ARG SUPABASE_SECRET_KEY
+ARG NEXT_PUBLIC_SITE_URL
+ARG NEXT_PUBLIC_API_BASE_URL
+ARG KAKAO_REST_API_KEY
+ARG KAKAO_CLIENT_SECRET
+ARG GOOGLE_CLOUD_API_KEY
+ARG CRON_SECRET
 
 # deps 스테이지에서 소스 코드 복사
 COPY --from=deps /app /app
@@ -40,19 +51,19 @@ RUN adduser --system --uid 1001 nextjs
 WORKDIR /app
 
 # Next.js standalone 출력에서 필요한 파일들만 복사
-COPY --from=builder --chown=nextjs:nodejs /app/apps/dev-kit/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/apps/dev-kit/.next/static ./apps/dev-kit/.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/apps/dev-kit/public ./apps/dev-kit/public
+COPY --from=builder --chown=nextjs:nodejs /app/apps/game-notification-assistant/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/game-notification-assistant/.next/static ./apps/game-notification-assistant/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/apps/game-notification-assistant/public ./apps/game-notification-assistant/public
 
 # 사용자 전환
 USER nextjs
 
 # 포트 노출
-EXPOSE 3001
+EXPOSE 3000
 
 # 환경 변수 설정
 ENV NODE_ENV=production
-ENV PORT=3001
+ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
 # health 체크 (curl 대신 wget 사용)
@@ -60,4 +71,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD pgrep -f "node.*server.js" || exit 1
 
 # 애플리케이션 실행
-CMD ["node", "apps/dev-kit/server.js"]
+CMD ["node", "apps/game-notification-assistant/server.js"]

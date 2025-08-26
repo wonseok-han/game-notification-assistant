@@ -1,15 +1,30 @@
 services:
-  dev-kit:
+  game-notification-assistant:
     build:
       context: ..
       dockerfile: docker/Dockerfile
       no_cache: true
-    container_name: dev-kit-app
+      args:
+        # Supabase 설정
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
+        SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY}
+        # 애플리케이션 설정
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:3000}
+        # 카카오톡 API 설정
+        KAKAO_REST_API_KEY: ${KAKAO_REST_API_KEY}
+        KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET}
+        # Google Cloud Vision API
+        GOOGLE_CLOUD_API_KEY: ${GOOGLE_CLOUD_API_KEY}
+        # Cron Job 설정
+        CRON_SECRET: ${CRON_SECRET}
+    container_name: game-notification-assistant-app
     ports:
-      - "3001:3001"
+      - "3000:3000"
     environment:
       - NODE_ENV=production
-      - PORT=3001
+      - PORT=3000
       - HOSTNAME=0.0.0.0
     restart: unless-stopped
     healthcheck:
@@ -19,8 +34,8 @@ services:
       retries: 3
       start_period: 40s
     networks:
-      - dev-kit-network
+      - game-notification-assistant-network
 
 networks:
-  dev-kit-network:
+  game-notification-assistant-network:
     driver: bridge

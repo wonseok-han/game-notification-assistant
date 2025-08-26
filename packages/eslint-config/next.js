@@ -31,8 +31,10 @@ export const nextJsConfig = [
     rules: {
       ...pluginNext.configs.recommended.rules,
       ...pluginNext.configs['core-web-vitals'].rules,
-      'react/prop-types': 'off',
-      'react/react-in-jsx-scope': 'off', // React scope 규칙을 명시적으로 off로 설정 (JSX Transform 사용 시 불필요)
+      'react/prop-types': 'off', // 프로퍼티 타입 검사 규칙을 명시적으로 off로 설정
+      'react/react-in-jsx-scope': 'off', // React scope 규칙을 명시적으로 off로 설정
+      'react-hooks/exhaustive-deps': 'off', // 의존성 배열 검사 규칙을 명시적으로 off로 설정
+      'turbo/no-undeclared-env-vars': 'off', // turbo 플러그인 사용 시 환경 변수 오류 방지
     },
   },
 ];

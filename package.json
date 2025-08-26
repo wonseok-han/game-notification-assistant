@@ -6,13 +6,15 @@
     "prepare": "husky",
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "dev:assistant": "turbo run dev --filter=coin-trade-assistant",
+    "dev:assistant": "turbo run dev --filter=game-notification-assistant",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md}\"",
     "check-types": "turbo run check-types"
   },
   "devDependencies": {
     "concurrently": "^9.2.0",
+    "dotenv": "^17.2.1",
+    "dotenv-cli": "^10.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
     "prettier": "^3.6.0",

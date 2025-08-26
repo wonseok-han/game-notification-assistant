@@ -24,8 +24,9 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint",
       "prettier --write",
+      "tsc --noEmit",
+      "eslint",
       "vitest run"
     ],
     "*.{json,md}": [

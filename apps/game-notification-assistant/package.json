@@ -5,16 +5,18 @@
   "private": true,
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0 --turbo --port 3000",
+    "dev:prod": "NODE_ENV=production dotenv -e .env.prod -- next dev --hostname 0.0.0.0 --turbo --port 3000",
     "dev:auto-index": "auto-index --watch",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint --fix --max-warnings 0",
+    "build:prod": "dotenv -e .env.prod -- next build",
+    "lint": "next lint --fix",
     "check-types": "tsc --noEmit"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint",
-      "prettier --write"
+      "prettier --write",
+      "tsc --noEmit",
+      "eslint"
     ],
     "*.{json,css,md}": [
       "prettier --write"

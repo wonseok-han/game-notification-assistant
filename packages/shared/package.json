@@ -24,6 +24,15 @@
     "build": "tsc --project tsconfig.json",
     "dev": "tsc --project tsconfig.json --watch"
   },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "tsc --noEmit"
+    ],
+    "*.{json,css,md}": [
+      "prettier --write"
+    ]
+  },
   "dependencies": {
     "dayjs": "^1.11.13",
     "diff": "^8.0.2"
