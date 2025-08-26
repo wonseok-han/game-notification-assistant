@@ -152,6 +152,41 @@ export function parseCliArgs(args: string[]): ParsedCliArgs {
 }
 
 /**
+ * 경로가 glob 패턴과 일치하는지 확인합니다
+ * @param relativePath - 확인할 상대 경로
+ * @param watchPath - glob 패턴 경로
+ * @returns 패턴 매칭 여부
+ */
+function isPathMatchingPattern(
+  relativePath: string,
+  watchPath: string
+): boolean {
+  if (!watchPath.includes('**')) {
+    // 일반 경로 매칭
+    return relativePath === watchPath;
+  }
+
+  // **로 끝나는 패턴 (예: src/components/**)
+  if (watchPath.endsWith('**')) {
+    const basePath = watchPath.replace(/\/?\*\*$/, '');
+    return relativePath.startsWith(basePath);
+  }
+
+  // 특정 폴더로 끝나는 패턴 (예: src/entities/**/ui)
+  const parts = watchPath.split('**');
+  if (parts.length === 2) {
+    const basePath = parts[0];
+    const targetFolder = parts[1];
+
+    if (basePath && targetFolder && relativePath.startsWith(basePath)) {
+      return relativePath.endsWith(targetFolder);
+    }
+  }
+
+  return false;
+}
+
+/**
  * 경로별 설정을 찾습니다
  * @param folderPath - 설정을 찾을 폴더 경로 (선택사항)
  * @param config - autoIndex 설정 객체
@@ -356,8 +391,11 @@ function generateIndex(
             // glob 패턴을 실제 경로로 변환
             let actualPath = watchPath;
             if (watchPath.includes('**')) {
-              // ** 패턴을 제거하고 기본 경로만 사용
-              actualPath = watchPath.replace(/\*\*/g, '').replace(/\/$/, '');
+              // ** 패턴이 있는 경우 기본 경로만 사용
+              const basePath = watchPath.split('**')[0];
+              if (basePath) {
+                actualPath = basePath.replace(/\/$/, '');
+              }
             }
 
             generateIndex(actualPath, cliOverrides);
@@ -495,7 +533,21 @@ function processDirectoryRecursively(
       });
 
       // 하위 폴더 처리 완료 후 현재 디렉토리에 index 파일 생성
-      processDirectoryWithSubfolders(dirPath, targetConfig);
+      // 현재 디렉토리가 설정된 경로 패턴과 일치하는지 확인
+      const relativePath = path.relative(process.cwd(), dirPath);
+      const shouldProcessDirectory = getConfig()?.targets?.some((target) => {
+        if (target.paths && Array.isArray(target.paths)) {
+          return target.paths.some((watchPath) =>
+            isPathMatchingPattern(relativePath, watchPath)
+          );
+        }
+        return false;
+      });
+
+      if (shouldProcessDirectory) {
+        log(`🔍 패턴 매칭 폴더 감지: ${dirPath}`);
+        processDirectoryWithSubfolders(dirPath, targetConfig);
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       error(`디렉토리 처리 오류 (${dirPath}):`, errorMessage);
@@ -580,6 +632,22 @@ function processDirectoryWithSubfolders(
   // 처리할 항목이 없으면 종료
   if (componentFiles.length === 0 && subfolders.length === 0) {
     log(`📁 ${fullPath}에 처리할 파일이나 폴더가 없습니다.`);
+    return;
+  }
+
+  // 현재 디렉토리가 설정된 경로 패턴과 일치하는지 확인
+  const relativePath = path.relative(process.cwd(), fullPath);
+  const shouldProcessDirectory = getConfig()?.targets?.some((target) => {
+    if (target.paths && Array.isArray(target.paths)) {
+      return target.paths.some((watchPath) =>
+        isPathMatchingPattern(relativePath, watchPath)
+      );
+    }
+    return false;
+  });
+
+  if (!shouldProcessDirectory) {
+    log(`📁 패턴 매칭 안됨, 건너뜀: ${fullPath}`);
     return;
   }
 
@@ -809,7 +877,19 @@ export function startWatchMode(
           const targetConfig = findTargetConfig(watchPath, config, overrides);
           const outputFileName = targetConfig.outputFile || 'index.ts';
 
-          const watcher = chokidar.watch(watchPath, {
+          // glob 패턴을 실제 경로로 변환
+          let actualWatchPath = watchPath;
+          if (watchPath.includes('**')) {
+            const basePath = watchPath.split('**')[0];
+            if (basePath) {
+              actualWatchPath = basePath.replace(/\/$/, '');
+              log(
+                `🔍 감시용 glob 패턴 변환: ${watchPath} → ${actualWatchPath}`
+              );
+            }
+          }
+
+          const watcher = chokidar.watch(actualWatchPath, {
             ignored: [
               /(^|[\/\\])\../,
               new RegExp(`${outputFileName.replace('.', '\\.')}$`),
@@ -822,21 +902,57 @@ export function startWatchMode(
             const fileName = path.basename(filePath);
             if (fileName === outputFileName) return;
             log(`📝 파일 추가: ${fileName} (${watchPath})`);
-            generateIndex(watchPath, overrides);
+
+            // 파일이 변경된 디렉토리 기준으로 처리
+            const fileDir = path.dirname(filePath);
+            const relativePath = path.relative(process.cwd(), fileDir);
+
+            // 패턴과 일치하는지 확인
+            const shouldProcess = target.paths?.some((p) =>
+              isPathMatchingPattern(relativePath, p)
+            );
+
+            if (shouldProcess) {
+              generateIndex(actualWatchPath, overrides);
+            }
           });
 
           watcher.on('unlink', (filePath: string) => {
             const fileName = path.basename(filePath);
             if (fileName === outputFileName) return;
             log(`🗑️  파일 삭제: ${fileName} (${watchPath})`);
-            generateIndex(watchPath, overrides);
+
+            // 파일이 변경된 디렉토리 기준으로 처리
+            const fileDir = path.dirname(filePath);
+            const relativePath = path.relative(process.cwd(), fileDir);
+
+            // 패턴과 일치하는지 확인
+            const shouldProcess = target.paths?.some((p) =>
+              isPathMatchingPattern(relativePath, p)
+            );
+
+            if (shouldProcess) {
+              generateIndex(actualWatchPath, overrides);
+            }
           });
 
           watcher.on('change', (filePath: string) => {
             const fileName = path.basename(filePath);
             if (fileName === outputFileName) return;
             log(`📝 파일 변경: ${fileName} (${watchPath})`);
-            generateIndex(watchPath, overrides);
+
+            // 파일이 변경된 디렉토리 기준으로 처리
+            const fileDir = path.dirname(filePath);
+            const relativePath = path.relative(process.cwd(), fileDir);
+
+            // 패턴과 일치하는지 확인
+            const shouldProcess = target.paths?.some((p) =>
+              isPathMatchingPattern(relativePath, p)
+            );
+
+            if (shouldProcess) {
+              generateIndex(actualWatchPath, overrides);
+            }
           });
 
           watchers.push(watcher);
