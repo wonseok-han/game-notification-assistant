@@ -28,7 +28,7 @@
     "build:components": "tsc",
     "dev:styles": "tailwindcss -i ./src/styles.css -o ./dist/index.css --watch",
     "dev:components": "tsc --watch",
-    "dev:auto-index": "auto-index --watch"
+    "dev:indexgen": "indexgencli --watch"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -41,7 +41,6 @@
     ]
   },
   "devDependencies": {
-    "@repo/auto-index": "workspace:*",
     "@repo/eslint-config": "workspace:*",
     "@repo/tailwind-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
@@ -51,6 +50,7 @@
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.1",
     "eslint": "^9.30.0",
+    "indexgen-cli": "^1.0.2",
     "postcss": "^8.5.6",
     "sass": "^1.89.2",
     "tailwindcss": "^4.1.11",

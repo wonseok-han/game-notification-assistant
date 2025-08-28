@@ -50,7 +50,6 @@ game-notification-assistant/
 ├── packages/                      # 공유 패키지
 │   ├── ui/                       # UI 컴포넌트 라이브러리
 │   ├── shared/                   # 공유 유틸리티
-│   ├── auto-index/               # 자동 인덱스 생성 도구
 │   ├── eslint-config/            # ESLint 설정
 │   ├── typescript-config/        # TypeScript 설정
 │   └── tailwind-config/          # Tailwind CSS 설정
@@ -190,15 +189,6 @@ cd packages/eslint-config
 # 설정 파일 수정
 ```
 
-### 3. 자동 인덱스 생성
-```bash
-# 모든 인덱스 파일 자동 생성
-pnpm run auto-index
-
-# 특정 패키지의 인덱스만 생성
-pnpm run auto-index --filter=@repo/ui
-```
-
 ## 기술 스택
 
 ### 모노레포 도구
@@ -231,7 +221,6 @@ pnpm run auto-index --filter=@repo/ui
 ### 개발 도구
 - **ESLint**: 코드 품질 관리
 - **Prettier**: 코드 포맷팅
-- **@repo/auto-index**: 자동 인덱스 생성
 
 ### UI 컴포넌트
 - **TipTap**: 리치 텍스트 에디터
@@ -248,11 +237,6 @@ pnpm run auto-index --filter=@repo/ui
 ### `@repo/shared`
 공유 유틸리티 함수들
 - 날짜 처리, diff 알고리즘 등
-
-### `@repo/auto-index`
-자동으로 인덱스 파일을 생성하는 도구
-- 컴포넌트, 훅, 스토어 등의 export 자동화
-- Watch 모드: 파일 변경 시 실시간 index.ts 업데이트
 
 ### 설정 패키지들
 - `@repo/eslint-config`: ESLint 설정

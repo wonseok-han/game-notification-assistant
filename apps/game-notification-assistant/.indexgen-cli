@@ -2,8 +2,8 @@
   "targets": [
     {
       "paths": [
-        "src/entities/**/ui",
-        "src/features/**/ui"
+        "src/entities/**/ui/**",
+        "src/features/**/ui/**"
       ],
       "fileExtensions": [
         ".tsx",
