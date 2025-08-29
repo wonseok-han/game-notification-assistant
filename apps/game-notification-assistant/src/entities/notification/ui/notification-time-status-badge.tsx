@@ -1,3 +1,5 @@
+import type { ActiveOptionType } from '../model/notification-domain';
+
 interface NotificationTimeStatusBadgeProps {
   status: string;
 }
@@ -8,9 +10,9 @@ export function NotificationTimeStatusBadge({
   /**
    * 알림 시간 상태 설정
    * @param {string} status - 알림 시간 상태
-   * @returns {NotificationTimeStatusType} 알림 시간 상태 설정
+   * @returns {ActiveOptionType} 알림 시간 상태 설정
    */
-  const getStatusConfig = (status: string) => {
+  const getStatusConfig = (status: string): Omit<ActiveOptionType, 'value'> => {
     switch (status) {
       case 'pending':
         return {

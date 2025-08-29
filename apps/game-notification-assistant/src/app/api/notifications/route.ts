@@ -1,4 +1,4 @@
-import type { UpdateNotificationRequestDto } from '@entities/notification/model/notification-dto';
+import type { CreateNotificationRequestDto } from '@entities/notification/model/notification-dto';
 
 import {
   MiddlewareWithGET,
@@ -9,12 +9,12 @@ import { NextResponse } from 'next/server';
 /**
  * 알림 생성
  * @param request - 요청 객체
- * @returns {UpdateNotificationRequest} 알림 생성 응답 데이터
+ * @returns {CreateNotificationResponseDto} 알림 생성 응답 데이터
  */
 export const POST = MiddlewareWithPOST(async (request) => {
   try {
     const { supabase, user } = request.auth;
-    const notificationData: UpdateNotificationRequestDto = await request.json();
+    const notificationData: CreateNotificationRequestDto = await request.json();
 
     // 입력 검증
     if (!notificationData.title || !notificationData.gameName) {
@@ -95,7 +95,7 @@ export const POST = MiddlewareWithPOST(async (request) => {
 /**
  * 사용자의 알림 목록 조회
  * @param request - 요청 객체
- * @returns {GameNotificationType} 알림 목록 조회 응답 데이터
+ * @returns {GetNotificationsResponseDto} 알림 목록 조회 응답 데이터
  */
 export const GET = MiddlewareWithGET(async (request) => {
   try {

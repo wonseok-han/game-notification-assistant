@@ -33,7 +33,6 @@
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "prettier --write",
-      "tsc --noEmit",
       "eslint"
     ],
     "*.{json,css,md}": [

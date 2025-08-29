@@ -4,12 +4,10 @@ import { useAuthStore } from '@entities/auth/model/auth-store';
 import { logoutUser } from '@entities/user/api/user-api';
 import { useState } from 'react';
 
-// ===== 사용자 프로필 Props =====
 interface UserProfileProps {
   onLogout?: () => void;
 }
 
-// ===== 사용자 프로필 컴포넌트 =====
 export function UserProfile({ onLogout }: UserProfileProps) {
   // ===== 상태 관리 =====
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

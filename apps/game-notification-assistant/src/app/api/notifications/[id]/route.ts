@@ -4,7 +4,11 @@ import {
 } from '@shared/lib/api/server/custom-method';
 import { NextResponse } from 'next/server';
 
-// ===== PATCH 메서드 - 알림 수정 =====
+/**
+ * @param request - 요청 객체
+ * @param params - 요청 파라미터
+ * @returns {UpdateNotificationResponseDto} 알림 수정 응답 데이터
+ */
 export const PATCH = MiddlewareWithPATCH<{ params: Promise<{ id: string }> }>(
   async (request, { params }) => {
     try {
@@ -147,7 +151,11 @@ export const PATCH = MiddlewareWithPATCH<{ params: Promise<{ id: string }> }>(
   }
 );
 
-// ===== DELETE 메서드 - 알림 삭제 =====
+/**
+ * @param request - 요청 객체
+ * @param params - 요청 파라미터
+ * @returns {ApiResponseType} 알림 삭제 응답 데이터
+ */
 export const DELETE = MiddlewareWithDELETE<{ params: Promise<{ id: string }> }>(
   async (request, { params }) => {
     try {
