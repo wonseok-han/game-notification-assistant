@@ -17,7 +17,7 @@ export const POST = MiddlewareWithPOST(async (request) => {
     const notificationData: CreateNotificationRequestDto = await request.json();
 
     // 입력 검증
-    if (!notificationData.title || !notificationData.gameName) {
+    if (!notificationData.title || !notificationData.game_name) {
       return NextResponse.json(
         { success: false, message: '필수 필드를 입력해주세요.' },
         { status: 400 }
@@ -31,8 +31,8 @@ export const POST = MiddlewareWithPOST(async (request) => {
         user_id: user.id,
         title: notificationData.title,
         description: notificationData.description,
-        game_name: notificationData.gameName,
-        image_url: notificationData.imageUrl,
+        game_name: notificationData.game_name,
+        image_url: notificationData.image_url,
         is_active: true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -50,18 +50,16 @@ export const POST = MiddlewareWithPOST(async (request) => {
 
     // notification_times 테이블에 시간 정보 삽입
     if (
-      notificationData.notificationTimes &&
-      notificationData.notificationTimes.length > 0
+      notificationData.notification_times &&
+      notificationData.notification_times.length > 0
     ) {
-      const timeEntries = notificationData.notificationTimes.map((time) => ({
+      const timeEntries = notificationData.notification_times.map((time) => ({
         notification_id: notification.id,
-        scheduled_time: time.scheduledTime,
+        scheduled_time: time.scheduled_time,
         status: 'pending',
-        is_enabled: time.isEnabled,
-        raw_text: time.rawText ?? null,
+        is_enabled: time.is_enabled,
+        raw_text: time.raw_text ?? null,
         label: time.label ?? null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
       }));
 
       const { error: timeError } = await supabase

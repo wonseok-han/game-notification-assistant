@@ -1,15 +1,20 @@
 'use client';
 
 import type {
-  EditingTimeType,
-  GameNotificationType,
-} from '@entities/notification/model/notification-domain';
+  NotificationEditFormType,
+  NotificationListType,
+} from '@entities/notification/model/notificaion-domain';
 
 import {
   deleteNotification,
   getNotifications,
   updateNotification,
+  updateNotificationActive,
 } from '@entities/notification/api/notification-api';
+import {
+  notificationsDtoToList,
+  notificationUpdateFormToDto,
+} from '@entities/notification/model/notification-mapper';
 import { NotificationFilters } from '@entities/notification/ui/notification-filters';
 import { NotificationTable } from '@entities/notification/ui/notification-table';
 import { NotificationEditModal } from '@features/edit-notification/ui';
@@ -19,16 +24,14 @@ import { useEffect, useState } from 'react';
 // ===== 알림 목록 컴포넌트 =====
 export function NotificationList() {
   // ===== 상태 관리 =====
-  const [notifications, setNotifications] = useState<GameNotificationType[]>(
-    []
-  );
+  const [notifications, setNotifications] = useState<NotificationListType>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState<
     'all' | 'true' | 'false'
   >('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [editingNotification, setEditingNotification] =
-    useState<GameNotificationType | null>(null);
+    useState<NotificationEditFormType | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const { showSnackbar } = useSnackbar();
@@ -39,7 +42,7 @@ export function NotificationList() {
       try {
         setIsLoading(true);
         const result = await getNotifications();
-        setNotifications(result || []);
+        setNotifications(notificationsDtoToList(result) || []);
       } catch (error) {
         console.error('알림 목록 조회 오류:', error);
         showSnackbar({
@@ -61,7 +64,7 @@ export function NotificationList() {
     // 상태 필터링
     if (
       selectedStatus !== 'all' &&
-      notification.is_active.toString() !== selectedStatus
+      notification.isActive.toString() !== selectedStatus
     ) {
       return false;
     }
@@ -71,7 +74,7 @@ export function NotificationList() {
       const searchLower = searchTerm.toLowerCase();
       return (
         notification.title.toLowerCase().includes(searchLower) ||
-        notification.game_name.toLowerCase().includes(searchLower) ||
+        notification.gameName.toLowerCase().includes(searchLower) ||
         notification.description?.toLowerCase().includes(searchLower)
       );
     }
@@ -116,68 +119,34 @@ export function NotificationList() {
 
   /**
    * 알림 수정 핸들러
-   * @param {GameNotificationType} notification - 알림 정보
+   * @param {NotificationEditFormType} notification - 알림 정보
    */
-  const handleEdit = (notification: GameNotificationType) => {
+  const handleEdit = (notification: NotificationEditFormType) => {
     setEditingNotification(notification);
     setIsEditModalOpen(true);
   };
 
   /**
    * 알림 저장 핸들러
-   * @param {string} id - 알림 ID
-   * @param {string} title - 알림 제목
-   * @param {string} description - 알림 설명
-   * @param {boolean} isActive - 활성 상태
-   * @param {EditingTimeType[]} editingTimes - 알림 시간 정보
+   * @param {NotificationEditFormType} form - 알림 정보
    * @returns {Promise<void>} 알림 저장 핸들러 결과
    */
-  const handleSave = async (
-    id: string,
-    title: string,
-    description: string,
-    isActive: boolean,
-    editingTimes: EditingTimeType[]
-  ) => {
+  const handleSave = async (form: NotificationEditFormType) => {
     try {
       // 디버깅: 받은 값들 확인
       console.log('handleSave에서 받은 값들:', {
-        id,
-        title,
-        isActive,
-        editingTimesCount: editingTimes.length,
+        id: form.id,
+        title: form.title,
+        isActive: form.isActive,
+        editingTimesCount: form.notificationTimes.length,
       });
 
-      const response = await updateNotification(id, {
-        title,
-        description,
-        is_active: isActive,
-      });
+      const response = await updateNotification(
+        form.id,
+        notificationUpdateFormToDto(form)
+      );
 
       if (response) {
-        // notification_times 업데이트
-        if (editingTimes.length > 0) {
-          // notification_times를 UpdateNotificationRequest 형식으로 변환
-          const notificationTimes = editingTimes.map((time) => ({
-            id: time.id,
-            scheduledTime: new Date(time.scheduledTime).toISOString(),
-            isEnabled: time.isEnabled,
-            rawText: time.rawText,
-            label: time.label,
-          }));
-
-          // notification_times와 is_active를 함께 업데이트
-          await updateNotification(id, {
-            is_active: isActive,
-            notificationTimes,
-          });
-        } else {
-          // notification_times가 없는 경우 is_active만 업데이트
-          await updateNotification(id, {
-            is_active: isActive,
-          });
-        }
-
         showSnackbar({
           message: '알림이 수정되었습니다.',
           type: 'success',
@@ -187,7 +156,7 @@ export function NotificationList() {
 
         // 전체 목록을 다시 가져와서 UI 최신화
         const result = await getNotifications();
-        setNotifications(result || []);
+        setNotifications(notificationsDtoToList(result) || []);
       }
     } catch (error) {
       console.error('알림 수정 오류:', error);
@@ -213,9 +182,7 @@ export function NotificationList() {
       if (!notification) return;
 
       // is_active만 업데이트
-      await updateNotification(id, {
-        is_active: isActive,
-      });
+      await updateNotificationActive(id, isActive);
 
       // 성공 메시지 표시
       showSnackbar({
@@ -227,7 +194,7 @@ export function NotificationList() {
 
       // 로컬 상태 업데이트
       setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, is_active: isActive } : n))
+        prev.map((n) => (n.id === id ? { ...n, isActive: isActive } : n))
       );
     } catch (error) {
       console.error('활성 상태 변경 오류:', error);

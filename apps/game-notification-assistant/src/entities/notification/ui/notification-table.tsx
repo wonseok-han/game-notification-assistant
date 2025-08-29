@@ -1,4 +1,7 @@
-import type { GameNotificationType } from '../model/notification-domain';
+import type {
+  NotificationEditFormType,
+  NotificationListType,
+} from '../model/notificaion-domain';
 
 import { ActionButton, ActiveSwitch } from '@repo/ui';
 import Image from 'next/image';
@@ -6,8 +9,8 @@ import Image from 'next/image';
 import { NotificationTimeStatusBadge } from './notification-time-status-badge';
 
 interface NotificationTableProps {
-  notifications: GameNotificationType[];
-  onEdit: (notification: GameNotificationType) => void;
+  notifications: NotificationListType;
+  onEdit: (notification: NotificationEditFormType) => void;
   onDelete: (id: string) => void;
   onActiveChange: (id: string, isActive: boolean) => void;
 }
@@ -65,7 +68,7 @@ export function NotificationTable({
                     fill
                     alt={notification.title}
                     className="object-cover"
-                    src={notification.image_url}
+                    src={notification.imageUrl}
                   />
                 </div>
               </td>
@@ -87,7 +90,7 @@ export function NotificationTable({
               {/* 게임명 */}
               <td className="px-6 py-4 whitespace-nowrap">
                 <span className="text-sm text-gray-900">
-                  {notification.game_name}
+                  {notification.gameName}
                 </span>
               </td>
 
@@ -95,7 +98,7 @@ export function NotificationTable({
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex items-center gap-2">
                   <ActiveSwitch
-                    isActive={notification.is_active}
+                    isActive={notification.isActive}
                     onChange={(isActive) =>
                       onActiveChange(notification.id, isActive)
                     }
@@ -106,18 +109,16 @@ export function NotificationTable({
               {/* 알림 시간 */}
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="space-y-1">
-                  {notification.notification_times &&
-                  notification.notification_times.length > 0 ? (
-                    notification.notification_times.map((time) => (
+                  {notification.notificationTimes &&
+                  notification.notificationTimes.length > 0 ? (
+                    notification.notificationTimes.map((time) => (
                       <div key={time.id} className="flex items-center gap-2">
                         <span className="text-xs text-gray-600">
-                          {new Date(time.scheduled_time).toLocaleString(
-                            'ko-KR'
-                          )}
+                          {time.scheduledTime.toLocaleString('ko-KR')}
                         </span>
                         <NotificationTimeStatusBadge status={time.status} />
                         <span className="text-xs text-gray-500">
-                          {time.is_enabled ? '활성' : '비활성'}
+                          {time.isEnabled ? '활성' : '비활성'}
                         </span>
                       </div>
                     ))

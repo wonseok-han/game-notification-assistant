@@ -1,38 +1,56 @@
+import type { NotificationTimeStatusType } from './notification-common';
+
 // ===== Request DTOs =====
 
-// 게임 알림 생성 요청 타입
+/**
+ * 알림 생성 요청 타입
+ */
 export type CreateNotificationRequestDto = {
   title: string;
   description?: string;
-  gameName: string;
-  imageUrl: string;
-  notificationTimes?: Array<{
-    scheduledTime: string;
-    isEnabled: boolean;
-    rawText?: string;
+  game_name: string;
+  image_url: string;
+  notification_times?: {
+    scheduled_time: string;
+    is_enabled: boolean;
+    raw_text?: string;
     label?: string;
-  }>;
+  }[];
 };
 
-// 알림 수정 요청 타입
-export type UpdateNotificationRequestDto = Partial<{
+/**
+ * 알림 수정 요청 타입
+ */
+export type UpdateNotificationRequestDto = {
+  id: string;
   title: string;
-  description: string;
-  gameName: string;
-  imageUrl: string;
+  description?: string;
+  game_name: string;
+  image_url: string;
   is_active: boolean;
-  notificationTimes?: Array<{
-    id?: string;
-    scheduledTime: string;
-    isEnabled: boolean;
-    rawText?: string;
+  notification_times: {
+    id: string;
+    notification_id: string;
+    scheduled_time: string;
+    is_enabled: boolean;
+    raw_text?: string;
     label?: string;
-  }>;
-}>;
+  }[];
+};
+
+/**
+ * 알림 활성 상태 업데이트 요청 타입
+ */
+export type UpdateNotificationActiveRequestDto = {
+  id: string;
+  is_active: boolean;
+};
 
 // ===== Response DTOs =====
 
-// 게임 알림 조회 응답 타입
+/**
+ * 알림 목록 조회 응답 타입
+ */
 export type GetNotificationsResponseDto = {
   id: string;
   user_id: string;
@@ -43,11 +61,11 @@ export type GetNotificationsResponseDto = {
   is_active: boolean;
   created_at: Date;
   updated_at: Date;
-  notification_times?: {
+  notification_times: {
     id: string;
     notification_id: string;
     scheduled_time: string;
-    status: 'pending' | 'sent' | 'failed';
+    status: NotificationTimeStatusType;
     is_enabled: boolean;
     raw_text?: string;
     label?: string;
@@ -58,7 +76,9 @@ export type GetNotificationsResponseDto = {
   }[];
 };
 
-// 게임 알림 생성 응답 타입
+/**
+ * 알림 생성 응답 타입
+ */
 export type CreateNotificationResponseDto = {
   id: string;
   user_id: string;
@@ -69,11 +89,11 @@ export type CreateNotificationResponseDto = {
   is_active: boolean;
   created_at: Date;
   updated_at: Date;
-  notification_times?: {
+  notification_times: {
     id: string;
     notification_id: string;
     scheduled_time: string;
-    status: 'pending' | 'sent' | 'failed';
+    status: NotificationTimeStatusType;
     is_enabled: boolean;
     raw_text?: string;
     label?: string;
@@ -84,7 +104,9 @@ export type CreateNotificationResponseDto = {
   }[];
 };
 
-// 게임 알림 수정 응답 타입
+/**
+ * 알림 수정 응답 타입
+ */
 export type UpdateNotificationResponseDto = {
   id: string;
   user_id: string;
@@ -95,11 +117,11 @@ export type UpdateNotificationResponseDto = {
   is_active: boolean;
   created_at: Date;
   updated_at: Date;
-  notification_times?: {
+  notification_times: {
     id: string;
     notification_id: string;
     scheduled_time: string;
-    status: 'pending' | 'sent' | 'failed';
+    status: NotificationTimeStatusType;
     is_enabled: boolean;
     raw_text?: string;
     label?: string;
@@ -110,8 +132,10 @@ export type UpdateNotificationResponseDto = {
   }[];
 };
 
-// 게임 알림 상태 업데이트 응답 타입
-export type UpdateNotificationStatusResponseDto = {
+/**
+ * 알림 활성 상태 업데이트 응답 타입
+ */
+export type UpdateNotificationActiveResponseDto = {
   id: string;
   user_id: string;
   title: string;
@@ -121,11 +145,11 @@ export type UpdateNotificationStatusResponseDto = {
   is_active: boolean;
   created_at: Date;
   updated_at: Date;
-  notification_times?: {
+  notification_times: {
     id: string;
     notification_id: string;
     scheduled_time: string;
-    status: 'pending' | 'sent' | 'failed';
+    status: NotificationTimeStatusType;
     is_enabled: boolean;
     raw_text?: string;
     label?: string;
@@ -136,7 +160,9 @@ export type UpdateNotificationStatusResponseDto = {
   }[];
 };
 
-// Google Vision API 응답 타입
+/**
+ * Google Vision API 응답 타입
+ */
 export type GoogleVisionResponseDto = {
   text: string;
   individualTexts: { text: string }[];

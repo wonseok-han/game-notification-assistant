@@ -3,9 +3,9 @@ import type {
   CreateNotificationResponseDto,
   GetNotificationsResponseDto,
   GoogleVisionResponseDto,
+  UpdateNotificationActiveResponseDto,
   UpdateNotificationRequestDto,
   UpdateNotificationResponseDto,
-  UpdateNotificationStatusResponseDto,
 } from '../model/notification-dto';
 
 import {
@@ -18,7 +18,7 @@ import {
 
 /**
  * 게임 알림 생성
- * @param {CreateNotificationRequestType} notificationData 알림 데이터
+ * @param {CreateNotificationRequestDto} notificationData 알림 데이터
  * @returns {CreateNotificationResponseDto} 알림 데이터
  */
 export async function createNotification(
@@ -121,21 +121,23 @@ export async function deleteNotification(id: string): Promise<ApiResponseType> {
 }
 
 /**
- * 게임 알림 상태 업데이트
+ * 게임 알림 활성 상태 업데이트
  * @param {string} id 알림 ID
- * @param {string} status 알림 상태
- * @returns {UpdateNotificationStatusResponseDto} 알림 상태 업데이트 결과
+ * @param {boolean} isActive 알림 상태
+ * @returns {UpdateNotificationActiveResponseDto} 알림 상태 업데이트 결과
  */
-export async function updateNotificationStatus(
+export async function updateNotificationActive(
   id: string,
-  status: string
-): Promise<UpdateNotificationStatusResponseDto> {
+  isActive: boolean
+): Promise<UpdateNotificationActiveResponseDto> {
   try {
-    const response = await apiPatch(`/api/notifications/${id}`, { status });
+    const response = await apiPatch(`/api/notifications/${id}`, {
+      is_active: isActive,
+    });
 
     const result =
       await parseApiResponse<
-        ApiResponseType<UpdateNotificationStatusResponseDto>
+        ApiResponseType<UpdateNotificationActiveResponseDto>
       >(response);
 
     if (!result.success || !result.data) {

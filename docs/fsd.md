@@ -238,6 +238,25 @@ App → Widgets → Features → Entities → Shared
 - **하위 레이어는 상위 레이어를 import 금지**
 - **같은 레이어 간에는 직접 import 금지**
 
+#### 의존성 매트릭스
+
+| From \ To | shared | entities | features | widgets | app |
+|-----------|--------|----------|----------|---------|-----|
+| **shared** | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **entities** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **features** | ✅ | ✅ | ❌ | ❌ | ❌ |
+| **widgets** | ✅ | ✅ | ✅ | ❌ | ❌ |
+| **app** | ✅ | ✅ | ✅ | ✅ | ❌ |
+
+**의존성 규칙 설명**:
+- **shared**: 가장 낮은 레벨, 다른 레이어에 의존하지 않음 (공통 유틸리티, 타입, 컴포넌트)
+- **entities**: shared만 사용 가능, 다른 레이어에 의존하지 않음 (비즈니스 도메인 모델)
+- **features**: shared와 entities 사용 가능, 다른 features나 widgets 사용 불가 (비즈니스 기능)
+- **widgets**: shared, entities, features 사용 가능, 다른 widgets 사용 불가 (복합 UI 블록)
+- **app**: 모든 레이어 사용 가능 (최상위 레벨, Next.js 페이지 및 레이아웃)
+
+
+
 ```typescript
 // ✅ 올바른 예시
 // features/create-notification/ui/form.tsx

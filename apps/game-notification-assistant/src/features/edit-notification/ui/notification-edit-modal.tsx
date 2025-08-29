@@ -1,22 +1,14 @@
-import type {
-  EditingTimeType,
-  GameNotificationType,
-} from '@entities/notification/model/notification-domain';
+import type { NotificationEditFormType } from '@entities/notification/model/notificaion-domain';
 
 import { ActionButton, ActiveSwitch } from '@repo/ui';
+import { formatForDatetimeLocal } from '@shared/lib/date';
 import { useEffect, useState } from 'react';
 
 interface NotificationEditModalProps {
-  notification: GameNotificationType | null;
+  notification: NotificationEditFormType | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (
-    id: string,
-    title: string,
-    description: string,
-    isActive: boolean,
-    editingTimes: EditingTimeType[]
-  ) => Promise<void>;
+  onSave: (form: NotificationEditFormType) => Promise<void>;
 }
 
 export function NotificationEditModal({
@@ -28,7 +20,9 @@ export function NotificationEditModal({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isActive, setIsActive] = useState(true);
-  const [editingTimes, setEditingTimes] = useState<EditingTimeType[]>([]);
+  const [editingTimes, setEditingTimes] = useState<
+    NotificationEditFormType['notificationTimes']
+  >([]);
   const [isLoading, setIsLoading] = useState(false);
 
   // 모달이 열릴 때마다 초기값 설정
@@ -36,29 +30,29 @@ export function NotificationEditModal({
     if (notification) {
       console.log('모달 초기값 설정:', {
         title: notification.title,
-        is_active: notification.is_active,
-        notification_times_count: notification.notification_times?.length || 0,
+        is_active: notification.isActive,
+        notification_times_count: notification.notificationTimes?.length || 0,
       });
 
       setTitle(notification.title);
       setDescription(notification.description || '');
-      setIsActive(notification.is_active);
+      setIsActive(notification.isActive);
 
       // notification_times 초기화
-      if (notification.notification_times) {
+      if (notification.notificationTimes) {
         console.log(
           'notification.notification_times',
-          notification.notification_times
+          notification.notificationTimes
         );
         setEditingTimes(
-          notification.notification_times.map((time) => ({
+          notification.notificationTimes.map((time) => ({
             id: time.id,
-            scheduledTime: new Date(time.scheduled_time)
-              .toLocaleString('sv-SE')
-              .slice(0, 16),
-            isEnabled: time.is_enabled,
-            rawText: time.raw_text || '',
+            notificationId: time.notificationId,
+            scheduledTime: time.scheduledTime,
+            isEnabled: time.isEnabled,
+            rawText: time.rawText || '',
             label: time.label || '',
+            status: time.status,
           }))
         );
       }
@@ -88,13 +82,23 @@ export function NotificationEditModal({
         editingTimesCount: editingTimes.length,
       });
 
-      await onSave(
-        notification.id,
-        finalTitle,
-        finalDescription,
+      await onSave({
+        id: notification.id,
+        title: finalTitle,
+        description: finalDescription,
+        gameName: notification.gameName,
+        imageUrl: notification.imageUrl,
         isActive,
-        editingTimes
-      );
+        notificationTimes: editingTimes.map((time) => ({
+          id: time.id,
+          notificationId: time.notificationId,
+          scheduledTime: time.scheduledTime,
+          status: time.status,
+          isEnabled: time.isEnabled,
+          rawText: time.rawText,
+          label: time.label,
+        })),
+      });
       onClose();
     } catch (error) {
       console.error('저장 오류:', error);
@@ -183,12 +187,14 @@ export function NotificationEditModal({
                           onChange={(e) => {
                             const newTimes = [...editingTimes];
                             if (newTimes[index]) {
-                              newTimes[index].scheduledTime = e.target.value;
+                              newTimes[index].scheduledTime = new Date(
+                                e.target.value
+                              );
                               setEditingTimes(newTimes);
                             }
                           }}
                           type="datetime-local"
-                          value={time.scheduledTime.slice(0, 16)}
+                          value={formatForDatetimeLocal(time.scheduledTime)}
                         />
                       </div>
 

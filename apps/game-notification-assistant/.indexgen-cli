@@ -3,7 +3,8 @@
     {
       "paths": [
         "src/entities/**/ui/**",
-        "src/features/**/ui/**"
+        "src/features/**/ui/**",
+        "src/widgets/**/ui/**"
       ],
       "fileExtensions": [
         ".tsx",

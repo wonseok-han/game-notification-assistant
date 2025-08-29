@@ -1,10 +1,12 @@
 'use client';
 
-import type { CreateNotificationRequestDto } from '@entities/notification/model/notification-dto';
+import type { NotificationTimeBaseType } from '@entities/notification/model/notificaion-domain';
 
 import { createNotification } from '@entities/notification/api/notification-api';
 import { extractMultipleTimesFromImage } from '@entities/notification/lib/time-extractor';
+import { notificationCreateFormToDto } from '@entities/notification/model/notification-mapper';
 import { useSnackbar, ActionButton } from '@repo/ui';
+import { formatForDatetimeLocal } from '@shared/lib/date';
 import Image from 'next/image';
 import { useState, useRef } from 'react';
 
@@ -17,17 +19,11 @@ export function NotificationForm() {
   // 시간 설정 관련 상태
   const [useImageTimeExtraction, setUseImageTimeExtraction] = useState(true);
   const [notificationTimes, setNotificationTimes] = useState<
-    Array<{
-      id: string;
-      scheduledTime: string;
-      isEnabled: boolean;
-      rawText?: string; // 추출된 원본 텍스트 보관 (선택)
-      label?: string; // 사용자가 정의하는 설명/컨텍스트 (선택)
-    }>
+    NotificationTimeBaseType[]
   >([
     {
       id: '1',
-      scheduledTime: getDefaultScheduledTime(),
+      scheduledTime: new Date(getDefaultScheduledTime()),
       isEnabled: true,
       rawText: '',
       label: '',
@@ -87,7 +83,7 @@ export function NotificationForm() {
 
                 return {
                   id: Date.now().toString() + index,
-                  scheduledTime: localTimeString, // 로컬 시간으로 표시
+                  scheduledTime: new Date(localTimeString), // 로컬 시간으로 표시
                   isEnabled: true,
                   rawText: displayTexts?.[index] ?? '', // 추출된 문구를 기본값으로 세팅
                   label: '',
@@ -128,7 +124,7 @@ export function NotificationForm() {
   const addNotificationTime = () => {
     const newTime = {
       id: Date.now().toString(),
-      scheduledTime: getDefaultScheduledTime(),
+      scheduledTime: new Date(getDefaultScheduledTime()),
       isEnabled: true,
       rawText: '',
       label: '',
@@ -140,7 +136,7 @@ export function NotificationForm() {
    * 알림 시간 제거
    * @param {string} id - 알림 시간 ID
    */
-  const removeNotificationTime = (id: string) => {
+  const removeNotificationTime = (id?: string) => {
     if (notificationTimes.length > 1) {
       setNotificationTimes(notificationTimes.filter((time) => time.id !== id));
     }
@@ -153,9 +149,9 @@ export function NotificationForm() {
    * @param {string | boolean} value - 업데이트할 값
    */
   const updateNotificationTime = (
-    id: string,
+    id: string | undefined,
     field: 'scheduledTime' | 'isEnabled' | 'rawText' | 'label',
-    value: string | boolean
+    value: string | boolean | Date
   ) => {
     setNotificationTimes(
       notificationTimes.map((time) =>
@@ -181,7 +177,7 @@ export function NotificationForm() {
     setNotificationTimes([
       {
         id: '1',
-        scheduledTime: getDefaultScheduledTime(),
+        scheduledTime: new Date(getDefaultScheduledTime()),
         isEnabled: true,
       },
     ]);
@@ -248,19 +244,18 @@ export function NotificationForm() {
       // 활성화된 알림 시간들 가져오기
       const enabledTimes = notificationTimes.filter((time) => time.isEnabled);
 
-      const formData: CreateNotificationRequestDto = {
+      const formData = notificationCreateFormToDto({
         title: title.trim() || `${gameName} 알림`,
         description: description.trim(),
         gameName: gameName.trim(),
         imageUrl,
         notificationTimes: enabledTimes.map((time) => ({
-          // 저장 시: 로컬 시간을 UTC 시간으로 변환하여 저장
-          scheduledTime: new Date(time.scheduledTime).toISOString(),
+          scheduledTime: time.scheduledTime,
           isEnabled: time.isEnabled,
           rawText: time.rawText,
           label: time.label,
         })),
-      };
+      });
 
       // API 호출
       await createNotification(formData);
@@ -448,11 +443,11 @@ export function NotificationForm() {
                       updateNotificationTime(
                         time.id,
                         'scheduledTime',
-                        e.target.value
+                        new Date(e.target.value)
                       )
                     }
                     type="datetime-local"
-                    value={time.scheduledTime}
+                    value={formatForDatetimeLocal(time.scheduledTime)}
                   />
                   {notificationTimes.length > 1 && (
                     <button

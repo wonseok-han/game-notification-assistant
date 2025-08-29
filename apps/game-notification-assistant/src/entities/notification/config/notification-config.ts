@@ -1,4 +1,4 @@
-import type { ActiveOptionType } from '../model/notification-domain';
+import type { ActiveOptionType } from '../model/notification-common';
 
 export const NOTIFICATION_CONFIG = {
   ACTIVE_OPTIONS: [

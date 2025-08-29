@@ -55,13 +55,13 @@ export const PATCH = MiddlewareWithPATCH<{ params: Promise<{ id: string }> }>(
       }
 
       // gameName이 제공된 경우 업데이트
-      if (updateData.gameName !== undefined) {
-        updateFields.game_name = updateData.gameName;
+      if (updateData.game_name !== undefined) {
+        updateFields.game_name = updateData.game_name;
       }
 
       // imageUrl이 제공된 경우 업데이트
-      if (updateData.imageUrl !== undefined) {
-        updateFields.image_url = updateData.imageUrl;
+      if (updateData.image_url !== undefined) {
+        updateFields.image_url = updateData.image_url;
       }
 
       // 디버깅: 업데이트할 필드들 확인
@@ -85,8 +85,8 @@ export const PATCH = MiddlewareWithPATCH<{ params: Promise<{ id: string }> }>(
 
       // notification_times 업데이트
       if (
-        updateData.notificationTimes &&
-        Array.isArray(updateData.notificationTimes)
+        updateData.notification_times &&
+        Array.isArray(updateData.notification_times)
       ) {
         // 기존 알림 시간들 삭제
         const { error: timeDeleteError } = await supabase
@@ -103,22 +103,20 @@ export const PATCH = MiddlewareWithPATCH<{ params: Promise<{ id: string }> }>(
         }
 
         // 새로운 알림 시간들 추가
-        if (updateData.notificationTimes.length > 0) {
-          const timeData = updateData.notificationTimes.map(
+        if (updateData.notification_times.length > 0) {
+          const timeData = updateData.notification_times.map(
             (time: {
-              scheduledTime: string;
-              isEnabled?: boolean;
-              rawText?: string;
+              scheduled_time: string;
+              is_enabled?: boolean;
+              raw_text?: string;
               label?: string;
             }) => ({
               notification_id: id,
-              scheduled_time: time.scheduledTime,
+              scheduled_time: time.scheduled_time,
               status: 'pending',
-              is_enabled: time.isEnabled ?? true,
-              raw_text: time.rawText ?? null,
+              is_enabled: time.is_enabled ?? true,
+              raw_text: time.raw_text ?? null,
               label: time.label ?? null,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
             })
           );
 
