@@ -5,7 +5,8 @@ import type {
   RegisterResponseDto,
   VerifyResponseDto,
 } from './user-dto';
-import type { QueryClient } from '@tanstack/react-query';
+
+import { BaseService } from '@shared/lib/api/client/base-service';
 
 import {
   loginUserApi,
@@ -14,13 +15,7 @@ import {
   verifyUserSessionApi,
 } from '../api/user-api';
 
-export class UserService {
-  private queryClient: QueryClient;
-
-  constructor(queryClient: QueryClient) {
-    this.queryClient = queryClient;
-  }
-
+export class UserService extends BaseService {
   /**
    * 사용자 로그인
    * @param credentials 로그인 정보
@@ -32,12 +27,12 @@ export class UserService {
       const user = await loginUserApi(credentials);
 
       // 캐시에 사용자 정보 저장
-      this.queryClient.setQueryData(['user'], user);
+      this.setQueryData(['user'], user);
 
       return user;
     } catch (error) {
       // 캐시에서 사용자 정보 제거 (로그인 실패 시)
-      this.queryClient.removeQueries({ queryKey: ['user'] });
+      this.removeQueries(['user']);
 
       // 에러를 다시 던져서 상위에서 처리할 수 있도록
       throw error;
@@ -55,12 +50,12 @@ export class UserService {
       const user = await registerUserApi(userData);
 
       // 캐시에 사용자 정보 저장
-      this.queryClient.setQueryData(['user'], user);
+      this.setQueryData(['user'], user);
 
       return user;
     } catch (error) {
       // 회원가입 실패 시 캐시 정리
-      this.queryClient.removeQueries({ queryKey: ['user'] });
+      this.removeQueries(['user']);
 
       throw error;
     }
@@ -78,8 +73,8 @@ export class UserService {
       console.error('로그아웃 API 실패:', error);
     } finally {
       // 성공/실패 관계없이 캐시에서 사용자 정보 제거
-      this.queryClient.removeQueries({ queryKey: ['user'] });
-      this.queryClient.clear();
+      this.removeQueries(['user']);
+      this.clearCache();
     }
   }
 
@@ -93,16 +88,16 @@ export class UserService {
 
       if (user) {
         // 유효한 세션이면 캐시에 저장
-        this.queryClient.setQueryData(['user'], user);
+        this.setQueryData(['user'], user);
       } else {
         // 유효하지 않은 세션이면 캐시에서 제거
-        this.queryClient.removeQueries({ queryKey: ['user'] });
+        this.removeQueries(['user']);
       }
 
       return user;
     } catch (error) {
       // 세션 검증 실패 시 캐시에서 제거
-      this.queryClient.removeQueries({ queryKey: ['user'] });
+      this.removeQueries(['user']);
       console.error('세션 검증 실패:', error);
       return null;
     }
@@ -113,22 +108,13 @@ export class UserService {
    * @returns 캐시된 사용자 정보 또는 null
    */
   getCachedUser(): VerifyResponseDto | null {
-    try {
-      return this.queryClient.getQueryData(['user']) || null;
-    } catch (error) {
-      console.error('캐시된 사용자 정보 조회 실패:', error);
-      return null;
-    }
+    return this.getQueryData(['user']);
   }
 
   /**
    * 사용자 정보 캐시 무효화
    */
   invalidateUserCache(): void {
-    try {
-      this.queryClient.invalidateQueries({ queryKey: ['user'] });
-    } catch (error) {
-      console.error('사용자 캐시 무효화 실패:', error);
-    }
+    this.invalidateQueries(['user']);
   }
 }

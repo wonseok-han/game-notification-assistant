@@ -6,13 +6,12 @@ import { extractMultipleTimesFromImage } from '@entities/notification/lib/time-e
 import { NotificationService } from '@entities/notification/model/notification-service';
 import { useSnackbar, ActionButton } from '@repo/ui';
 import { formatForDatetimeLocal } from '@shared/lib/date';
-import { QueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import { useState, useRef } from 'react';
 
-const queryClient = new QueryClient();
-
 export function NotificationForm() {
+  const queryClient = useQueryClient();
   const notificationService = new NotificationService(queryClient);
 
   // ===== 상태 관리 =====
@@ -37,13 +36,52 @@ export function NotificationForm() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
 
-  const [isLoading, setIsLoading] = useState(false);
   const [isImageLoading, setIsImageLoading] = useState(false);
 
   // ===== refs =====
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { showSnackbar } = useSnackbar();
+
+  // ===== React Query Mutation =====
+  const createMutation = useMutation({
+    mutationFn: (formData: {
+      title: string;
+      description: string;
+      gameName: string;
+      imageUrl: string;
+      notificationTimes: {
+        scheduledTime: Date;
+        isEnabled: boolean;
+        rawText: string;
+        label: string;
+      }[];
+    }) => notificationService.create(formData),
+    onSuccess: () => {
+      showSnackbar({
+        message: '게임 알림이 성공적으로 생성되었습니다!',
+        type: 'success',
+        position: 'bottom-right',
+        autoHideDuration: 6000,
+      });
+      // 폼 초기화
+      clearForm();
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      // 알림 목록 캐시 무효화
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+    onError: (error) => {
+      console.error('알림 생성 오류:', error);
+      showSnackbar({
+        message: '알림 생성에 실패했습니다. 다시 시도해주세요.',
+        type: 'error',
+        position: 'bottom-right',
+        autoHideDuration: 6000,
+      });
+    },
+  });
 
   /**
    * 이미지 선택 핸들러
@@ -232,60 +270,32 @@ export function NotificationForm() {
       return;
     }
 
-    try {
-      setIsLoading(true);
+    // 이미지를 base64로 변환
+    const imageUrl = await new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target?.result as string);
 
-      // 이미지를 base64로 변환
-      const imageUrl = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target?.result as string);
-
-        if (selectedImage) {
-          reader.readAsDataURL(selectedImage);
-        }
-      });
-
-      // 활성화된 알림 시간들 가져오기
-      const enabledTimes = notificationTimes.filter((time) => time.isEnabled);
-
-      // API 호출
-      await notificationService.create({
-        title: title.trim() || `${gameName} 알림`,
-        description: description.trim(),
-        gameName: gameName.trim(),
-        imageUrl,
-        notificationTimes: enabledTimes.map((time) => ({
-          scheduledTime: time.scheduledTime,
-          isEnabled: time.isEnabled,
-          rawText: time.rawText,
-          label: time.label,
-        })),
-      });
-
-      // 성공 시 폼 초기화
-      clearForm();
-
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+      if (selectedImage) {
+        reader.readAsDataURL(selectedImage);
       }
+    });
 
-      showSnackbar({
-        message: '게임 알림이 성공적으로 생성되었습니다!',
-        type: 'success',
-        position: 'bottom-right',
-        autoHideDuration: 6000,
-      });
-    } catch (error) {
-      console.error('알림 생성 오류:', error);
-      showSnackbar({
-        message: '알림 생성에 실패했습니다. 다시 시도해주세요.',
-        type: 'error',
-        position: 'bottom-right',
-        autoHideDuration: 6000,
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    // 활성화된 알림 시간들 가져오기
+    const enabledTimes = notificationTimes.filter((time) => time.isEnabled);
+
+    // React Query Mutation 사용
+    createMutation.mutate({
+      title: title.trim() || `${gameName} 알림`,
+      description: description.trim(),
+      gameName: gameName.trim(),
+      imageUrl,
+      notificationTimes: enabledTimes.map((time) => ({
+        scheduledTime: time.scheduledTime,
+        isEnabled: time.isEnabled,
+        rawText: time.rawText || '',
+        label: time.label || '',
+      })),
+    });
   };
 
   /**
@@ -576,7 +586,7 @@ export function NotificationForm() {
             disabled={
               !selectedImage ||
               notificationTimes.filter((time) => time.isEnabled).length === 0 ||
-              isLoading ||
+              createMutation.isPending ||
               isImageLoading
             }
             size="lg"
@@ -584,7 +594,7 @@ export function NotificationForm() {
           >
             {isImageLoading
               ? '이미지 처리 중...'
-              : isLoading
+              : createMutation.isPending
                 ? '생성 중...'
                 : '알림 생성'}
           </ActionButton>

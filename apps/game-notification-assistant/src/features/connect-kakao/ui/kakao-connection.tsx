@@ -2,12 +2,11 @@
 
 import { KakaoService } from '@entities/kakao/model/kakao-service';
 import { useSnackbar, ActionButton } from '@repo/ui';
-import { QueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 
-const queryClient = new QueryClient();
-
 export function KakaoConnection() {
+  const queryClient = useQueryClient();
   const kakaoService = new KakaoService(queryClient);
 
   // ===== 상태 관리 =====

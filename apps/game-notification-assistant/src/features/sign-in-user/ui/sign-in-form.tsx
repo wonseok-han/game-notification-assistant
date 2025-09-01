@@ -3,13 +3,12 @@
 import { useAuthStore } from '@entities/auth/model/auth-store';
 import { UserService } from '@entities/user/model/user-service';
 import { ActionButton, useSnackbar } from '@repo/ui';
-import { QueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-const queryClient = new QueryClient();
-
 export function SignInForm() {
+  const queryClient = useQueryClient();
   const userService = new UserService(queryClient);
 
   const router = useRouter();

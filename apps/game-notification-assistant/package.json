@@ -43,6 +43,7 @@
     "@repo/typescript-config": "workspace:*",
     "@svgr/webpack": "^8.1.0",
     "@tailwindcss/postcss": "^4.1.11",
+    "@tanstack/react-query-devtools": "^5.85.6",
     "@types/node": "^22.15.3",
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.1",

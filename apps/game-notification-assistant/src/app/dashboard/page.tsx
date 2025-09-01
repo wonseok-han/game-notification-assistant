@@ -5,12 +5,11 @@ import { UserService } from '@entities/user/model/user-service';
 import { KakaoConnection } from '@features/connect-kakao/ui/kakao-connection';
 import { NotificationForm } from '@features/create-notification/ui/notification-form';
 import { NotificationList } from '@features/list-notification/ui/notification-list';
-import { QueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { AppHeader } from '@widgets/layout/app-header';
 
-const queryClient = new QueryClient();
-
 export default function DashboardPage() {
+  const queryClient = useQueryClient();
   const userService = new UserService(queryClient);
 
   const { reset, user } = useAuthStore();
