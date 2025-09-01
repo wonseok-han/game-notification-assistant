@@ -4,13 +4,13 @@
 
 ## 📋 목차
 
-- [시작하기](#🚀-시작하기)
-- [패키지 관리](#📦-패키지-관리)
-- [앱 및 워크스페이스 생성](#🏗️-앱-및-워크스페이스-생성)
-- [실행 및 빌드](#🚀-실행-및-빌드)
-- [문제 해결](#🐛-문제-해결)
+- [시작하기](#시작하기)
+- [패키지 관리](#패키지-관리)
+- [앱 및 워크스페이스 생성](#앱-및-워크스페이스-생성)
+- [실행 및 빌드](#실행-및-빌드)
+- [문제 해결](#문제-해결)
 
-## 🚀 시작하기
+## 시작하기
 
 ### 1. 필수 도구 설치
 
@@ -36,7 +36,7 @@ pnpm run dev
 npx create-turbo@latest
 ```
 
-## 📦 패키지 관리
+## 패키지 관리
 
 ### 1. 종속성 설치
 
@@ -82,7 +82,7 @@ pnpm remove 패키지명 --filter=앱명
 pnpm remove -w 패키지명
 ```
 
-## 🏗️ 앱 및 워크스페이스 생성
+## 앱 및 워크스페이스 생성
 
 ### 1. 새로운 Next.js 앱 생성
 
@@ -115,7 +115,7 @@ npx turbo gen component --name 컴포넌트명
 npx turbo gen component --name Modal
 ```
 
-## 🚀 실행 및 빌드
+## 실행 및 빌드
 
 ### 1. 개발 서버 실행
 
@@ -166,7 +166,7 @@ pnpm run format
 pnpm run type-check
 ```
 
-## 🔧 고급 사용법
+## 고급 사용법
 
 ### 1. 캐시 관리
 
@@ -198,7 +198,7 @@ pnpm turbo run build --filter="[HEAD^1]"
 pnpm turbo run build --filter="dev-tools..."
 ```
 
-## 🐛 문제 해결
+## 문제 해결
 
 ### 1. 일반적인 문제
 
@@ -249,7 +249,7 @@ pnpm turbo run build --profile
 pnpm turbo run build --parallel --concurrency=8
 ```
 
-## 📚 추가 자료
+## 참고 자료
 
 - [Turborepo 공식 문서](https://turbo.build/repo/docs)
 - [pnpm 워크스페이스 가이드](https://pnpm.io/workspaces)
