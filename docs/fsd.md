@@ -1,11 +1,11 @@
 # Feature-Sliced Design (FSD) 가이드
 
-본 프로젝트는 **Feature-Sliced Design** 아키텍처 패턴을 적용하여 확장 가능하고 유지보수하기 쉬운 구조로 설계되었습니다.
+본 문서는 **Feature-Sliced Design** 아키텍처 패턴의 기본 원칙과 구조를 설명합니다.
 
 ## 목차
 
 - [FSD란?](#fsd란)
-- [앱 구조](#앱-구조)
+- [기본 앱 구조](#기본-앱-구조)
 - [레이어별 역할](#레이어별-역할)
 - [세그먼트 구조](#세그먼트-구조)
 - [핵심 원칙](#핵심-원칙)
@@ -23,10 +23,10 @@
 - **제어 가능성**: 변경의 영향 범위가 제한적
 - **재사용성**: 컴포넌트와 로직의 재사용이 쉬움
 
-## 앱 구조
+## 기본 앱 구조
 
 ```
-apps/game-notification-assistant/src/
+src/
 ├── app/                          # App Layer - Next.js App Router
 │   ├── api/                      # API Routes
 │   ├── dashboard/                # 페이지 컴포넌트
@@ -146,7 +146,7 @@ export function NotificationForm() {
 
 **예시**:
 ```typescript
-// entities/notification/model/notification-domain.ts
+// entities/notification/model/notification.ts
 export interface Notification {
   id: string;
   title: string;
@@ -255,8 +255,6 @@ App → Widgets → Features → Entities → Shared
 - **widgets**: shared, entities, features 사용 가능, 다른 widgets 사용 불가 (복합 UI 블록)
 - **app**: 모든 레이어 사용 가능 (최상위 레벨, Next.js 페이지 및 레이아웃)
 
-
-
 ```typescript
 // ✅ 올바른 예시
 // features/create-notification/ui/form.tsx
@@ -290,37 +288,6 @@ import { CreateForm } from '@features/create-notification'; // ❌ entity → fe
 2. **Feature 구현**: 사용자 상호작용과 비즈니스 로직
 3. **Widget 조합**: 여러 feature를 결합한 복합 UI
 4. **App에서 사용**: 페이지에서 위젯을 배치
-
-### 파일 네이밍 규칙
-
-기본적으로 **kebab-case**를 사용하며, 도메인-명사 형태로 구성합니다.
-
-```
-// 컴포넌트 및 도메인 관련: 도메인-명사
-notification-card.tsx
-user-profile.tsx
-notification.ts
-
-// 설정 파일: 도메인-config
-auth-config.ts
-notification-config.ts
-
-// DTO 타입: 도메인-dto
-user-dto.ts
-notification-dto.ts
-
-// API 호출부: 도메인-api
-user-api.ts
-notification-api.ts
-
-// Features: 동사-도메인 (사용자 행동 중심)
-create-notification/      # 알림 생성
-edit-notification/        # 알림 수정
-list-notification/        # 알림 목록
-sign-in-user/            # 사용자 로그인
-sign-up-user/            # 사용자 회원가입
-connect-kakao/           # 카카오 연결
-```
 
 ## 실제 예시
 
