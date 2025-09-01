@@ -14,7 +14,7 @@ export async function middleware(request: NextRequest) {
   ) {
     if (!user) {
       // 로그인되지 않은 경우 로그인 페이지로 리다이렉트
-      return NextResponse.redirect(new URL('/user/login', request.url));
+      return NextResponse.redirect(new URL('/user/sign-in', request.url));
     }
   }
 

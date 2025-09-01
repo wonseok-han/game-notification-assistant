@@ -1,12 +1,17 @@
 'use client';
 
 import { useAuthStore } from '@entities/auth/model/auth-store';
-import { registerUser } from '@entities/user/api/user-api';
+import { UserService } from '@entities/user/model/user-service';
 import { ActionButton, useSnackbar } from '@repo/ui';
+import { QueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+const queryClient = new QueryClient();
+
 export function SignUpForm() {
+  const userService = new UserService(queryClient);
+
   const router = useRouter();
 
   // ===== 상태 관리 =====
@@ -56,7 +61,7 @@ export function SignUpForm() {
     setLoading(true);
 
     try {
-      const user = await registerUser({ email, password, username });
+      const user = await userService.register({ email, password, username });
 
       // 성공 시 상태 업데이트
       setUser(user);

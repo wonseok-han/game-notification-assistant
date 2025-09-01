@@ -19,7 +19,7 @@ import {
  * @param {LoginRequestType} credentials 로그인 정보
  * @returns {LoginResponseDto} 사용자 정보
  */
-export async function loginUser(
+export async function loginUserApi(
   credentials: LoginRequestDto
 ): Promise<LoginResponseDto> {
   const response = await apiPost('/api/user/login', credentials);
@@ -39,7 +39,7 @@ export async function loginUser(
  * @param {RegisterRequestType} userData 회원가입 정보
  * @returns {UserType} 사용자 정보
  */
-export async function registerUser(
+export async function registerUserApi(
   userData: RegisterRequestDto
 ): Promise<RegisterResponseDto> {
   const response = await apiPost('/api/user/register', userData);
@@ -58,7 +58,7 @@ export async function registerUser(
  * 사용자 로그아웃
  * @returns {void} 로그아웃 결과
  */
-export async function logoutUser(): Promise<void> {
+export async function logoutUserApi(): Promise<void> {
   const response = await apiPost('/api/user/logout');
 
   const result = await parseApiResponse<ApiResponseType>(response);
@@ -72,7 +72,7 @@ export async function logoutUser(): Promise<void> {
  * 세션 검증
  * @returns {VerifyResponseDto | null} 사용자 정보 또는 null
  */
-export async function verifyUserSession(): Promise<VerifyResponseDto | null> {
+export async function verifyUserSessionApi(): Promise<VerifyResponseDto | null> {
   try {
     const response = await apiGet('/api/user/verify');
     const result =

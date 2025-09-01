@@ -1,12 +1,17 @@
 'use client';
 
 import { useAuthStore } from '@entities/auth/model/auth-store';
-import { loginUser } from '@entities/user/api/user-api';
+import { UserService } from '@entities/user/model/user-service';
 import { ActionButton, useSnackbar } from '@repo/ui';
+import { QueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+const queryClient = new QueryClient();
+
 export function SignInForm() {
+  const userService = new UserService(queryClient);
+
   const router = useRouter();
   // ===== 상태 관리 =====
   const [email, setEmail] = useState('');
@@ -39,7 +44,7 @@ export function SignInForm() {
     setLoading(true);
 
     try {
-      const user = await loginUser({ email, password });
+      const user = await userService.login({ email, password });
 
       // 성공 시 상태 업데이트
       setUser(user);

@@ -1,21 +1,27 @@
 'use client';
 
 import { useAuthStore } from '@entities/auth/model/auth-store';
-import { logoutUser } from '@entities/user/api/user-api';
+import { UserService } from '@entities/user/model/user-service';
 import { KakaoConnection } from '@features/connect-kakao/ui/kakao-connection';
 import { NotificationForm } from '@features/create-notification/ui/notification-form';
 import { NotificationList } from '@features/list-notification/ui/notification-list';
+import { QueryClient } from '@tanstack/react-query';
 import { AppHeader } from '@widgets/layout/app-header';
 
+const queryClient = new QueryClient();
+
 export default function DashboardPage() {
-  const { user } = useAuthStore();
+  const userService = new UserService(queryClient);
+
+  const { reset, user } = useAuthStore();
 
   return (
     <div className="min-h-screen bg-gray-50">
       <AppHeader
         onLogout={async () => {
           try {
-            await logoutUser();
+            await userService.logout();
+            reset();
           } catch (error) {
             console.error('로그아웃 오류:', error);
           } finally {

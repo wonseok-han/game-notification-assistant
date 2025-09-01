@@ -8,7 +8,7 @@ const AUTH_CONFIG = {
     '/user/sign-in', // 로그인
     '/user/sign-up', // 회원가입
   ],
-  // server middleware 인증 체크 생략 리스트
+  // server middleware 인증 체크 생략 API 리스트
   AUTH_SKIP_ROUTES: [
     '/api/user/login', // 로그인
     '/api/user/logout', // 로그아웃

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 
 import { SnackbarManager } from '@repo/ui';
+import { CustomQueryClientProvider } from '@shared/providers/custom-query-client-provider';
 import { Analytics } from '@vercel/analytics/next';
 import localFont from 'next/font/local';
 import './globals.css';
@@ -37,8 +38,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
-        <SnackbarManager maxSnackbars={5} />
+        <CustomQueryClientProvider>
+          {children}
+          <SnackbarManager maxSnackbars={5} />
+        </CustomQueryClientProvider>
         <Analytics />
       </body>
     </html>
