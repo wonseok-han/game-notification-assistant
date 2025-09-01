@@ -15,9 +15,28 @@ export abstract class BaseService {
    * 쿼리 캐시 무효화
    * @param queryKey 무효화할 쿼리 키
    */
-  protected invalidateQueries(queryKey: string[]): void {
+  protected invalidateQueries(
+    queryKey: (string | Record<string, unknown>)[]
+  ): void {
     try {
       this.queryClient.invalidateQueries({ queryKey });
+    } catch (error) {
+      console.error('쿼리 무효화 실패:', error);
+    }
+  }
+
+  /**
+   * 쿼리 캐시에서 모든 데이터 무효화
+   * @param queryKey 무효화할 쿼리 키
+   */
+  protected invalidateAllQueries(
+    queryKey: (string | Record<string, unknown>)[]
+  ): void {
+    try {
+      this.queryClient.invalidateQueries({
+        queryKey,
+        exact: true,
+      });
     } catch (error) {
       console.error('쿼리 무효화 실패:', error);
     }
@@ -27,9 +46,28 @@ export abstract class BaseService {
    * 쿼리 캐시에서 데이터 제거
    * @param queryKey 제거할 쿼리 키
    */
-  protected removeQueries(queryKey: string[]): void {
+  protected removeQueries(
+    queryKey: (string | Record<string, unknown>)[]
+  ): void {
     try {
       this.queryClient.removeQueries({ queryKey });
+    } catch (error) {
+      console.error('쿼리 제거 실패:', error);
+    }
+  }
+
+  /**
+   * 쿼리 캐시에서 모든 데이터 제거
+   * @param queryKey 제거할 쿼리 키
+   */
+  protected removeAllQueries(
+    queryKey: (string | Record<string, unknown>)[]
+  ): void {
+    try {
+      this.queryClient.removeQueries({
+        queryKey,
+        exact: true,
+      });
     } catch (error) {
       console.error('쿼리 제거 실패:', error);
     }
@@ -40,7 +78,10 @@ export abstract class BaseService {
    * @param queryKey 설정할 쿼리 키
    * @param data 설정할 데이터
    */
-  protected setQueryData<T>(queryKey: string[], data: T): void {
+  protected setQueryData<T>(
+    queryKey: (string | Record<string, unknown>)[],
+    data: T
+  ): void {
     try {
       this.queryClient.setQueryData(queryKey, data);
     } catch (error) {
@@ -53,7 +94,9 @@ export abstract class BaseService {
    * @param queryKey 가져올 쿼리 키
    * @returns 캐시된 데이터 또는 null
    */
-  protected getQueryData<T>(queryKey: string[]): T | null {
+  protected getQueryData<T>(
+    queryKey: (string | Record<string, unknown>)[]
+  ): T | null {
     try {
       return this.queryClient.getQueryData(queryKey) || null;
     } catch (error) {

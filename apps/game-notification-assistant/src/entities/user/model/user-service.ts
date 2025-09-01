@@ -17,6 +17,14 @@ import {
 
 export class UserService extends BaseService {
   /**
+   * 사용자 쿼리 키
+   * @returns 사용자 쿼리 키
+   */
+  public queryKey = {
+    user: (id?: string) => (id ? ['user', id] : ['user']),
+  };
+
+  /**
    * 사용자 로그인
    * @param credentials 로그인 정보
    * @returns 로그인된 사용자 정보
@@ -27,7 +35,7 @@ export class UserService extends BaseService {
       const user = await loginUserApi(credentials);
 
       // 캐시에 사용자 정보 저장
-      this.setQueryData(['user'], user);
+      this.setQueryData(this.queryKey.user(user.id), user);
 
       return user;
     } catch (error) {
@@ -50,12 +58,12 @@ export class UserService extends BaseService {
       const user = await registerUserApi(userData);
 
       // 캐시에 사용자 정보 저장
-      this.setQueryData(['user'], user);
+      this.setQueryData(this.queryKey.user(user.id), user);
 
       return user;
     } catch (error) {
       // 회원가입 실패 시 캐시 정리
-      this.removeQueries(['user']);
+      this.removeAllQueries(this.queryKey.user());
 
       throw error;
     }
@@ -73,7 +81,7 @@ export class UserService extends BaseService {
       console.error('로그아웃 API 실패:', error);
     } finally {
       // 성공/실패 관계없이 캐시에서 사용자 정보 제거
-      this.removeQueries(['user']);
+      this.removeAllQueries(this.queryKey.user());
       this.clearCache();
     }
   }
@@ -88,16 +96,16 @@ export class UserService extends BaseService {
 
       if (user) {
         // 유효한 세션이면 캐시에 저장
-        this.setQueryData(['user'], user);
+        this.setQueryData(this.queryKey.user(user.id), user);
       } else {
         // 유효하지 않은 세션이면 캐시에서 제거
-        this.removeQueries(['user']);
+        this.removeAllQueries(this.queryKey.user());
       }
 
       return user;
     } catch (error) {
       // 세션 검증 실패 시 캐시에서 제거
-      this.removeQueries(['user']);
+      this.removeAllQueries(this.queryKey.user());
       console.error('세션 검증 실패:', error);
       return null;
     }
@@ -108,13 +116,13 @@ export class UserService extends BaseService {
    * @returns 캐시된 사용자 정보 또는 null
    */
   getCachedUser(): VerifyResponseDto | null {
-    return this.getQueryData(['user']);
+    return this.getQueryData(this.queryKey.user());
   }
 
   /**
    * 사용자 정보 캐시 무효화
    */
   invalidateUserCache(): void {
-    this.invalidateQueries(['user']);
+    this.invalidateAllQueries(this.queryKey.user());
   }
 }

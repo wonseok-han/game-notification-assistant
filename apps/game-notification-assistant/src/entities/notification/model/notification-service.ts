@@ -21,6 +21,15 @@ import {
 
 export class NotificationService extends BaseService {
   /**
+   * 알림 쿼리 키
+   * @returns 알림 쿼리 키
+   */
+  public queryKey = {
+    notifications: (filters?: Record<string, unknown>) =>
+      filters ? ['notifications', filters] : ['notifications'],
+  };
+
+  /**
    * 알림 생성
    * @param form 알림 데이터
    * @returns 알림 데이터
@@ -43,7 +52,7 @@ export class NotificationService extends BaseService {
       });
 
       // 알림 목록 캐시 무효화 (새 알림이 추가되었으므로)
-      this.invalidateQueries(['notifications']);
+      this.invalidateQueries(this.queryKey.notifications());
 
       return {
         id: response.id,
@@ -94,7 +103,7 @@ export class NotificationService extends BaseService {
       }));
     } catch (error) {
       // 조회 실패 시 캐시에서 제거
-      this.removeQueries(['notifications']);
+      this.removeQueries(this.queryKey.notifications());
       console.error('알림 목록 조회 실패:', error);
       throw error;
     }
@@ -129,7 +138,7 @@ export class NotificationService extends BaseService {
       });
 
       // 알림 목록 캐시 무효화 (알림이 수정되었으므로)
-      this.invalidateQueries(['notifications']);
+      this.invalidateQueries(this.queryKey.notifications());
 
       return {
         id: response.id,
@@ -163,7 +172,7 @@ export class NotificationService extends BaseService {
       const response = await deleteNotificationApi(id);
 
       // 알림 목록 캐시 무효화 (알림이 삭제되었으므로)
-      this.invalidateQueries(['notifications']);
+      this.invalidateQueries(this.queryKey.notifications());
 
       return response;
     } catch (error) {
@@ -186,7 +195,7 @@ export class NotificationService extends BaseService {
       const response = await updateNotificationActiveApi(id, isActive);
 
       // 알림 목록 캐시 무효화 (상태가 변경되었으므로)
-      this.invalidateQueries(['notifications']);
+      this.invalidateQueries(this.queryKey.notifications());
 
       return {
         id: response.id,
@@ -231,13 +240,13 @@ export class NotificationService extends BaseService {
    * @returns 캐시된 알림 목록 또는 null
    */
   getCachedNotifications(): GetNotificationsResponseDto[] | null {
-    return this.getQueryData(['notifications']);
+    return this.getQueryData(this.queryKey.notifications());
   }
 
   /**
    * 알림 목록 캐시 무효화
    */
   invalidateNotificationsCache(): void {
-    this.invalidateQueries(['notifications']);
+    this.invalidateQueries(this.queryKey.notifications());
   }
 }

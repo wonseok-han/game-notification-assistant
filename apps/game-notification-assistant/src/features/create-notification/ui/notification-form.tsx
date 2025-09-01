@@ -70,7 +70,9 @@ export function NotificationForm() {
         fileInputRef.current.value = '';
       }
       // 알림 목록 캐시 무효화
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({
+        queryKey: notificationService.queryKey.notifications(),
+      });
     },
     onError: (error) => {
       console.error('알림 생성 오류:', error);

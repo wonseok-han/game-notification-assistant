@@ -59,10 +59,7 @@ pnpm run check-types
 src/
 ├── components/           # UI 컴포넌트들
 │   ├── action-button.tsx
-│   ├── code-textarea.tsx
-│   ├── monaco-editor.tsx
 │   ├── snackbar/        # 스낵바 관련 컴포넌트
-│   ├── tiptap-editor/   # TipTap 에디터 관련
 │   └── tool-card.tsx
 ├── hooks/               # 커스텀 훅
 ├── utils/               # 유틸리티 함수
@@ -71,6 +68,4 @@ src/
 
 ## 🔗 관련 링크
 
-- [Monaco Editor](https://microsoft.github.io/monaco-editor/)
-- [TipTap Editor](https://tiptap.dev/)
 - [Tailwind CSS](https://tailwindcss.com/)

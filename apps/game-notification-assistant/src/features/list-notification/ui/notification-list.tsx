@@ -31,7 +31,7 @@ export function NotificationList() {
     error,
     isLoading,
   } = useQuery({
-    queryKey: ['notifications'],
+    queryKey: notificationService.queryKey.notifications(),
     queryFn: () => notificationService.getNotifications(),
   });
 
