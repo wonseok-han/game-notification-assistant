@@ -192,11 +192,42 @@ export function NotificationList() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">알림 목록을 불러오는 중...</p>
-        </div>
+      <div className="space-y-4 py-8">
+        {/* 알림 카드 스켈레톤 3개 */}
+        {Array.from({ length: 3 }, (_, index) => (
+          <div
+            key={`skeleton-${index}`}
+            className="bg-white rounded-lg shadow p-6 animate-pulse"
+          >
+            <div className="space-y-4">
+              {/* 제목과 상태 스켈레톤 */}
+              <div className="flex items-start justify-between">
+                <div className="h-6 bg-gray-200 rounded w-2/3" />
+                <div className="h-6 bg-gray-200 rounded w-16" />
+              </div>
+              {/* 설명 스켈레톤 */}
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-full" />
+                <div className="h-4 bg-gray-200 rounded w-3/4" />
+              </div>
+              {/* 게임명과 이미지 스켈레톤 */}
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-gray-200 rounded" />
+                <div className="h-4 bg-gray-200 rounded w-24" />
+              </div>
+              {/* 알림 시간 스켈레톤 */}
+              <div className="space-y-2">
+                <div className="h-3 bg-gray-200 rounded w-32" />
+                <div className="h-3 bg-gray-200 rounded w-28" />
+              </div>
+              {/* 액션 버튼 스켈레톤 */}
+              <div className="flex space-x-2 pt-2">
+                <div className="h-8 bg-gray-200 rounded w-16" />
+                <div className="h-8 bg-gray-200 rounded w-16" />
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     );
   }

@@ -4,7 +4,8 @@
       "paths": [
         "src/entities/**/ui/**",
         "src/features/**/ui/**",
-        "src/widgets/**/ui/**"
+        "src/widgets/**/ui/**",
+        "src/shared/**/ui/**"
       ],
       "fileExtensions": [
         ".tsx",

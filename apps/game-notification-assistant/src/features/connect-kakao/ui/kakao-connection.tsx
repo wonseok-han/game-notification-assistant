@@ -2,6 +2,7 @@
 
 import { KakaoService } from '@entities/kakao/model/kakao-service';
 import { useSnackbar, ActionButton } from '@repo/ui';
+import { LoadingSpinner } from '@shared/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 
@@ -10,7 +11,7 @@ export function KakaoConnection() {
   const kakaoService = new KakaoService(queryClient);
 
   // ===== 상태 관리 =====
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const { showSnackbar } = useSnackbar();
@@ -152,6 +153,26 @@ export function KakaoConnection() {
     }
   };
 
+  if (isConnected === null) {
+    return (
+      <div className="bg-white rounded-lg shadow p-4">
+        <div className="animate-pulse space-y-3">
+          {/* 제목 스켈레톤 */}
+          <div className="h-6 bg-gray-200 rounded w-3/4" />
+          {/* 설명 스켈레톤 */}
+          <div className="space-y-2">
+            <div className="h-4 bg-gray-200 rounded w-full" />
+            <div className="h-4 bg-gray-200 rounded w-5/6" />
+          </div>
+          {/* 버튼 스켈레톤 */}
+          <div className="pt-2">
+            <div className="h-10 bg-gray-200 rounded w-32" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ===== 연결된 상태 표시 =====
   if (isConnected) {
     return (
@@ -209,8 +230,8 @@ export function KakaoConnection() {
           variant="primary"
         >
           {isLoading ? (
-            <div className="flex items-center">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black mr-2" />
+            <div className="flex items-center gap-2">
+              <LoadingSpinner color="primary" size="sm" />
               연결 중...
             </div>
           ) : (

@@ -1,33 +1,17 @@
 'use client';
 
 import { useAuthStore } from '@entities/auth/model/auth-store';
-import { UserService } from '@entities/user/model/user-service';
 import { KakaoConnection } from '@features/connect-kakao/ui/kakao-connection';
 import { NotificationForm } from '@features/create-notification/ui/notification-form';
 import { NotificationList } from '@features/list-notification/ui/notification-list';
-import { useQueryClient } from '@tanstack/react-query';
 import { AppHeader } from '@widgets/layout/app-header';
 
 export default function DashboardPage() {
-  const queryClient = useQueryClient();
-  const userService = new UserService(queryClient);
-
-  const { reset, user } = useAuthStore();
+  const { user } = useAuthStore();
 
   return (
     <div className="min-h-screen bg-gray-50">
       <AppHeader
-        onLogout={async () => {
-          try {
-            await userService.logout();
-            reset();
-          } catch (error) {
-            console.error('로그아웃 오류:', error);
-          } finally {
-            useAuthStore.getState().reset();
-            window.location.href = '/';
-          }
-        }}
         title="게임 알림 어시스턴트"
         username={user?.username ?? null}
         variant="solid"

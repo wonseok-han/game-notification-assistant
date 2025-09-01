@@ -2,6 +2,7 @@ import type { NotificationEditFormType } from '@entities/notification/model/noti
 
 import { ActionButton, ActiveSwitch } from '@repo/ui';
 import { formatForDatetimeLocal } from '@shared/lib/date';
+import { LoadingSpinner } from '@shared/ui';
 import { useEffect, useState } from 'react';
 
 interface NotificationEditModalProps {
@@ -99,7 +100,7 @@ export function NotificationEditModal({
           label: time.label,
         })),
       });
-      onClose();
+      // onClose();
     } catch (error) {
       console.error('저장 오류:', error);
     } finally {
@@ -276,7 +277,14 @@ export function NotificationEditModal({
             onClick={handleSave}
             variant="primary"
           >
-            {isLoading ? '저장 중...' : '저장'}
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <LoadingSpinner color="white" size="sm" />
+                저장 중...
+              </div>
+            ) : (
+              '저장'
+            )}
           </ActionButton>
         </div>
       </div>

@@ -3,6 +3,7 @@
 import { useAuthStore } from '@entities/auth/model/auth-store';
 import { UserService } from '@entities/user/model/user-service';
 import { ActionButton, useSnackbar } from '@repo/ui';
+import { LoadingSpinner } from '@shared/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -126,8 +127,8 @@ export function SignInForm() {
           variant="primary"
         >
           {isLoading ? (
-            <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" />
+            <div className="flex items-center justify-center gap-2">
+              <LoadingSpinner color="white" size="sm" />
               로그인 중...
             </div>
           ) : (

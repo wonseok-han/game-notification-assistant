@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 export default function HomePage() {
   const router = useRouter();
   const { hasHydrated, user } = useAuthStore();
+
   // 로그인 후 대시보드로 이동
   const handleGoToDashboard = () => {
     router.push('/dashboard');
@@ -25,10 +26,22 @@ export default function HomePage() {
   // 로딩 중
   if (!hasHydrated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">로딩 중...</p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="text-center space-y-8">
+            {/* 제목 스켈레톤 */}
+            <div className="h-16 bg-gray-200 rounded w-3/4 mx-auto animate-pulse" />
+            {/* 설명 스켈레톤 */}
+            <div className="space-y-3 max-w-3xl mx-auto">
+              <div className="h-6 bg-gray-200 rounded w-full animate-pulse" />
+              <div className="h-6 bg-gray-200 rounded w-5/6 mx-auto animate-pulse" />
+            </div>
+            {/* 버튼 스켈레톤 */}
+            <div className="flex justify-center space-x-4">
+              <div className="h-12 bg-gray-200 rounded w-32 animate-pulse" />
+              <div className="h-12 bg-gray-200 rounded w-32 animate-pulse" />
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -37,7 +50,6 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <AppHeader
-        onGoDashboard={user ? handleGoToDashboard : undefined}
         onLogin={!user ? handleGoToLogin : undefined}
         onRegister={!user ? handleGoToRegister : undefined}
         title="게임 알림 어시스턴트"

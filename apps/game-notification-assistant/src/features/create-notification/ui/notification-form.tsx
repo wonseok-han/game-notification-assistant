@@ -6,6 +6,7 @@ import { extractMultipleTimesFromImage } from '@entities/notification/lib/time-e
 import { NotificationService } from '@entities/notification/model/notification-service';
 import { useSnackbar, ActionButton } from '@repo/ui';
 import { formatForDatetimeLocal } from '@shared/lib/date';
+import { LoadingSpinner } from '@shared/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import { useState, useRef } from 'react';
@@ -594,11 +595,16 @@ export function NotificationForm() {
             size="lg"
             type="submit"
           >
-            {isImageLoading
-              ? '이미지 처리 중...'
-              : createMutation.isPending
-                ? '생성 중...'
-                : '알림 생성'}
+            <div className="flex items-center gap-2">
+              {isImageLoading || createMutation.isPending ? (
+                <LoadingSpinner color="white" size="sm" />
+              ) : null}
+              {isImageLoading
+                ? '이미지 처리 중...'
+                : createMutation.isPending
+                  ? '생성 중...'
+                  : '알림 생성'}
+            </div>
           </ActionButton>
         </div>
       </form>

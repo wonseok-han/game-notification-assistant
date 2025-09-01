@@ -1,14 +1,16 @@
 'use client';
 
 import { useAuthStore } from '@entities/auth/model/auth-store';
-import { logoutUser } from '@entities/user/api/user-api';
+import { LoadingSpinner } from '@shared/ui';
+import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
-interface UserProfileProps {
-  onLogout?: () => void;
-}
+import { UserService } from '../model/user-service';
 
-export function UserProfile({ onLogout }: UserProfileProps) {
+export function UserProfile() {
+  const queryClient = useQueryClient();
+  const userService = new UserService(queryClient);
+
   // ===== 상태 관리 =====
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -23,18 +25,14 @@ export function UserProfile({ onLogout }: UserProfileProps) {
     setIsLoggingOut(true);
 
     try {
-      await logoutUser();
-
-      // 로그아웃 성공 시 상태 초기화
-      reset();
-      onLogout?.();
+      await userService.logout();
     } catch (error) {
       console.error('로그아웃 오류:', error);
-      // 로그아웃에 실패해도 로컬 상태는 초기화
-      reset();
-      onLogout?.();
     } finally {
+      // 로그아웃 성공 시 상태 초기화
+      reset();
       setIsLoggingOut(false);
+      window.location.href = '/';
     }
   };
 
@@ -99,7 +97,63 @@ export function UserProfile({ onLogout }: UserProfileProps) {
               {/* ===== 메뉴 아이템들 ===== */}
               <div className="py-1">
                 <button
-                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                  onClick={() => {
+                    setIsDropdownOpen(false);
+                    window.location.href = '/';
+                  }}
+                >
+                  <div className="flex items-center space-x-2">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                      />
+                    </svg>
+                    <span>홈</span>
+                  </div>
+                </button>
+
+                <button
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                  onClick={() => {
+                    setIsDropdownOpen(false);
+                    window.location.href = '/dashboard';
+                  }}
+                >
+                  <div className="flex items-center space-x-2">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                      />
+                      <path
+                        d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                      />
+                    </svg>
+                    <span>대시보드</span>
+                  </div>
+                </button>
+
+                <button
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
                   onClick={() => {
                     setIsDropdownOpen(false);
                     // 프로필 편집 페이지로 이동 (향후 구현)
@@ -124,7 +178,7 @@ export function UserProfile({ onLogout }: UserProfileProps) {
                 </button>
 
                 <button
-                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
                   onClick={() => {
                     setIsDropdownOpen(false);
                     // 설정 페이지로 이동 (향후 구현)
@@ -155,7 +209,7 @@ export function UserProfile({ onLogout }: UserProfileProps) {
                 </button>
 
                 <button
-                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
                   onClick={() => {
                     setIsDropdownOpen(false);
                     // 도움말 페이지로 이동 (향후 구현)
@@ -185,13 +239,13 @@ export function UserProfile({ onLogout }: UserProfileProps) {
 
               {/* ===== 로그아웃 버튼 ===== */}
               <button
-                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50 cursor-pointer"
                 disabled={isLoggingOut}
                 onClick={handleLogout}
               >
                 <div className="flex items-center space-x-2">
                   {isLoggingOut ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600" />
+                    <LoadingSpinner color="danger" size="sm" />
                   ) : (
                     <svg
                       className="w-4 h-4"
