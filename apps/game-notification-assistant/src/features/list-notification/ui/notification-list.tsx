@@ -3,26 +3,21 @@
 import type {
   NotificationEditFormType,
   NotificationListType,
-} from '@entities/notification/model/notificaion-domain';
+} from '@entities/notification/model/notificaion';
 
-import {
-  deleteNotification,
-  getNotifications,
-  updateNotification,
-  updateNotificationActive,
-} from '@entities/notification/api/notification-api';
-import {
-  notificationsDtoToList,
-  notificationUpdateFormToDto,
-} from '@entities/notification/model/notification-mapper';
+import { NotificationService } from '@entities/notification/model/notification-service';
 import { NotificationFilters } from '@entities/notification/ui/notification-filters';
 import { NotificationTable } from '@entities/notification/ui/notification-table';
 import { NotificationEditModal } from '@features/edit-notification/ui';
 import { useSnackbar } from '@repo/ui';
+import { QueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 
-// ===== 알림 목록 컴포넌트 =====
+const queryClient = new QueryClient();
+
 export function NotificationList() {
+  const notificationService = new NotificationService(queryClient);
+
   // ===== 상태 관리 =====
   const [notifications, setNotifications] = useState<NotificationListType>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,8 +36,8 @@ export function NotificationList() {
     const fetchNotifications = async () => {
       try {
         setIsLoading(true);
-        const result = await getNotifications();
-        setNotifications(notificationsDtoToList(result) || []);
+        const result = await notificationService.getNotifications();
+        setNotifications(result || []);
       } catch (error) {
         console.error('알림 목록 조회 오류:', error);
         showSnackbar({
@@ -93,7 +88,7 @@ export function NotificationList() {
     }
 
     try {
-      const response = await deleteNotification(id);
+      const response = await notificationService.delete(id);
 
       if (response?.message) {
         showSnackbar({
@@ -141,10 +136,7 @@ export function NotificationList() {
         editingTimesCount: form.notificationTimes.length,
       });
 
-      const response = await updateNotification(
-        form.id,
-        notificationUpdateFormToDto(form)
-      );
+      const response = await notificationService.update(form.id, form);
 
       if (response) {
         showSnackbar({
@@ -155,8 +147,8 @@ export function NotificationList() {
         });
 
         // 전체 목록을 다시 가져와서 UI 최신화
-        const result = await getNotifications();
-        setNotifications(notificationsDtoToList(result) || []);
+        const result = await notificationService.getNotifications();
+        setNotifications(result || []);
       }
     } catch (error) {
       console.error('알림 수정 오류:', error);
@@ -182,7 +174,7 @@ export function NotificationList() {
       if (!notification) return;
 
       // is_active만 업데이트
-      await updateNotificationActive(id, isActive);
+      await notificationService.updateActive(id, isActive);
 
       // 성공 메시지 표시
       showSnackbar({

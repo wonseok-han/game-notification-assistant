@@ -1,16 +1,20 @@
 'use client';
 
-import type { NotificationTimeBaseType } from '@entities/notification/model/notificaion-domain';
+import type { NotificationTimeBaseType } from '@entities/notification/model/notificaion';
 
-import { createNotification } from '@entities/notification/api/notification-api';
 import { extractMultipleTimesFromImage } from '@entities/notification/lib/time-extractor';
-import { notificationCreateFormToDto } from '@entities/notification/model/notification-mapper';
+import { NotificationService } from '@entities/notification/model/notification-service';
 import { useSnackbar, ActionButton } from '@repo/ui';
 import { formatForDatetimeLocal } from '@shared/lib/date';
+import { QueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import { useState, useRef } from 'react';
 
+const queryClient = new QueryClient();
+
 export function NotificationForm() {
+  const notificationService = new NotificationService(queryClient);
+
   // ===== 상태 관리 =====
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -244,7 +248,8 @@ export function NotificationForm() {
       // 활성화된 알림 시간들 가져오기
       const enabledTimes = notificationTimes.filter((time) => time.isEnabled);
 
-      const formData = notificationCreateFormToDto({
+      // API 호출
+      await notificationService.create({
         title: title.trim() || `${gameName} 알림`,
         description: description.trim(),
         gameName: gameName.trim(),
@@ -256,9 +261,6 @@ export function NotificationForm() {
           label: time.label,
         })),
       });
-
-      // API 호출
-      await createNotification(formData);
 
       // 성공 시 폼 초기화
       clearForm();
@@ -273,8 +275,6 @@ export function NotificationForm() {
         position: 'bottom-right',
         autoHideDuration: 6000,
       });
-
-      window.location.reload();
     } catch (error) {
       console.error('알림 생성 오류:', error);
       showSnackbar({

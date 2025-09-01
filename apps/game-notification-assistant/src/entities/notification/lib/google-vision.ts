@@ -4,7 +4,7 @@
  * - 내부 API는 Vision API를 호출해 텍스트를 추출
  */
 
-import { googleVision } from '../api/notification-api';
+import { googleVisionApi } from '../api/notification-api';
 
 /**
  * File을 base64 문자열로 변환
@@ -40,7 +40,7 @@ export async function extractTextWithGoogleVision(
   // base64 변환
   const base64Image = await fileToBase64(imageFile);
 
-  const response = await googleVision(base64Image);
+  const response = await googleVisionApi(base64Image);
 
   return response.text;
 }

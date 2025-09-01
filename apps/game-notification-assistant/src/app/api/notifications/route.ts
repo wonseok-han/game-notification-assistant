@@ -73,11 +73,33 @@ export const POST = MiddlewareWithPOST(async (request) => {
       }
     }
 
+    // 생성된 notification_times 조회
+    const { data: createdNotificationTimes, error: timeFetchError } =
+      await supabase
+        .from('notification_times')
+        .select('*')
+        .eq('notification_id', notification.id)
+        .order('scheduled_time', { ascending: true });
+
+    if (timeFetchError) {
+      console.error('생성된 알림 시간 조회 오류:', timeFetchError);
+      return NextResponse.json(
+        { success: false, message: '알림 시간 조회에 실패했습니다.' },
+        { status: 500 }
+      );
+    }
+
+    // 알림과 알림 시간을 함께 반환
+    const responseData = {
+      ...notification,
+      notification_times: createdNotificationTimes || [],
+    };
+
     return NextResponse.json(
       {
         success: true,
         message: '게임 알림이 성공적으로 생성되었습니다.',
-        data: notification,
+        data: responseData,
       },
       { status: 201 }
     );

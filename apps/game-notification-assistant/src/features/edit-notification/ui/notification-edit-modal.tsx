@@ -1,4 +1,4 @@
-import type { NotificationEditFormType } from '@entities/notification/model/notificaion-domain';
+import type { NotificationEditFormType } from '@entities/notification/model/notificaion';
 
 import { ActionButton, ActiveSwitch } from '@repo/ui';
 import { formatForDatetimeLocal } from '@shared/lib/date';

@@ -21,7 +21,7 @@ import {
  * @param {CreateNotificationRequestDto} notificationData 알림 데이터
  * @returns {CreateNotificationResponseDto} 알림 데이터
  */
-export async function createNotification(
+export async function createNotificationApi(
   notificationData: CreateNotificationRequestDto
 ): Promise<CreateNotificationResponseDto> {
   try {
@@ -47,7 +47,7 @@ export async function createNotification(
  * 게임 알림 목록 조회
  * @returns {GetNotificationsResponseDto[]} 알림 목록
  */
-export async function getNotifications(): Promise<
+export async function getNotificationsApi(): Promise<
   GetNotificationsResponseDto[]
 > {
   try {
@@ -75,7 +75,7 @@ export async function getNotifications(): Promise<
  * @param {UpdateNotificationRequestDto} body 알림 수정 데이터
  * @returns {UpdateNotificationResponseDto} 알림 수정 결과
  */
-export async function updateNotification(
+export async function updateNotificationApi(
   id: string,
   body: UpdateNotificationRequestDto
 ): Promise<UpdateNotificationResponseDto> {
@@ -103,7 +103,9 @@ export async function updateNotification(
  * @param {string} id 알림 ID
  * @returns {ApiResponseType} 알림 삭제 결과
  */
-export async function deleteNotification(id: string): Promise<ApiResponseType> {
+export async function deleteNotificationApi(
+  id: string
+): Promise<ApiResponseType> {
   try {
     const response = await apiDelete(`/api/notifications/${id}`);
 
@@ -126,7 +128,7 @@ export async function deleteNotification(id: string): Promise<ApiResponseType> {
  * @param {boolean} isActive 알림 상태
  * @returns {UpdateNotificationActiveResponseDto} 알림 상태 업데이트 결과
  */
-export async function updateNotificationActive(
+export async function updateNotificationActiveApi(
   id: string,
   isActive: boolean
 ): Promise<UpdateNotificationActiveResponseDto> {
@@ -156,7 +158,7 @@ export async function updateNotificationActive(
  * @param image - 이미지 데이터
  * @returns {GoogleVisionResponseDto} Google Vision API 응답 데이터
  */
-export async function googleVision(
+export async function googleVisionApi(
   image: string
 ): Promise<GoogleVisionResponseDto> {
   try {

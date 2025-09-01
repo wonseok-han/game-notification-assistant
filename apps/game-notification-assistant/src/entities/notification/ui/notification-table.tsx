@@ -1,7 +1,7 @@
 import type {
   NotificationEditFormType,
   NotificationListType,
-} from '../model/notificaion-domain';
+} from '../model/notificaion';
 
 import { ActionButton, ActiveSwitch } from '@repo/ui';
 import Image from 'next/image';

@@ -299,7 +299,7 @@ import { CreateForm } from '@features/create-notification'; // ❌ entity → fe
 // 컴포넌트 및 도메인 관련: 도메인-명사
 notification-card.tsx
 user-profile.tsx
-notification-domain.ts
+notification.ts
 
 // 설정 파일: 도메인-config
 auth-config.ts
