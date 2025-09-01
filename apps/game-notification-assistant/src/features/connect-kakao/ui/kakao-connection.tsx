@@ -1,10 +1,15 @@
 'use client';
 
-import { auth, disconnect, status } from '@entities/kakao/api/kakao-api';
+import { KakaoService } from '@entities/kakao/model/kakao-service';
 import { useSnackbar, ActionButton } from '@repo/ui';
+import { QueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 
+const queryClient = new QueryClient();
+
 export function KakaoConnection() {
+  const kakaoService = new KakaoService(queryClient);
+
   // ===== 상태 관리 =====
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -36,7 +41,7 @@ export function KakaoConnection() {
    */
   const checkConnectionStatus = async () => {
     try {
-      const data = await status();
+      const data = await kakaoService.status();
 
       if (data.accessToken) {
         setIsConnected(true);
@@ -58,7 +63,7 @@ export function KakaoConnection() {
 
     try {
       // 서버에서 카카오 OAuth URL 생성
-      const data = await auth();
+      const data = await kakaoService.auth();
 
       if (data.authUrl) {
         // 팝업 창 열기
@@ -134,7 +139,7 @@ export function KakaoConnection() {
     if (!confirm('카카오톡 연결을 해제하시겠습니까?')) return;
 
     try {
-      await disconnect();
+      await kakaoService.disconnect();
 
       setIsConnected(false);
     } catch (error) {

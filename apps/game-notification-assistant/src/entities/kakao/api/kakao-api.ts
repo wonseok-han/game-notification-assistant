@@ -13,7 +13,7 @@ import {
  * 카카오 연결 상태 조회
  * @returns {KakaoStatusResponseDto} 카카오 연결 상태
  */
-export async function status(): Promise<KakaoStatusResponseDto> {
+export async function statusApi(): Promise<KakaoStatusResponseDto> {
   try {
     const response = await apiPost('/api/kakao/status');
 
@@ -37,7 +37,7 @@ export async function status(): Promise<KakaoStatusResponseDto> {
  * 카카오 인증
  * @returns {KakaoAuthResponseDto} 카카오 인증 정보
  */
-export async function auth(): Promise<KakaoAuthResponseDto> {
+export async function authApi(): Promise<KakaoAuthResponseDto> {
   try {
     const response = await apiGet('/api/kakao/auth');
 
@@ -59,7 +59,7 @@ export async function auth(): Promise<KakaoAuthResponseDto> {
  * 카카오 연결 해제
  * @returns {void} 연결 해제 결과
  */
-export async function disconnect(): Promise<void> {
+export async function disconnectApi(): Promise<void> {
   try {
     const response = await apiPost('/api/kakao/disconnect');
 
