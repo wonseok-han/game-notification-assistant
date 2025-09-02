@@ -3,6 +3,7 @@ import type { AnimationWrapperProps } from '@shared/ui';
 
 import { AnimationWrapper } from '@shared/ui';
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 interface BaseModalProps extends Omit<AnimationWrapperProps, 'isStart'> {
   isOpen: boolean;
@@ -130,7 +131,8 @@ export function BaseModal({
     }
   };
 
-  return (
+  // 포탈을 사용해서 모달을 body에 직접 렌더링
+  const modalContent = (
     <div
       className="fixed inset-0 backdrop-blur-sm bg-black/40 flex items-center justify-center z-50 p-4"
       onClick={handleBackdropClick}
@@ -139,7 +141,7 @@ export function BaseModal({
         animation={animation}
         animationDirection={animationDirection}
         animationDuration={animationDuration}
-        className={`w-full max-h-[90vh] ${sizeClasses[size]}`}
+        className={`w-full max-h-svh ${sizeClasses[size]}`}
         isStart={status === 'entering' || status === 'entered'}
       >
         <div
@@ -182,4 +184,8 @@ export function BaseModal({
       </AnimationWrapper>
     </div>
   );
+
+  // 포탈을 사용해서 modal-root에 렌더링
+  const modalRoot = document.getElementById('modal-root') || document.body;
+  return createPortal(modalContent, modalRoot);
 }

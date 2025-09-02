@@ -43,6 +43,7 @@ export default function RootLayout({
           <SnackbarManager maxSnackbars={5} />
         </CustomQueryClientProvider>
         <Analytics />
+        <div id="modal-root" />
       </body>
     </html>
   );
