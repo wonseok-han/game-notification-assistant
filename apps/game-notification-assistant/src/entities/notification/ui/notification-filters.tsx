@@ -1,3 +1,5 @@
+import { Tabs } from '@repo/ui';
+
 import NOTIFICATION_CONFIG from '../config/notification-config';
 
 interface NotificationFiltersProps {
@@ -17,37 +19,31 @@ export function NotificationFilters({
     <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
       <div className="flex flex-col sm:flex-row gap-4">
         {/* 상태 필터 */}
-        <div className="flex-1">
+        <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             활성 상태
           </label>
-          <div className="flex gap-2">
-            <button
-              className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                selectedStatus === 'all'
-                  ? 'bg-blue-100 text-blue-700 border border-blue-300'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-              onClick={() => onStatusChange('all')}
-            >
-              전체
-            </button>
-            {NOTIFICATION_CONFIG.ACTIVE_OPTIONS.map((option) => (
-              <button
-                key={option.value.toString()}
-                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                  selectedStatus === option.value.toString()
-                    ? `${option.bgColor} ${option.color} border border-current`
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-                onClick={() =>
-                  onStatusChange(option.value.toString() as 'true' | 'false')
-                }
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
+          <Tabs
+            activeTextColor="text-white"
+            backgroundColor="bg-gray-100"
+            containerClassName="bg-white border-none"
+            hoverTextColor="hover:text-gray-800"
+            inactiveTextColor="text-gray-600"
+            indicatorColor="bg-blue-500"
+            items={[
+              { id: 'all', label: '전체' },
+              ...NOTIFICATION_CONFIG.ACTIVE_OPTIONS.map((option) => ({
+                id: option.value.toString(),
+                label: option.label,
+              })),
+            ]}
+            onChange={(value) =>
+              onStatusChange(value as 'all' | 'true' | 'false')
+            }
+            size="md"
+            value={selectedStatus}
+            variant="default"
+          />
         </div>
 
         {/* 검색 */}
