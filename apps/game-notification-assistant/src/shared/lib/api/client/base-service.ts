@@ -12,24 +12,10 @@ export abstract class BaseService {
   }
 
   /**
-   * 쿼리 캐시 무효화
+   * 쿼리 캐시 무효화 (정확히 일치하는 쿼리만)
    * @param queryKey 무효화할 쿼리 키
    */
   protected invalidateQueries(
-    queryKey: (string | Record<string, unknown>)[]
-  ): void {
-    try {
-      this.queryClient.invalidateQueries({ queryKey });
-    } catch (error) {
-      console.error('쿼리 무효화 실패:', error);
-    }
-  }
-
-  /**
-   * 쿼리 캐시에서 모든 데이터 무효화
-   * @param queryKey 무효화할 쿼리 키
-   */
-  protected invalidateAllQueries(
     queryKey: (string | Record<string, unknown>)[]
   ): void {
     try {
@@ -43,24 +29,24 @@ export abstract class BaseService {
   }
 
   /**
-   * 쿼리 캐시에서 데이터 제거
-   * @param queryKey 제거할 쿼리 키
+   * 쿼리 캐시에서 모든 데이터 무효화 (부분 일치하는 모든 쿼리)
+   * @param queryKey 무효화할 쿼리 키
    */
-  protected removeQueries(
+  protected invalidateAllQueries(
     queryKey: (string | Record<string, unknown>)[]
   ): void {
     try {
-      this.queryClient.removeQueries({ queryKey });
+      this.queryClient.invalidateQueries({ queryKey });
     } catch (error) {
-      console.error('쿼리 제거 실패:', error);
+      console.error('쿼리 무효화 실패:', error);
     }
   }
 
   /**
-   * 쿼리 캐시에서 모든 데이터 제거
+   * 쿼리 캐시에서 데이터 제거 (정확히 일치하는 쿼리만)
    * @param queryKey 제거할 쿼리 키
    */
-  protected removeAllQueries(
+  protected removeQueries(
     queryKey: (string | Record<string, unknown>)[]
   ): void {
     try {
@@ -68,6 +54,20 @@ export abstract class BaseService {
         queryKey,
         exact: true,
       });
+    } catch (error) {
+      console.error('쿼리 제거 실패:', error);
+    }
+  }
+
+  /**
+   * 쿼리 캐시에서 모든 데이터 제거 (부분 일치하는 모든 쿼리)
+   * @param queryKey 제거할 쿼리 키
+   */
+  protected removeAllQueries(
+    queryKey: (string | Record<string, unknown>)[]
+  ): void {
+    try {
+      this.queryClient.removeQueries({ queryKey });
     } catch (error) {
       console.error('쿼리 제거 실패:', error);
     }

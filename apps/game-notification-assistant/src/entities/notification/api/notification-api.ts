@@ -4,6 +4,7 @@ import type {
   GetNotificationResponseDto,
   GetNotificationsResponseDto,
   GoogleVisionResponseDto,
+  GetNotificationsRequestDto,
   UpdateNotificationActiveResponseDto,
   UpdateNotificationRequestDto,
   UpdateNotificationResponseDto,
@@ -46,13 +47,37 @@ export async function createNotificationApi(
 
 /**
  * 게임 알림 목록 조회
+ * @param {GetNotificationsRequestDto} filters 필터 조건
  * @returns {GetNotificationsResponseDto[]} 알림 목록
  */
-export async function getNotificationsApi(): Promise<
-  GetNotificationsResponseDto[]
-> {
+export async function getNotificationsApi(
+  filters?: GetNotificationsRequestDto
+): Promise<GetNotificationsResponseDto[]> {
   try {
-    const response = await apiGet('/api/notifications');
+    // 쿼리 파라미터 생성
+    const queryParams = new URLSearchParams();
+
+    if (filters?.status && filters.status !== 'all') {
+      queryParams.append('status', filters.status);
+    }
+
+    if (filters?.search) {
+      queryParams.append('search', filters.search);
+    }
+
+    if (filters?.page) {
+      queryParams.append('page', filters.page.toString());
+    }
+
+    if (filters?.limit) {
+      queryParams.append('limit', filters.limit.toString());
+    }
+
+    const url = queryParams.toString()
+      ? `/api/notifications?${queryParams.toString()}`
+      : '/api/notifications';
+
+    const response = await apiGet(url);
 
     const result =
       await parseApiResponse<ApiResponseType<GetNotificationsResponseDto[]>>(

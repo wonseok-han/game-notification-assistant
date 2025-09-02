@@ -3,6 +3,20 @@ import type { NotificationTimeStatusType } from './notification-common';
 // ===== Request DTOs =====
 
 /**
+ * 알림 목록 조회 요청 타입
+ */
+export type GetNotificationsRequestDto = {
+  /** 활성 상태 필터 ('all' | 'true' | 'false') */
+  status?: 'all' | 'true' | 'false';
+  /** 검색어 (제목, 게임명, 설명에서 검색) */
+  search?: string;
+  /** 페이지 번호 (페이징 지원) */
+  page?: number;
+  /** 페이지당 항목 수 (페이징 지원) */
+  limit?: number;
+};
+
+/**
  * 알림 생성 요청 타입
  */
 export type CreateNotificationRequestDto = {

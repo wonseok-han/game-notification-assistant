@@ -31,8 +31,15 @@ export function NotificationList() {
     error,
     isLoading,
   } = useQuery({
-    queryKey: notificationService.queryKey.notifications(),
-    queryFn: () => notificationService.getNotifications(),
+    queryKey: notificationService.queryKey.notifications({
+      status: selectedStatus,
+      search: searchTerm,
+    }),
+    queryFn: () =>
+      notificationService.getNotifications({
+        status: selectedStatus,
+        search: searchTerm,
+      }),
   });
 
   // ===== Mutations =====
@@ -89,29 +96,6 @@ export function NotificationList() {
     });
   }
 
-  // ===== 필터링된 알림 목록 =====
-  const filteredNotifications = notifications.filter((notification) => {
-    // 상태 필터링
-    if (
-      selectedStatus !== 'all' &&
-      notification.isActive.toString() !== selectedStatus
-    ) {
-      return false;
-    }
-
-    // 검색어 필터링
-    if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
-      return (
-        notification.title.toLowerCase().includes(searchLower) ||
-        notification.gameName.toLowerCase().includes(searchLower) ||
-        notification.description?.toLowerCase().includes(searchLower)
-      );
-    }
-
-    return true;
-  });
-
   /**
    * 알림 삭제 핸들러
    * @param {string} id - 알림 ID
@@ -144,48 +128,6 @@ export function NotificationList() {
     updateActiveMutation.mutate({ id, isActive });
   };
 
-  if (isLoading) {
-    return (
-      <div className="space-y-4 py-8">
-        {/* 알림 카드 스켈레톤 3개 */}
-        {Array.from({ length: 3 }, (_, index) => (
-          <div
-            key={`skeleton-${index}`}
-            className="bg-white rounded-lg shadow p-6 animate-pulse"
-          >
-            <div className="space-y-4">
-              {/* 제목과 상태 스켈레톤 */}
-              <div className="flex items-start justify-between">
-                <div className="h-6 bg-gray-200 rounded w-2/3" />
-                <div className="h-6 bg-gray-200 rounded w-16" />
-              </div>
-              {/* 설명 스켈레톤 */}
-              <div className="space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-full" />
-                <div className="h-4 bg-gray-200 rounded w-3/4" />
-              </div>
-              {/* 게임명과 이미지 스켈레톤 */}
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-gray-200 rounded" />
-                <div className="h-4 bg-gray-200 rounded w-24" />
-              </div>
-              {/* 알림 시간 스켈레톤 */}
-              <div className="space-y-2">
-                <div className="h-3 bg-gray-200 rounded w-32" />
-                <div className="h-3 bg-gray-200 rounded w-28" />
-              </div>
-              {/* 액션 버튼 스켈레톤 */}
-              <div className="flex space-x-2 pt-2">
-                <div className="h-8 bg-gray-200 rounded w-16" />
-                <div className="h-8 bg-gray-200 rounded w-16" />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <NotificationFilters
@@ -196,7 +138,8 @@ export function NotificationList() {
       />
 
       <NotificationTable
-        notifications={filteredNotifications}
+        isLoading={isLoading}
+        notifications={notifications}
         onActiveChange={handleActiveChange}
         onDelete={handleDelete}
         onSelect={handleSelect}

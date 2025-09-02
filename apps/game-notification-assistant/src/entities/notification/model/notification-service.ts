@@ -6,6 +6,7 @@ import type {
 import type {
   GetNotificationsResponseDto,
   GoogleVisionResponseDto,
+  GetNotificationsRequestDto,
 } from './notification-dto';
 
 import { BaseService } from '@shared/lib/api/client/base-service';
@@ -81,11 +82,14 @@ export class NotificationService extends BaseService {
 
   /**
    * 알림 목록 조회
+   * @param filters 필터 조건
    * @returns 알림 목록
    */
-  async getNotifications(): Promise<NotificationListType> {
+  async getNotifications(
+    filters?: GetNotificationsRequestDto
+  ): Promise<NotificationListType> {
     try {
-      const notifications = await getNotificationsApi();
+      const notifications = await getNotificationsApi(filters);
 
       return notifications.map((item) => ({
         id: item.id,
@@ -106,7 +110,7 @@ export class NotificationService extends BaseService {
       }));
     } catch (error) {
       // 조회 실패 시 캐시에서 제거
-      this.removeQueries(this.queryKey.notifications());
+      this.removeQueries(this.queryKey.notifications(filters));
       console.error('알림 목록 조회 실패:', error);
       throw error;
     }

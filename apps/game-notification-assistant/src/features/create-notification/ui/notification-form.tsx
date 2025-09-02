@@ -573,17 +573,31 @@ export function NotificationForm() {
         </div>
 
         {/* ===== 액션 버튼 ===== */}
-        <div className="flex justify-end space-x-4 pt-4 border-t">
+        <div className="flex justify-end space-x-2 pt-4 border-t">
           <ActionButton
             onClick={() => {
               // 모든 입력값 초기화
               clearForm();
             }}
             size="lg"
+            title="폼 초기화"
             type="button"
             variant="secondary"
           >
-            취소
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+              />
+            </svg>
           </ActionButton>
           <ActionButton
             disabled={

@@ -120,9 +120,16 @@ export const POST = MiddlewareWithPOST(async (request) => {
 export const GET = MiddlewareWithGET(async (request) => {
   try {
     const { supabase, user } = request.auth;
+    const { searchParams } = new URL(request.url);
 
-    // 사용자의 게임 알림 목록 조회 (notification_times 포함)
-    const { data: notifications, error } = await supabase
+    // 쿼리 파라미터에서 필터 조건 추출
+    const status = searchParams.get('status');
+    const search = searchParams.get('search');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '50');
+
+    // 기본 쿼리 빌더
+    let query = supabase
       .from('game_notifications')
       .select(
         `
@@ -141,8 +148,28 @@ export const GET = MiddlewareWithGET(async (request) => {
         )
       `
       )
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+      .eq('user_id', user.id);
+
+    // 상태 필터 적용
+    if (status && status !== 'all') {
+      const isActive = status === 'true';
+      query = query.eq('is_active', isActive);
+    }
+
+    // 검색어 필터 적용
+    if (search?.trim()) {
+      const searchTerm = search.trim();
+      query = query.or(
+        `title.ilike.%${searchTerm}%,game_name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`
+      );
+    }
+
+    // 정렬 및 페이징 적용
+    query = query
+      .order('created_at', { ascending: false })
+      .range((page - 1) * limit, page * limit - 1);
+
+    const { data: notifications, error } = await query;
 
     if (error) {
       console.error('알림 목록 조회 오류:', error);

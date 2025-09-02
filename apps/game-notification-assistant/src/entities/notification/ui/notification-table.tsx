@@ -13,14 +13,89 @@ interface NotificationTableProps {
   onSelect: (notification: NotificationEditFormType) => void;
   onDelete: (id: string) => void;
   onActiveChange: (id: string, isActive: boolean) => void;
+  isLoading?: boolean;
+}
+
+/**
+ * 테이블 스켈레톤 컴포넌트
+ */
+function TableSkeleton() {
+  return (
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+              이미지
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+              제목
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+              게임
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+              활성 상태
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+              알림 시간
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+              액션
+            </th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {Array.from({ length: 1 }).map(() => (
+            <tr
+              key={`skeleton-${crypto.randomUUID()}`}
+              className="animate-pulse"
+            >
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="w-12 h-12 bg-gray-200 rounded-lg" />
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="h-4 bg-gray-200 rounded w-32 mb-2" />
+                <div className="h-3 bg-gray-200 rounded w-24" />
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="h-4 bg-gray-200 rounded w-20" />
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="w-16 h-6 bg-gray-200 rounded-full" />
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="space-y-1">
+                  <div className="h-3 bg-gray-200 rounded w-16" />
+                  <div className="h-3 bg-gray-200 rounded w-20" />
+                </div>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <div className="flex space-x-2">
+                  <div className="w-12 h-8 bg-gray-200 rounded" />
+                  <div className="w-12 h-8 bg-gray-200 rounded" />
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 export function NotificationTable({
+  isLoading = false,
   notifications,
   onActiveChange,
   onDelete,
   onSelect,
 }: NotificationTableProps) {
+  // 로딩 중일 때 스켈레톤 표시
+  if (isLoading) {
+    return <TableSkeleton />;
+  }
+
   if (notifications.length === 0) {
     return (
       <div className="text-center py-8">
