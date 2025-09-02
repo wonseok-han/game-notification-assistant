@@ -1,64 +1,164 @@
 import type { NotificationEditFormType } from '@entities/notification/model/notificaion';
 
-import { ActionButton, ActiveSwitch } from '@repo/ui';
+import { NotificationService } from '@entities/notification/model/notification-service';
+import { ActionButton, ActiveSwitch, useSnackbar } from '@repo/ui';
 import { formatForDatetimeLocal } from '@shared/lib/date';
-import { LoadingSpinner } from '@shared/ui';
+import { BaseModal, LoadingSpinner } from '@shared/ui';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 
 interface NotificationEditModalProps {
-  notification: NotificationEditFormType | null;
+  id: NotificationEditFormType['id'];
   isOpen: boolean;
   onClose: () => void;
-  onSave: (form: NotificationEditFormType) => Promise<void>;
+}
+
+/**
+ * 알림 수정 모달 스켈레톤 컴포넌트
+ */
+function NotificationEditModalSkeleton() {
+  return (
+    <div className="space-y-4">
+      {/* 제목 입력 스켈레톤 */}
+      <div>
+        <div className="h-4 w-20 bg-gray-200 rounded mb-2 animate-pulse" />
+        <div className="h-10 w-full bg-gray-200 rounded-md animate-pulse" />
+      </div>
+
+      {/* 설명 입력 스켈레톤 */}
+      <div>
+        <div className="h-4 w-16 bg-gray-200 rounded mb-2 animate-pulse" />
+        <div className="h-24 w-full bg-gray-200 rounded-md animate-pulse" />
+      </div>
+
+      {/* 활성 상태 스켈레톤 */}
+      <div>
+        <div className="h-4 w-20 bg-gray-200 rounded mb-2 animate-pulse" />
+        <div className="flex items-center gap-3">
+          <div className="h-6 w-12 bg-gray-200 rounded animate-pulse" />
+          <div className="h-4 w-16 bg-gray-200 rounded animate-pulse" />
+        </div>
+      </div>
+
+      {/* 알림 시간 설정 스켈레톤 */}
+      <div>
+        <div className="h-4 w-24 bg-gray-200 rounded mb-2 animate-pulse" />
+        <div className="space-y-3">
+          {Array.from({ length: 2 }, (_, index) => (
+            <div
+              key={`skeleton-${index}`}
+              className="p-3 border border-gray-200 rounded-md bg-gray-50"
+            >
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                <div>
+                  <div className="h-3 w-16 bg-gray-200 rounded mb-1 animate-pulse" />
+                  <div className="h-8 w-full bg-gray-200 rounded animate-pulse" />
+                </div>
+                <div>
+                  <div className="h-3 w-16 bg-gray-200 rounded mb-1 animate-pulse" />
+                  <div className="h-6 w-12 bg-gray-200 rounded animate-pulse" />
+                </div>
+              </div>
+              <div className="mb-2">
+                <div className="h-3 w-20 bg-gray-200 rounded mb-1 animate-pulse" />
+                <div className="h-8 w-full bg-gray-200 rounded animate-pulse" />
+              </div>
+              <div>
+                <div className="h-3 w-24 bg-gray-200 rounded mb-1 animate-pulse" />
+                <div className="h-8 w-full bg-gray-200 rounded animate-pulse" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * 알림 수정 모달 액션 버튼 스켈레톤 컴포넌트
+ */
+function ActionButtonsSkeleton() {
+  return (
+    <>
+      <div className="h-10 w-20 bg-gray-200 rounded animate-pulse" />
+      <div className="h-10 w-20 bg-gray-200 rounded animate-pulse" />
+    </>
+  );
 }
 
 export function NotificationEditModal({
+  id,
   isOpen,
-  notification,
   onClose,
-  onSave,
 }: NotificationEditModalProps) {
+  const queryClient = useQueryClient();
+  const notificationService = new NotificationService(queryClient);
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isActive, setIsActive] = useState(true);
   const [editingTimes, setEditingTimes] = useState<
     NotificationEditFormType['notificationTimes']
   >([]);
-  const [isLoading, setIsLoading] = useState(false);
 
-  // 모달이 열릴 때마다 초기값 설정
+  const { showSnackbar } = useSnackbar();
+
+  // ===== React Query 훅 =====
+  const { data: notification, error } = useQuery({
+    queryKey: notificationService.queryKey.notification(id),
+    queryFn: () => notificationService.getNotification(id),
+  });
+
+  // ===== Mutations =====
+  const updateMutation = useMutation({
+    mutationFn: ({
+      form,
+      id,
+    }: {
+      id: string;
+      form: NotificationEditFormType;
+    }) => notificationService.update(id, form),
+    onSuccess: () => {
+      showSnackbar({
+        message: '알림이 수정되었습니다.',
+        type: 'success',
+        position: 'bottom-right',
+        autoHideDuration: 4000,
+      });
+      onClose();
+    },
+    onError: (error) => {
+      console.error('알림 수정 오류:', error);
+      showSnackbar({
+        message: '알림 수정 중 오류가 발생했습니다.',
+        type: 'error',
+        position: 'bottom-right',
+        autoHideDuration: 6000,
+      });
+    },
+  });
+
   useEffect(() => {
     if (notification) {
-      console.log('모달 초기값 설정:', {
-        title: notification.title,
-        is_active: notification.isActive,
-        notification_times_count: notification.notificationTimes?.length || 0,
-      });
-
       setTitle(notification.title);
       setDescription(notification.description || '');
       setIsActive(notification.isActive);
-
-      // notification_times 초기화
-      if (notification.notificationTimes) {
-        console.log(
-          'notification.notification_times',
-          notification.notificationTimes
-        );
-        setEditingTimes(
-          notification.notificationTimes.map((time) => ({
-            id: time.id,
-            notificationId: time.notificationId,
-            scheduledTime: time.scheduledTime,
-            isEnabled: time.isEnabled,
-            rawText: time.rawText || '',
-            label: time.label || '',
-            status: time.status,
-          }))
-        );
-      }
+      setEditingTimes(notification.notificationTimes);
     }
   }, [notification]);
+
+  useEffect(() => {
+    if (error) {
+      console.error('알림 상세 조회 오류:', error);
+      showSnackbar({
+        message: '알림 상세 조회 중 오류가 발생했습니다.',
+        type: 'error',
+        position: 'bottom-right',
+        autoHideDuration: 6000,
+      });
+    }
+  }, [error]);
 
   /**
    * 알림 수정 저장
@@ -67,7 +167,6 @@ export function NotificationEditModal({
   const handleSave = async () => {
     if (!notification) return;
 
-    setIsLoading(true);
     try {
       // 제목이 비어있으면 기존 제목 사용
       const finalTitle = title.trim() || notification.title;
@@ -83,38 +182,38 @@ export function NotificationEditModal({
         editingTimesCount: editingTimes.length,
       });
 
-      await onSave({
+      await updateMutation.mutate({
         id: notification.id,
-        title: finalTitle,
-        description: finalDescription,
-        gameName: notification.gameName,
-        imageUrl: notification.imageUrl,
-        isActive,
-        notificationTimes: editingTimes.map((time) => ({
-          id: time.id,
-          notificationId: time.notificationId,
-          scheduledTime: time.scheduledTime,
-          status: time.status,
-          isEnabled: time.isEnabled,
-          rawText: time.rawText,
-          label: time.label,
-        })),
+        form: {
+          id: notification.id,
+          title: finalTitle,
+          description: finalDescription,
+          gameName: notification.gameName,
+          imageUrl: notification.imageUrl,
+          isActive,
+          notificationTimes: editingTimes.map((time) => ({
+            id: time.id,
+            notificationId: time.notificationId,
+            scheduledTime: time.scheduledTime,
+            status: time.status,
+            isEnabled: time.isEnabled,
+            rawText: time.rawText,
+            label: time.label,
+          })),
+        },
       });
       // onClose();
     } catch (error) {
       console.error('저장 오류:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  if (!isOpen || !notification) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">알림 수정</h2>
-
+    <BaseModal isOpen={isOpen} onClose={onClose} size="2xl" title="알림 수정">
+      {/* 메인 콘텐츠 - 스켈레톤 또는 실제 폼 */}
+      {!notification ? (
+        <NotificationEditModalSkeleton />
+      ) : (
         <div className="space-y-4">
           {/* 제목 입력 */}
           <div>
@@ -262,32 +361,38 @@ export function NotificationEditModal({
             </div>
           )}
         </div>
+      )}
 
-        {/* 액션 버튼 */}
-        <div className="flex justify-end gap-3 mt-6">
-          <ActionButton
-            disabled={isLoading}
-            onClick={onClose}
-            variant="secondary"
-          >
-            취소
-          </ActionButton>
-          <ActionButton
-            disabled={isLoading}
-            onClick={handleSave}
-            variant="primary"
-          >
-            {isLoading ? (
-              <div className="flex items-center gap-2">
-                <LoadingSpinner color="white" size="sm" />
-                저장 중...
-              </div>
-            ) : (
-              '저장'
-            )}
-          </ActionButton>
-        </div>
+      {/* 액션 버튼 - 스켈레톤 또는 실제 버튼 */}
+      <div className="flex justify-end gap-3 mt-6">
+        {!notification ? (
+          <ActionButtonsSkeleton />
+        ) : (
+          <>
+            <ActionButton
+              disabled={updateMutation.isPending}
+              onClick={onClose}
+              variant="secondary"
+            >
+              취소
+            </ActionButton>
+            <ActionButton
+              disabled={updateMutation.isPending}
+              onClick={handleSave}
+              variant="primary"
+            >
+              {updateMutation.isPending ? (
+                <div className="flex items-center gap-2">
+                  <LoadingSpinner color="white" size="sm" />
+                  저장 중...
+                </div>
+              ) : (
+                '저장'
+              )}
+            </ActionButton>
+          </>
+        )}
       </div>
-    </div>
+    </BaseModal>
   );
 }

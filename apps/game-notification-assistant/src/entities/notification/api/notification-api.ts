@@ -1,6 +1,7 @@
 import type {
   CreateNotificationRequestDto,
   CreateNotificationResponseDto,
+  GetNotificationResponseDto,
   GetNotificationsResponseDto,
   GoogleVisionResponseDto,
   UpdateNotificationActiveResponseDto,
@@ -65,6 +66,27 @@ export async function getNotificationsApi(): Promise<
     return result.data;
   } catch (error) {
     console.error('알림 목록 조회 오류:', error);
+    throw error;
+  }
+}
+
+export async function getNotificationApi(
+  id: string
+): Promise<GetNotificationResponseDto> {
+  try {
+    const response = await apiGet(`/api/notifications/${id}`);
+    const result =
+      await parseApiResponse<ApiResponseType<GetNotificationResponseDto>>(
+        response
+      );
+
+    if (!result.success || !result.data) {
+      throw new Error(result.message || '알림 정보를 가져올 수 없습니다.');
+    }
+
+    return result.data;
+  } catch (error) {
+    console.error('알림 상세 조회 오류:', error);
     throw error;
   }
 }

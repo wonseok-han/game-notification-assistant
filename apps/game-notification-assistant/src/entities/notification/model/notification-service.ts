@@ -17,6 +17,7 @@ import {
   deleteNotificationApi,
   updateNotificationActiveApi,
   googleVisionApi,
+  getNotificationApi,
 } from '../api/notification-api';
 
 export class NotificationService extends BaseService {
@@ -25,8 +26,10 @@ export class NotificationService extends BaseService {
    * @returns 알림 쿼리 키
    */
   public queryKey = {
+    all: () => ['notifications'],
     notifications: (filters?: Record<string, unknown>) =>
       filters ? ['notifications', filters] : ['notifications'],
+    notification: (id: string) => ['notification', id],
   };
 
   /**
@@ -110,6 +113,37 @@ export class NotificationService extends BaseService {
   }
 
   /**
+   * 알림 상세 조회
+   * @param id 알림 ID
+   * @returns 알림 상세 정보
+   */
+  async getNotification(id: string): Promise<NotificationEditFormType> {
+    try {
+      const response = await getNotificationApi(id);
+      return {
+        id: response.id,
+        title: response.title,
+        description: response.description,
+        gameName: response.game_name,
+        imageUrl: response.image_url,
+        isActive: response.is_active,
+        notificationTimes: response.notification_times.map((time) => ({
+          id: time.id,
+          notificationId: time.notification_id,
+          scheduledTime: new Date(time.scheduled_time),
+          status: time.status,
+          isEnabled: time.is_enabled,
+          rawText: time.raw_text,
+          label: time.label,
+        })),
+      };
+    } catch (error) {
+      console.error('알림 상세 조회 실패:', error);
+      throw error;
+    }
+  }
+
+  /**
    * 알림 수정
    * @param id 알림 ID
    * @param form 수정할 알림 데이터
@@ -137,8 +171,8 @@ export class NotificationService extends BaseService {
         })),
       });
 
-      // 알림 목록 캐시 무효화 (알림이 수정되었으므로)
-      this.invalidateQueries(this.queryKey.notifications());
+      // 알림 관련 쿼리 무효화
+      this.invalidateAllQueries(this.queryKey.all());
 
       return {
         id: response.id,
@@ -172,7 +206,7 @@ export class NotificationService extends BaseService {
       const response = await deleteNotificationApi(id);
 
       // 알림 목록 캐시 무효화 (알림이 삭제되었으므로)
-      this.invalidateQueries(this.queryKey.notifications());
+      this.invalidateAllQueries(this.queryKey.all());
 
       return response;
     } catch (error) {
@@ -195,7 +229,7 @@ export class NotificationService extends BaseService {
       const response = await updateNotificationActiveApi(id, isActive);
 
       // 알림 목록 캐시 무효화 (상태가 변경되었으므로)
-      this.invalidateQueries(this.queryKey.notifications());
+      this.invalidateAllQueries(this.queryKey.all());
 
       return {
         id: response.id,

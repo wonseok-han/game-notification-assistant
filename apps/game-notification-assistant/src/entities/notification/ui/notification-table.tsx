@@ -10,7 +10,7 @@ import { NotificationTimeStatusBadge } from './notification-time-status-badge';
 
 interface NotificationTableProps {
   notifications: NotificationListType;
-  onEdit: (notification: NotificationEditFormType) => void;
+  onSelect: (notification: NotificationEditFormType) => void;
   onDelete: (id: string) => void;
   onActiveChange: (id: string, isActive: boolean) => void;
 }
@@ -19,7 +19,7 @@ export function NotificationTable({
   notifications,
   onActiveChange,
   onDelete,
-  onEdit,
+  onSelect,
 }: NotificationTableProps) {
   if (notifications.length === 0) {
     return (
@@ -34,22 +34,22 @@ export function NotificationTable({
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
               이미지
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
               제목
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
               게임
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
               활성 상태
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
               알림 시간
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
               액션
             </th>
           </tr>
@@ -59,7 +59,7 @@ export function NotificationTable({
             <tr
               key={notification.id}
               className="hover:bg-gray-50 cursor-pointer"
-              onClick={() => onEdit(notification)}
+              onClick={() => onSelect(notification)}
             >
               {/* 이미지 */}
               <td className="px-6 py-4 whitespace-nowrap">
@@ -112,12 +112,17 @@ export function NotificationTable({
                   {notification.notificationTimes &&
                   notification.notificationTimes.length > 0 ? (
                     notification.notificationTimes.map((time) => (
-                      <div key={time.id} className="flex items-center gap-2">
-                        <span className="text-xs text-gray-600">
+                      <div
+                        key={time.id}
+                        className="flex flex-row gap-1 items-center"
+                      >
+                        <span className="text-xs text-gray-600 truncate flex-1">
                           {time.scheduledTime.toLocaleString('ko-KR')}
                         </span>
-                        <NotificationTimeStatusBadge status={time.status} />
-                        <span className="text-xs text-gray-500">
+                        <div className="">
+                          <NotificationTimeStatusBadge status={time.status} />
+                        </div>
+                        <span className="text-xs text-gray-500 flex-shrink-0">
                           {time.isEnabled ? '활성' : '비활성'}
                         </span>
                       </div>

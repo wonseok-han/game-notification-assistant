@@ -1,8 +1,55 @@
 import {
-  MiddlewareWithPATCH,
   MiddlewareWithDELETE,
+  MiddlewareWithGET,
+  MiddlewareWithPATCH,
 } from '@shared/lib/api/server/custom-method';
 import { NextResponse } from 'next/server';
+
+/**
+ * @param request - 요청 객체
+ * @param params - 요청 파라미터
+ * @returns {GetNotificationResponseDto} 알림 상세 조회 응답 데이터
+ */
+export const GET = MiddlewareWithGET<{ params: Promise<{ id: string }> }>(
+  async (request, { params }) => {
+    try {
+      const { id } = await params;
+      const { supabase, user } = request.auth;
+
+      // 알림 상세 정보 조회 (사용자 소유 확인 포함)
+      const { data: notification, error: fetchError } = await supabase
+        .from('game_notifications')
+        .select(
+          `
+          *,
+          notification_times (*)
+        `
+        )
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .single();
+
+      if (fetchError || !notification) {
+        return NextResponse.json(
+          { success: false, message: '알림을 찾을 수 없습니다.' },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: '알림 상세 정보를 성공적으로 조회했습니다.',
+        data: notification,
+      });
+    } catch (error) {
+      console.error('알림 상세 조회 처리 오류:', error);
+      return NextResponse.json(
+        { success: false, message: '서버 오류가 발생했습니다.' },
+        { status: 500 }
+      );
+    }
+  }
+);
 
 /**
  * @param request - 요청 객체

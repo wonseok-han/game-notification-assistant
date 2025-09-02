@@ -57,35 +57,6 @@ export function NotificationList() {
     },
   });
 
-  const updateMutation = useMutation({
-    mutationFn: ({
-      form,
-      id,
-    }: {
-      id: string;
-      form: NotificationEditFormType;
-    }) => notificationService.update(id, form),
-    onSuccess: () => {
-      showSnackbar({
-        message: '알림이 수정되었습니다.',
-        type: 'success',
-        position: 'bottom-right',
-        autoHideDuration: 4000,
-      });
-      setIsEditModalOpen(false);
-      setEditingNotification(null);
-    },
-    onError: (error) => {
-      console.error('알림 수정 오류:', error);
-      showSnackbar({
-        message: '알림 수정 중 오류가 발생했습니다.',
-        type: 'error',
-        position: 'bottom-right',
-        autoHideDuration: 6000,
-      });
-    },
-  });
-
   const updateActiveMutation = useMutation({
     mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
       notificationService.updateActive(id, isActive),
@@ -158,26 +129,9 @@ export function NotificationList() {
    * 알림 수정 핸들러
    * @param {NotificationEditFormType} notification - 알림 정보
    */
-  const handleEdit = (notification: NotificationEditFormType) => {
+  const handleSelect = (notification: NotificationEditFormType) => {
     setEditingNotification(notification);
     setIsEditModalOpen(true);
-  };
-
-  /**
-   * 알림 저장 핸들러
-   * @param {NotificationEditFormType} form - 알림 정보
-   * @returns {Promise<void>} 알림 저장 핸들러 결과
-   */
-  const handleSave = async (form: NotificationEditFormType) => {
-    // 디버깅: 받은 값들 확인
-    console.log('handleSave에서 받은 값들:', {
-      id: form.id,
-      title: form.title,
-      isActive: form.isActive,
-      editingTimesCount: form.notificationTimes.length,
-    });
-
-    updateMutation.mutate({ id: form.id, form });
   };
 
   /**
@@ -245,18 +199,17 @@ export function NotificationList() {
         notifications={filteredNotifications}
         onActiveChange={handleActiveChange}
         onDelete={handleDelete}
-        onEdit={handleEdit}
+        onSelect={handleSelect}
       />
 
       {editingNotification && (
         <NotificationEditModal
+          id={editingNotification.id}
           isOpen={isEditModalOpen}
-          notification={editingNotification}
           onClose={() => {
             setIsEditModalOpen(false);
             setEditingNotification(null);
           }}
-          onSave={handleSave}
         />
       )}
     </div>
