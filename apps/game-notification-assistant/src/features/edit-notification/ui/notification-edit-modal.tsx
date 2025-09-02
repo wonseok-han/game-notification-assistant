@@ -1,4 +1,5 @@
 import type { NotificationEditFormType } from '@entities/notification/model/notificaion';
+import type { ModalStatusType } from '@shared/types/modal';
 
 import { NotificationService } from '@entities/notification/model/notification-service';
 import { ActionButton, ActiveSwitch, useSnackbar } from '@repo/ui';
@@ -44,7 +45,7 @@ function NotificationEditModalSkeleton() {
       <div>
         <div className="h-4 w-24 bg-gray-200 rounded mb-2 animate-pulse" />
         <div className="space-y-3">
-          {Array.from({ length: 2 }, (_, index) => (
+          {Array.from({ length: 1 }, (_, index) => (
             <div
               key={`skeleton-${index}`}
               className="p-3 border border-gray-200 rounded-md bg-gray-50"
@@ -101,6 +102,7 @@ export function NotificationEditModal({
   const [editingTimes, setEditingTimes] = useState<
     NotificationEditFormType['notificationTimes']
   >([]);
+  const [modalStatus, setModalStatus] = useState<ModalStatusType>();
 
   const { showSnackbar } = useSnackbar();
 
@@ -164,7 +166,7 @@ export function NotificationEditModal({
    * 알림 수정 저장
    * @returns {Promise<void>} 알림 수정 저장 결과
    */
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!notification) return;
 
     try {
@@ -182,7 +184,7 @@ export function NotificationEditModal({
         editingTimesCount: editingTimes.length,
       });
 
-      await updateMutation.mutate({
+      updateMutation.mutate({
         id: notification.id,
         form: {
           id: notification.id,
@@ -202,14 +204,19 @@ export function NotificationEditModal({
           })),
         },
       });
-      // onClose();
     } catch (error) {
       console.error('저장 오류:', error);
     }
   };
 
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose} size="2xl" title="알림 수정">
+    <BaseModal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="2xl"
+      status={modalStatus}
+      title="알림 수정"
+    >
       {/* 메인 콘텐츠 - 스켈레톤 또는 실제 폼 */}
       {!notification ? (
         <NotificationEditModalSkeleton />
@@ -371,7 +378,7 @@ export function NotificationEditModal({
           <>
             <ActionButton
               disabled={updateMutation.isPending}
-              onClick={onClose}
+              onClick={() => setModalStatus('exiting')}
               variant="secondary"
             >
               취소

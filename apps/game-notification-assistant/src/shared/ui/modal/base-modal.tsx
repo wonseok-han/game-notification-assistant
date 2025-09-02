@@ -1,6 +1,10 @@
-import { useEffect } from 'react';
+import type { ModalStatusType } from '@shared/types/modal';
+import type { AnimationWrapperProps } from '@shared/ui';
 
-interface BaseModalProps {
+import { AnimationWrapper } from '@shared/ui';
+import { useEffect, useState } from 'react';
+
+interface BaseModalProps extends Omit<AnimationWrapperProps, 'isStart'> {
   isOpen: boolean;
   onClose: () => void;
   title?: string;
@@ -8,6 +12,7 @@ interface BaseModalProps {
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
   showCloseButton?: boolean;
   closeOnBackdropClick?: boolean;
+  status?: ModalStatusType | null;
 }
 
 /**
@@ -21,19 +26,46 @@ interface BaseModalProps {
  * @param props.size - 모달 크기 (sm, md, lg, xl, 2xl, full)
  * @param props.showCloseButton - 닫기 버튼 표시 여부 (기본값: true)
  * @param props.closeOnBackdropClick - 백드롭 클릭 시 닫기 여부 (기본값: true)
+ * @param props.animation - 애니메이션 타입
+ * @param props.animationDirection - 애니메이션 방향
+ * @param props.animationDuration - 애니메이션 지속 시간
  */
 export function BaseModal({
+  animation = 'scale',
+  animationDirection = 'center',
+  animationDuration = 200,
   children,
   closeOnBackdropClick = true,
   isOpen,
   onClose,
   showCloseButton = true,
   size = 'md',
+  status: statusProp,
   title,
 }: BaseModalProps) {
-  // 모달이 열릴 때 body 스크롤 방지
+  const [status, setStatus] = useState<ModalStatusType>('exited');
+
+  // CSSTransition 방식의 상태 관리
   useEffect(() => {
     if (isOpen) {
+      // 열기: entering -> entered
+      setStatus('entering');
+      requestAnimationFrame(() => {
+        setStatus('entered');
+      });
+    } else {
+      // 닫기: exiting -> exited
+      setStatus('exiting');
+      setTimeout(() => {
+        setStatus('exited');
+        onClose();
+      }, animationDuration);
+    }
+  }, [isOpen, animationDuration, onClose]);
+
+  // 모달이 열릴 때 body 스크롤 방지
+  useEffect(() => {
+    if (status === 'entering' || status === 'entered') {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -43,26 +75,37 @@ export function BaseModal({
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen]);
+  }, [status]);
 
   // ESC 키로 모달 닫기
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpen) {
+      if (
+        event.key === 'Escape' &&
+        (status === 'entering' || status === 'entered')
+      ) {
         onClose();
       }
     };
 
-    if (isOpen) {
+    if (status === 'entering' || status === 'entered') {
       document.addEventListener('keydown', handleEscape);
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [isOpen, onClose]);
+  }, [status, onClose]);
 
-  if (!isOpen) return null;
+  // 상태를 전달받아 강제로 닫기
+  useEffect(() => {
+    if (statusProp === 'exiting') {
+      handleClose();
+    }
+  }, [statusProp]);
+
+  // CSSTransition 방식: state가 'exited'일 때만 컴포넌트 제거
+  if (status === 'exited') return null;
 
   const sizeClasses = {
     sm: 'max-w-sm',
@@ -73,9 +116,17 @@ export function BaseModal({
     full: 'max-w-full mx-4',
   };
 
+  const handleClose = () => {
+    setStatus('exiting');
+    // 애니메이션 완료 후 onClose 호출
+    setTimeout(() => {
+      onClose();
+    }, animationDuration);
+  };
+
   const handleBackdropClick = (event: React.MouseEvent) => {
     if (closeOnBackdropClick && event.target === event.currentTarget) {
-      onClose();
+      handleClose();
     }
   };
 
@@ -84,43 +135,51 @@ export function BaseModal({
       className="fixed inset-0 backdrop-blur-sm bg-black/40 flex items-center justify-center z-50 p-4"
       onClick={handleBackdropClick}
     >
-      <div
-        className={`bg-white backdrop-blur-md rounded-lg w-full ${sizeClasses[size]} max-h-[90vh] overflow-y-auto shadow-2xl border border-white/40`}
-        onClick={(e) => e.stopPropagation()}
+      <AnimationWrapper
+        animation={animation}
+        animationDirection={animationDirection}
+        animationDuration={animationDuration}
+        className={`w-full max-h-[90vh] ${sizeClasses[size]}`}
+        isStart={status === 'entering' || status === 'entered'}
       >
-        {/* 헤더 */}
-        {(title || showCloseButton) && (
-          <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-200">
-            {title && (
-              <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-            )}
-            {showCloseButton && (
-              <button
-                aria-label="모달 닫기"
-                className="p-1 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
-                onClick={onClose}
-              >
-                <svg
-                  className="w-5 h-5 text-gray-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+        <div
+          className={`bg-white backdrop-blur-md rounded-lg overflow-y-auto shadow-2xl border border-white/40`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* 헤더 */}
+          {(title || showCloseButton) && (
+            <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-200">
+              {title && (
+                <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+              )}
+              {showCloseButton && (
+                <button
+                  aria-label="모달 닫기"
+                  className="p-1 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+                  onClick={handleClose}
                 >
-                  <path
-                    d="M6 18L18 6M6 6l12 12"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                  />
-                </svg>
-              </button>
-            )}
-          </div>
-        )}
+                  <svg
+                    className="w-5 h-5 text-gray-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M6 18L18 6M6 6l12 12"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
+                  </svg>
+                </button>
+              )}
+            </div>
+          )}
 
-        {/* 내용 */}
-        <div className="p-6 pt-4">{children}</div>
-      </div>
+          {/* 내용 */}
+          <div className="p-6 pt-4">{children}</div>
+        </div>
+      </AnimationWrapper>
     </div>
   );
 }
