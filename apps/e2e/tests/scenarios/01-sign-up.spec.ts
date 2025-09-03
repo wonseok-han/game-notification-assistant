@@ -63,7 +63,7 @@ test.describe('01 - 신규 사용자 회원가입', () => {
   });
 
   test('새로운 유저로 회원가입', async ({ page }) => {
-    const userInfo = getTestUser();
+    const userInfo = getTestUser(test.info().project.name);
 
     // 네트워크 요청 모니터링
     page.on('response', (response) => {

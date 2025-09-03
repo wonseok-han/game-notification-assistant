@@ -1,14 +1,12 @@
 import { test, expect } from '@playwright/test';
-import { setupScenarioTest, getTestUser } from '../helpers/scenario-helpers';
+import { getTestUser } from '../helpers/scenario-helpers';
 import { saveSession } from '../helpers/session-helpers';
 
 test.describe.configure({ mode: 'serial' });
 
 test.describe('02 - 로그인', () => {
   test('회원가입한 유저로 로그인', async ({ page }) => {
-    await setupScenarioTest(page);
-
-    const user = getTestUser();
+    const user = getTestUser(test.info().project.name);
     await page.goto('/user/sign-in');
 
     await page.fill('input[name="email"]', user.email);

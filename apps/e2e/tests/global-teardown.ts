@@ -1,4 +1,5 @@
-import { FullConfig } from '@playwright/test';
+import { FullConfig, chromium } from '@playwright/test';
+import { cleanupE2ETestDataBulk } from './helpers/scenario-helpers';
 
 /**
  * 전역 테스트 정리
@@ -8,15 +9,24 @@ async function globalTeardown(config: FullConfig) {
   console.log('🧹 E2E 테스트 전역 정리 시작...');
 
   try {
-    // 테스트용 데이터 정리
-    console.log('🗑️ 테스트 데이터 정리 중...');
-    // await cleanupTestData();
+    // 브라우저 컨텍스트 생성하여 API 직접 호출
+    const browser = await chromium.launch();
+    const context = await browser.newContext();
+    const page = await context.newPage();
 
-    // 테스트용 사용자 계정 삭제 (필요한 경우)
-    // await deleteTestUsers();
+    const baseURL = config?.projects?.[0]?.use?.baseURL;
 
-    // 테스트용 파일 정리
-    // await cleanupTestFiles();
+    if (!baseURL) {
+      throw new Error('baseURL이 없습니다.');
+    }
+
+    // API를 통한 테스트 데이터 정리
+    await cleanupE2ETestDataBulk(page, {
+      baseURL,
+    });
+
+    // 브라우저 정리
+    await browser.close();
 
     console.log('✅ 테스트 데이터 정리 완료');
   } catch (error) {
