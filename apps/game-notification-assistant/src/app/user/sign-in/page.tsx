@@ -1,11 +1,7 @@
-'use client';
-
 import { SignInForm } from '@features/sign-in-user/ui';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function SignInPage() {
-  const router = useRouter();
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -25,12 +21,12 @@ export default function SignInPage() {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               계정이 없으신가요?{' '}
-              <button
+              <Link
                 className="font-medium text-blue-600 hover:text-blue-500 cursor-pointer hover:underline"
-                onClick={() => router.push('/user/sign-up')}
+                href="/user/sign-up"
               >
                 회원가입
-              </button>
+              </Link>
             </p>
           </div>
         </div>

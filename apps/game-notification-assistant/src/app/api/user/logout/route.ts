@@ -23,12 +23,7 @@ export const POST = MiddlewareWithPOST(async (request) => {
       message: '로그아웃이 완료되었습니다.',
     };
 
-    // 세션 쿠키 제거
-    const responseObj = NextResponse.json(response);
-    responseObj.cookies.delete('sb-access-token');
-    responseObj.cookies.delete('sb-refresh-token');
-
-    return responseObj;
+    return NextResponse.json(response);
   } catch (error) {
     console.error('로그아웃 처리 오류:', error);
     return NextResponse.json(

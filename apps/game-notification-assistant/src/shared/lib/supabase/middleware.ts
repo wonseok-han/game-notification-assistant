@@ -59,8 +59,7 @@ export async function checkAuthStatus(request: NextRequest) {
       { success: false, message: '세션이 만료되었습니다.' },
       { status: 401 }
     );
-    response.cookies.delete('sb-access-token');
-    response.cookies.delete('sb-refresh-token');
+
     // signOut은 실패해도 무시 (최대한 정리 시도)
     try {
       await supabase.auth.signOut({ scope: 'global' });

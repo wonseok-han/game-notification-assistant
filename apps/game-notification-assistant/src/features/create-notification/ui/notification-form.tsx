@@ -78,7 +78,8 @@ export function NotificationForm() {
     onError: (error) => {
       console.error('알림 생성 오류:', error);
       showSnackbar({
-        message: '알림 생성에 실패했습니다. 다시 시도해주세요.',
+        message:
+          error.message || '알림 생성에 실패했습니다. 다시 시도해주세요.',
         type: 'error',
         position: 'bottom-right',
         autoHideDuration: 6000,
@@ -438,6 +439,7 @@ export function NotificationForm() {
               >
                 <div className="flex items-center space-x-3">
                   <input
+                    aria-label="알림 시간 활성화 여부"
                     checked={time.isEnabled}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     onChange={(e) =>

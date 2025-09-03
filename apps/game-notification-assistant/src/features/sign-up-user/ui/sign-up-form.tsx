@@ -12,6 +12,7 @@ export function SignUpForm() {
   const queryClient = useQueryClient();
   const userService = new UserService(queryClient);
 
+  const { setUser } = useAuthStore();
   const router = useRouter();
 
   // ===== 상태 관리 =====
@@ -22,9 +23,6 @@ export function SignUpForm() {
   const [isLoading, setIsLoading] = useState(false);
 
   const { showSnackbar } = useSnackbar();
-
-  // ===== Store 사용 =====
-  const { setLoading, setUser } = useAuthStore();
 
   /**
    * 회원가입 폼 제출 핸들러
@@ -58,21 +56,18 @@ export function SignUpForm() {
     }
 
     setIsLoading(true);
-    setLoading(true);
 
     try {
       const user = await userService.register({ email, password, username });
 
-      // 성공 시 상태 업데이트
-      setUser(user);
-
       showSnackbar({
-        message: '회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.',
+        message: '회원가입이 완료되었습니다. 대시보드 페이지로 이동합니다.',
         type: 'success',
         position: 'bottom-right',
         autoHideDuration: 6000,
       });
 
+      setUser(user);
       router.replace('/dashboard');
     } catch (error) {
       const errorMessage =
@@ -88,7 +83,6 @@ export function SignUpForm() {
       });
     } finally {
       setIsLoading(false);
-      setLoading(false);
     }
   };
 
@@ -115,6 +109,7 @@ export function SignUpForm() {
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
             disabled={isLoading}
             id="email"
+            name="email"
             onChange={(e) => setEmail(e.target.value)}
             placeholder="your@email.com"
             type="email"
@@ -137,6 +132,7 @@ export function SignUpForm() {
             id="username"
             maxLength={20}
             minLength={2}
+            name="username"
             onChange={(e) => setUsername(e.target.value)}
             placeholder="사용자명을 입력하세요"
             type="text"
@@ -161,6 +157,7 @@ export function SignUpForm() {
             disabled={isLoading}
             id="password"
             minLength={6}
+            name="password"
             onChange={(e) => setPassword(e.target.value)}
             placeholder="비밀번호를 입력하세요"
             type="password"
@@ -184,6 +181,7 @@ export function SignUpForm() {
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
             disabled={isLoading}
             id="confirmPassword"
+            name="confirmPassword"
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="비밀번호를 다시 입력하세요"
             type="password"

@@ -44,6 +44,7 @@ export function UserProfile() {
     <div className="relative">
       {/* ===== 사용자 아바타 버튼 ===== */}
       <button
+        aria-label="프로필 메뉴"
         className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
         disabled={isLoggingOut}
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}

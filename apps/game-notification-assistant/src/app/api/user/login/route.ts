@@ -69,32 +69,6 @@ export const POST = MiddlewareWithPOST(async (request) => {
       },
     });
 
-    if (authData.session) {
-      responseObj.cookies.set(
-        'sb-access-token',
-        authData.session.access_token,
-        {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 60 * 60 * 24 * 7, // 7일
-          path: '/',
-        }
-      );
-
-      responseObj.cookies.set(
-        'sb-refresh-token',
-        authData.session.refresh_token,
-        {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 60 * 60 * 24 * 30, // 30일
-          path: '/',
-        }
-      );
-    }
-
     return responseObj;
   } catch (error) {
     console.error('로그인 처리 오류:', error);

@@ -34,6 +34,7 @@ export async function createNotificationApi(
         response
       );
 
+    console.log('이거 타는거 아니야?', result);
     if (!result.success || !result.data) {
       throw new Error(result.message || '알림 생성에 실패했습니다.');
     }

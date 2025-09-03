@@ -68,8 +68,6 @@ function withAuthentication<T = unknown>(
           { success: false, message: '인증이 만료되었습니다.' },
           { status: 401 }
         );
-        response.cookies.delete('sb-access-token');
-        response.cookies.delete('sb-refresh-token');
 
         try {
           await supabase.auth.signOut({ scope: 'global' });

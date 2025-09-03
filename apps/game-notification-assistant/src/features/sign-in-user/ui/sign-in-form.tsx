@@ -91,6 +91,7 @@ export function SignInForm() {
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
             disabled={isLoading}
             id="email"
+            name="email"
             onChange={(e) => setEmail(e.target.value)}
             placeholder="your@email.com"
             type="email"
@@ -111,6 +112,7 @@ export function SignInForm() {
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
             disabled={isLoading}
             id="password"
+            name="password"
             onChange={(e) => setPassword(e.target.value)}
             placeholder="비밀번호를 입력하세요"
             type="password"
