@@ -13,7 +13,7 @@ const __dirname = dirname(__filename);
 /**
  * 세션 파일 경로 (E2E 앱 디렉토리 기준)
  */
-const SESSION_PATH = join(__dirname, '..', '..', '.auth', 'user.json');
+const SESSION_PATH = join(__dirname, '..', '..', '.storage', 'state.json');
 
 /**
  * 저장된 세션으로 브라우저 컨텍스트를 생성합니다
@@ -61,14 +61,14 @@ export async function saveSession(
   description: string = '세션'
 ): Promise<void> {
   try {
-    // .auth 디렉토리 생성
-    const authDir = join(SESSION_PATH, '..');
-    await mkdir(authDir, { recursive: true });
+    // .storage 디렉토리 생성
+    const storageDir = join(SESSION_PATH, '..');
+    await mkdir(storageDir, { recursive: true });
 
     // 세션 저장
     await page.context().storageState({ path: SESSION_PATH });
 
-    console.log(`${description} 저장 완료: .auth/user.json`);
+    console.log(`${description} 저장 완료: .storage/state.json`);
     console.log('현재 URL:', page.url());
     console.log('페이지 제목:', await page.title());
   } catch (error) {
@@ -87,7 +87,7 @@ export async function clearSession(
   try {
     if (existsSync(SESSION_PATH)) {
       await unlink(SESSION_PATH);
-      console.log(`${description} 삭제 완료: .auth/user.json`);
+      console.log(`${description} 삭제 완료: .storage/state.json`);
     } else {
       console.log(`${description} 파일이 존재하지 않습니다.`);
     }

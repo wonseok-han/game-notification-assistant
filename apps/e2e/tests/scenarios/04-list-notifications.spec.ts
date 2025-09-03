@@ -42,7 +42,7 @@ test.describe('04 - 알림 목록 확인', () => {
     ).toBeVisible();
   });
 
-  test('알림 활성/비활성 토글 기능', async () => {
+  test('알림 활성/비활성 토글', async () => {
     await page.goto('/dashboard');
 
     // ===== 활성 상태 토글 버튼 찾기 =====
@@ -120,7 +120,7 @@ test.describe('04 - 알림 목록 확인', () => {
     }
   });
 
-  test('알림 삭제 기능', async () => {
+  test('알림 삭제', async () => {
     await page.goto('/dashboard');
 
     // ===== 삭제 버튼 클릭 =====

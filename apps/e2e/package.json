@@ -8,7 +8,8 @@
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
-    "test:report": "playwright show-report"
+    "test:report": "playwright show-report",
+    "codegen": "playwright codegen http://localhost:3000 --save-storage=. /state.json --load-storage=.storage/state.json"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",

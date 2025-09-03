@@ -106,7 +106,11 @@ export function NotificationTable({
 
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
+      <table
+        aria-label="알림 테이블"
+        className="min-w-full divide-y divide-gray-200"
+        data-testid="notifications-table"
+      >
         <thead className="bg-gray-50">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
@@ -133,6 +137,7 @@ export function NotificationTable({
           {notifications.map((notification) => (
             <tr
               key={notification.id}
+              aria-label="알림 행 데이터"
               className="hover:bg-gray-50 cursor-pointer"
               onClick={() => onSelect(notification)}
             >

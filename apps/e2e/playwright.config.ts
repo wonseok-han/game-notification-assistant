@@ -44,6 +44,12 @@ export default defineConfig({
     // 액션 타임아웃
     actionTimeout: 10000,
     navigationTimeout: 30000,
+
+    // data-testid 속성을 우선적으로 사용
+    testIdAttribute: 'data-testid',
+
+    // 헤드리스 모드
+    headless: true,
   },
 
   // 프로젝트별 브라우저 설정

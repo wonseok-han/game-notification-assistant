@@ -98,5 +98,5 @@ temp/
 # OS generated files
 Thumbs.db
 
-.auth/
+.storage/
 .github/
