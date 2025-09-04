@@ -1,4 +1,5 @@
 import { Page } from '@playwright/test';
+import { logQueue } from '@utils/log';
 
 /**
  * 시나리오별 테스트 헬퍼 함수들
@@ -23,10 +24,10 @@ export function getTestUser(projectName: string) {
  */
 export async function cleanupE2ETestData(
   page: Page,
-  { baseURL }: { baseURL: string }
+  { baseURL, logs }: { baseURL: string; logs: string[] }
 ) {
   try {
-    console.log('🗑️ 테스트 데이터 정리 중...');
+    logQueue(logs, '    ◐ 테스트 데이터 정리 중...');
 
     // 1. e2e-reset API 호출로 모든 테스트 데이터 삭제
     const resetResponse = await page.request.post(
@@ -35,12 +36,18 @@ export async function cleanupE2ETestData(
 
     if (resetResponse.ok()) {
       const result = await resetResponse.json();
-      console.log('✅ E2E 데이터 초기화 완료:', result.message);
+      logQueue(logs, '    ✓ E2E 데이터 초기화 완료');
       if (result.deletedEmails?.length > 0) {
-        console.log('📧 삭제된 이메일:', result.deletedEmails);
+        logQueue(
+          logs,
+          '        ✓ 삭제된 이메일: \n' +
+            result.deletedEmails
+              .map((email: string) => '            ' + email)
+              .join('\n')
+        );
       }
     } else {
-      console.log('⚠️ E2E 데이터 초기화 실패:', resetResponse.status());
+      logQueue(logs, '    ✗ E2E 데이터 초기화 실패: ' + resetResponse.status());
     }
 
     // 2. 로컬 스토리지 정리
@@ -52,10 +59,8 @@ export async function cleanupE2ETestData(
         // 접근 불가 시 무시
       }
     });
-
-    console.log('✅ 테스트 데이터 정리 완료');
   } catch (error) {
-    console.log('⚠️ 테스트 데이터 정리 실패 (무시됨):', error);
+    logQueue(logs, '    ✗ 테스트 데이터 정리 실패 (무시됨): ' + error);
   }
 }
 
@@ -65,16 +70,16 @@ export async function cleanupE2ETestData(
  */
 export async function cleanupE2ETestDataBulk(
   page: Page,
-  { baseURL }: { baseURL: string }
+  { baseURL, logs }: { baseURL: string; logs: string[] }
 ) {
   try {
-    console.log('🗑️ 테스트 데이터 일괄 정리 중...');
+    logQueue(logs, '    ◐ 테스트 데이터 일괄 정리 중...');
 
     // e2e-reset API 호출로 모든 테스트 데이터 삭제
-    await cleanupE2ETestData(page, { baseURL });
+    await cleanupE2ETestData(page, { baseURL, logs });
 
-    console.log('✅ 테스트 데이터 일괄 정리 완료');
+    logQueue(logs, '    ✓ 테스트 데이터 일괄 정리 완료');
   } catch (error) {
-    console.log('⚠️ 테스트 데이터 일괄 정리 실패 (무시됨):', error);
+    logQueue(logs, '    ✗ 테스트 데이터 일괄 정리 실패 (무시됨): ' + error);
   }
 }

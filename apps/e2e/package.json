@@ -4,12 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "playwright test",
+    "test": "playwright test --reporter=list",
+    "test:verbose": "FORCE_COLOR=1 playwright test",
+    "test:html": "playwright test --reporter=html",
+    "test:debug": "playwright test --debug",
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
-    "test:debug": "playwright test --debug",
     "test:report": "playwright show-report",
-    "codegen": "playwright codegen http://localhost:3000 --save-storage=. /state.json --load-storage=.storage/state.json"
+    "codegen": "playwright codegen http://localhost:3000 --save-storage=./.storage --load-storage=./.storage"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",

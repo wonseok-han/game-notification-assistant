@@ -23,6 +23,7 @@ export default defineConfig({
 
   // 리포터 설정
   reporter: [
+    ['./custom-reporter.ts'], // 커스텀 리포터
     ['html'],
     ['json', { outputFile: 'test-results/results.json' }],
     ['junit', { outputFile: 'test-results/results.xml' }],
