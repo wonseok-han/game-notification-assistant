@@ -115,12 +115,14 @@ test.describe('01 - 신규 사용자 회원가입', () => {
     console.log(`회원가입 사용자: ${userInfo.email}`);
 
     // 이후 시나리오 파일에서 로그인 상태 재사용을 위해 세션 저장
-    await saveSession(page, '회원가입 세션');
+    const projectName = test.info().project.name;
+    await saveSession(page, projectName, '회원가입 세션');
   });
 
   test('회원가입한 유저 로그아웃', async ({ browser }) => {
     // 세션이 저장된 컨텍스트로 새 페이지 생성
-    const context = await createContextWithSession(browser);
+    const projectName = test.info().project.name;
+    const context = await createContextWithSession(browser, projectName);
     const page = await context.newPage();
 
     await page.goto('/dashboard');
@@ -156,6 +158,6 @@ test.describe('01 - 신규 사용자 회원가입', () => {
     await expect(page).toHaveURL(/.*\/$/);
 
     // 로그아웃 후 세션 삭제
-    await clearSession('로그아웃 세션');
+    await clearSession(projectName, '로그아웃 세션');
   });
 });

@@ -30,6 +30,7 @@ test.describe('02 - 로그인', () => {
     await expect(page.locator('h2:has-text("게임 알림 관리")')).toBeVisible();
 
     // 로그인 세션 저장 (다른 테스트에서 사용)
-    await saveSession(page, '로그인 세션');
+    const projectName = test.info().project.name;
+    await saveSession(page, projectName, '로그인 세션');
   });
 });

@@ -8,7 +8,8 @@ test.describe('06 - 카카오톡 연동', () => {
   let page: Page;
 
   test.beforeEach(async ({ browser }) => {
-    context = await createContextWithSession(browser);
+    const projectName = test.info().project.name;
+    context = await createContextWithSession(browser, projectName);
     page = await context.newPage();
   });
 

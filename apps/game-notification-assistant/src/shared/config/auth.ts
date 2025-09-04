@@ -15,7 +15,7 @@ const AUTH_CONFIG = {
     '/api/user/register', // 회원가입
     '/api/user/verify', // 토큰 검증
     '/api/cron/notifications', // 알림 전송
-    '/api/e2e-reset', // E2E 테스트 데이터 초기화
+    '/api/e2e/reset', // E2E 테스트 데이터 초기화
   ],
 };
 

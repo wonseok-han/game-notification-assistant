@@ -21,9 +21,6 @@ export default defineConfig({
   // 실패 시 재시도 횟수
   retries: process.env.CI ? 2 : 0,
 
-  // 병렬 워커 수 (순차 실행을 위해 1로 고정)
-  workers: 1,
-
   // 리포터 설정
   reporter: [
     ['html'],
@@ -57,23 +54,38 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      // 프로젝트 내 직렬 실행
+      fullyParallel: false,
+      workers: 1,
     },
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
+      // 프로젝트 내 직렬 실행
+      fullyParallel: false,
+      workers: 1,
     },
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
+      // 프로젝트 내 직렬 실행
+      fullyParallel: false,
+      workers: 1,
     },
     // 모바일 테스트
     {
       name: 'mobile-chrome',
       use: { ...devices['Pixel 5'] },
+      // 프로젝트 내 직렬 실행
+      fullyParallel: false,
+      workers: 1,
     },
     {
       name: 'mobile-safari',
       use: { ...devices['iPhone 12'] },
+      // 프로젝트 내 직렬 실행
+      fullyParallel: false,
+      workers: 1,
     },
   ],
 

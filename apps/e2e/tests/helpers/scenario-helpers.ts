@@ -30,7 +30,7 @@ export async function cleanupE2ETestData(
 
     // 1. e2e-reset API 호출로 모든 테스트 데이터 삭제
     const resetResponse = await page.request.post(
-      new URL('/api/e2e-reset', baseURL).toString()
+      new URL('/api/e2e/reset', baseURL).toString()
     );
 
     if (resetResponse.ok()) {

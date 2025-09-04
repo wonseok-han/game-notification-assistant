@@ -9,7 +9,8 @@ test.describe('03 - 알림 생성', () => {
 
   test.beforeEach(async ({ browser }) => {
     // 세션이 저장된 컨텍스트로 새 페이지 생성
-    context = await createContextWithSession(browser);
+    const projectName = test.info().project.name;
+    context = await createContextWithSession(browser, projectName);
     page = await context.newPage();
   });
 
