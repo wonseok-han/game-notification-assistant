@@ -60,8 +60,8 @@ DELETE FROM auth.refresh_tokens;
 -- ===== 사용자 테이블 =====
 CREATE TABLE IF NOT EXISTS public.users (
     id UUID REFERENCES auth.users(id) PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL CHECK (LENGTH(email) <= 255),
+    username VARCHAR(255) NOT NULL CHECK (LENGTH(username) <= 255),
     avatar_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -71,8 +71,8 @@ CREATE TABLE IF NOT EXISTS public.users (
 CREATE TABLE IF NOT EXISTS public.oauth_connections (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
-    provider VARCHAR(50) NOT NULL, -- 'kakao', 'google' 등
-    provider_user_id VARCHAR(255) NOT NULL, -- OAuth 제공자의 사용자 ID
+    provider TEXT NOT NULL, -- 'kakao', 'google' 등
+    provider_user_id VARCHAR(255) NOT NULL CHECK (LENGTH(provider_user_id) <= 255), -- OAuth 제공자의 사용자 ID
     access_token TEXT NOT NULL,
     refresh_token TEXT NOT NULL,
     expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS public.oauth_connections (
     connected_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     disconnected_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 
     UNIQUE(user_id, provider)
 );
@@ -89,9 +89,9 @@ CREATE TABLE IF NOT EXISTS public.oauth_connections (
 CREATE TABLE IF NOT EXISTS public.game_notifications (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
-    title VARCHAR(255) NOT NULL,
+    title TEXT NOT NULL,
     description TEXT,
-    game_name VARCHAR(255) NOT NULL,
+    game_name TEXT NOT NULL,
     image_url TEXT NOT NULL,
     is_active BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS public.notification_times (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   notification_id UUID NOT NULL REFERENCES game_notifications(id) ON DELETE CASCADE,
   scheduled_time TIMESTAMP WITH TIME ZONE NOT NULL,
-  status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'sent', 'failed')),
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'sent', 'failed')),
   raw_text TEXT,
   label TEXT,
   sent_at TIMESTAMP WITH TIME ZONE,
