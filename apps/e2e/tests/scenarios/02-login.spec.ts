@@ -5,6 +5,11 @@ import { saveSession } from '../helpers/session-helpers';
 test.describe.configure({ mode: 'serial' });
 
 test.describe('02 - 로그인', () => {
+  test.afterEach(async ({ page }) => {
+    // 각 테스트 종료 후 페이지 닫기
+    await page.close();
+  });
+
   test('회원가입한 유저로 로그인', async ({ page }) => {
     const user = getTestUser(test.info().project.name);
     await page.goto('/user/sign-in');

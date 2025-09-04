@@ -14,6 +14,11 @@ test.describe('05 - 알림 편집', () => {
     page = await context.newPage();
   });
 
+  test.afterEach(async () => {
+    // 각 테스트 종료 후 페이지 닫기
+    await page.close();
+  });
+
   test('알림 편집 모달을 통한 수정', async () => {
     await page.goto('/dashboard');
 

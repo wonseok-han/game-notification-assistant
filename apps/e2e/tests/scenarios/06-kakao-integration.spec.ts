@@ -13,6 +13,11 @@ test.describe('06 - 카카오톡 연동', () => {
     page = await context.newPage();
   });
 
+  test.afterEach(async () => {
+    // 각 테스트 종료 후 페이지 닫기
+    await page.close();
+  });
+
   test('카카오 연동 UI 확인', async () => {
     await page.goto('/dashboard');
 

@@ -14,6 +14,11 @@ test.describe('03 - 알림 생성', () => {
     page = await context.newPage();
   });
 
+  test.afterEach(async () => {
+    // 각 테스트 종료 후 페이지 닫기
+    await page.close();
+  });
+
   /**
    * 테스트용 이미지 파일을 업로드하는 헬퍼 함수
    */

@@ -9,7 +9,10 @@ import {
 // describe 블록 내의 테스트들을 순차 실행
 test.describe.configure({ mode: 'serial' });
 
-// 첫 번째 테스트에서만 세션을 생성하고, 나머지는 독립적으로 실행
+test.afterEach(async ({ page }) => {
+  // 각 테스트 종료 후 페이지 닫기
+  await page.close();
+});
 
 test.describe('01 - 신규 사용자 회원가입', () => {
   test('메인 페이지로 진입', async ({ page }) => {

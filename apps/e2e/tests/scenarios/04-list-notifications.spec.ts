@@ -14,6 +14,11 @@ test.describe('04 - 알림 목록 확인', () => {
     page = await context.newPage();
   });
 
+  test.afterEach(async () => {
+    // 각 테스트 종료 후 페이지 닫기
+    await page.close();
+  });
+
   test('대시보드에서 생성한 알림 리스트 확인', async () => {
     await page.goto('/dashboard');
 
