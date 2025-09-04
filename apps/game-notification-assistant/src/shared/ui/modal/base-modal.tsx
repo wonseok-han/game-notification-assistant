@@ -141,16 +141,16 @@ export function BaseModal({
         animation={animation}
         animationDirection={animationDirection}
         animationDuration={animationDuration}
-        className={`w-full max-h-svh ${sizeClasses[size]}`}
+        className={`w-full ${sizeClasses[size]}`}
         isStart={status === 'entering' || status === 'entered'}
       >
         <div
-          className={`bg-white backdrop-blur-md rounded-lg overflow-y-auto shadow-2xl border border-white/40`}
+          className={`relative bg-white backdrop-blur-md rounded-lg max-h-svh overflow-y-auto shadow-2xl border border-white/40`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* 헤더 */}
           {(title || showCloseButton) && (
-            <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-200">
+            <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-200 sticky top-0 bg-white">
               {title && (
                 <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
               )}
