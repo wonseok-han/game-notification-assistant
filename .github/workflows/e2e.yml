@@ -40,16 +40,13 @@ jobs:
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
 
-    - name: Cache pnpm global installation
-      uses: actions/cache@v4
-      with:
-        path: /usr/local/bin/pnpm
-        key: ${{ runner.os }}-pnpm-global-9
-
-    - name: Copy pnpm to workspace
+    - name: Find pnpm location and copy to workspace
       run: |
-        cp /usr/local/bin/pnpm ./pnpm
+        PNPM_PATH=$(which pnpm)
+        echo "pnpm found at: $PNPM_PATH"
+        cp "$PNPM_PATH" ./pnpm
         chmod +x ./pnpm
+        echo "pnpm copied to workspace"
 
     - name: Upload pnpm and dependencies
       uses: actions/upload-artifact@v4
