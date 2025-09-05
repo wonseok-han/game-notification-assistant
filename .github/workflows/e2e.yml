@@ -52,7 +52,13 @@ jobs:
         name: pnpm-and-deps
         path: |
           node_modules/
-          /usr/local/bin/pnpm
+        retention-days: 1
+
+    - name: Upload pnpm binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: pnpm-binary
+        path: /usr/local/bin/pnpm
         retention-days: 1
 
   # 2. E2E Tests - 테스트 실행
@@ -78,6 +84,12 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: pnpm-and-deps
+        path: ./
+
+    - name: Download pnpm binary
+      uses: actions/download-artifact@v4
+      with:
+        name: pnpm-binary
         path: ./
 
     - name: Restore pnpm
