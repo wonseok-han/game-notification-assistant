@@ -34,7 +34,7 @@ jobs:
       run: pnpm --filter=e2e exec playwright install --with-deps ${{ matrix.browser }}
 
     - name: Run E2E tests - ${{ matrix.browser }}
-      run: pnpm --filter=e2e test --project=${{ matrix.browser }}
+      run: pnpm --filter=e2e test:${{ matrix.browser }}
       env:
         # GitHub Secrets
         NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}

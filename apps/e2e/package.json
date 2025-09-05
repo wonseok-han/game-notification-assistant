@@ -7,7 +7,7 @@
     "env:setup": "cp .env.local .env && echo '✅ .env 파일이 생성되었습니다. 필요에 따라 수정하세요.'",
     "pretest": "pnpm env:setup",
     "test": "playwright test",
-    "test:chrome": "playwright test --project=chromium",
+    "test:chromium": "playwright test --project=chromium",
     "test:firefox": "playwright test --project=firefox",
     "test:webkit": "playwright test --project=webkit",
     "test:mobile-chrome": "playwright test --project=mobile-chrome",
