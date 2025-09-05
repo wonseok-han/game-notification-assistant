@@ -35,7 +35,8 @@
     "tests/**/*",
     "utils/**/*",
     "custom-reporter.ts",
-    "playwright.config.ts"
+    "playwright.config.ts",
+    "index.d.ts"
   ],
   "exclude": [
     "node_modules",

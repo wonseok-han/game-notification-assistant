@@ -1,4 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
+import { config } from 'dotenv';
+
+// .env 파일 로드
+config({ path: '.env' });
 
 /**
  * Playwright E2E 테스트 설정
@@ -19,7 +23,7 @@ export default defineConfig({
   fullyParallel: false,
 
   // 실패 시 재시도 횟수
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 2 : parseInt(process.env.RETRIES || '0'),
 
   // 리포터 설정
   reporter: [
@@ -31,8 +35,8 @@ export default defineConfig({
 
   // 전역 테스트 설정
   use: {
-    // 기본 URL (로컬 개발 서버)
-    baseURL: 'http://localhost:3000',
+    // 기본 URL
+    baseURL: process.env.BASE_URL || 'http://localhost:3000',
 
     // 브라우저 컨텍스트 옵션
     trace: 'on-first-retry',
@@ -40,14 +44,14 @@ export default defineConfig({
     video: 'retain-on-failure',
 
     // 액션 타임아웃
-    actionTimeout: 10000,
-    navigationTimeout: 30000,
+    actionTimeout: parseInt(process.env.BROWSER_TIMEOUT || '10000'),
+    navigationTimeout: parseInt(process.env.NAVIGATION_TIMEOUT || '30000'),
 
     // data-testid 속성을 우선적으로 사용
     testIdAttribute: 'data-testid',
 
     // 헤드리스 모드
-    headless: true,
+    headless: process.env.HEADLESS === 'true',
   },
 
   // 프로젝트별 브라우저 설정
@@ -93,16 +97,20 @@ export default defineConfig({
   // 웹 서버 설정 (테스트 실행 전 앱 시작)
   webServer: {
     command: 'cd ../game-notification-assistant && pnpm dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
+    url: process.env.BASE_URL || 'http://localhost:3000',
+    reuseExistingServer: process.env.CI
+      ? false
+      : process.env.REUSE_EXISTING_SERVER === 'true',
     timeout: 120 * 1000, // 2분 타임아웃
+    // stdout: 'ignore', // 서버 로그를 숨기려면 주석 해제
+    // stderr: 'pipe',   // 에러만 표시하려면 주석 해제
   },
 
   // 출력 디렉토리
-  outputDir: 'test-results/',
+  outputDir: process.env.REPORTER_OUTPUT_DIR || 'test-results/',
 
   // 타임아웃 설정
-  timeout: 30 * 1000, // 30초
+  timeout: parseInt(process.env.TIMEOUT || '30000'), // 기본 30초
   expect: {
     timeout: 5000, // 5초
   },

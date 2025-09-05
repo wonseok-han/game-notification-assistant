@@ -9,6 +9,7 @@
 - [모노레포 구조](#모노레포-구조)
 - [Getting Started](#Getting-Started)
 - [개발 워크플로우](#개발-워크플로우)
+- [E2E 테스트](#e2e-테스트)
 - [기술 스택](#기술-스택)
 
 ## 개발 환경
@@ -26,6 +27,7 @@
 | **데이터베이스**  | `Supabase` (PostgreSQL)                  |
 | **OCR 서비스**    | `Google Cloud Vision API`                |
 | **Cron Job**    | `cron-job`                |
+| **E2E 테스트**    | `Playwright@1.55.0`                |
 
 ## 프로젝트 개요
 
@@ -46,13 +48,15 @@
 ```
 game-notification-assistant/
 ├── apps/                           # 애플리케이션
-│   └── game-notification-assistant/ # 메인 게임 알림 앱 (FSD 패턴 적용)
+│   ├── game-notification-assistant/ # 메인 게임 알림 앱 (FSD 패턴 적용)
+│   └── e2e/                       # E2E 테스트 (Playwright)
 ├── packages/                      # 공유 패키지
 │   ├── ui/                       # UI 컴포넌트 라이브러리
 │   ├── shared/                   # 공유 유틸리티
 │   ├── eslint-config/            # ESLint 설정
 │   ├── typescript-config/        # TypeScript 설정
 │   └── tailwind-config/          # Tailwind CSS 설정
+├── .github/workflows/             # GitHub Actions 워크플로우
 ├── docker/                       # Docker 설정
 ├── docs/                         # 문서
 ├── turbo.json                    # Turborepo 설정
@@ -189,6 +193,44 @@ cd packages/eslint-config
 # 설정 파일 수정
 ```
 
+## E2E 테스트
+
+### 개요
+Playwright를 사용한 End-to-End 테스트로 사용자 시나리오를 자동화하여 애플리케이션의 품질을 보장합니다.
+
+### 지원 브라우저
+- **Desktop**: Chrome, Firefox, Safari
+- **Mobile**: Chrome (Pixel 5), Safari (iPhone 12)
+
+### 빠른 시작
+```bash
+# E2E 테스트 실행
+cd apps/e2e
+pnpm test
+
+# 특정 브라우저에서 테스트
+pnpm test:mobile-chrome
+pnpm test:mobile-safari
+
+# 브라우저 UI로 테스트 확인
+pnpm test:headed
+
+# 상세한 Step 로그와 함께 실행
+SHOW_STEP_LOG=true pnpm test
+```
+
+### CI/CD 통합
+- **GitHub Actions**: `main`, `develop` 브랜치 push 시 자동 실행
+- **Pull Request**: PR 생성 시 모든 브라우저에서 테스트 실행
+- **아티팩트**: 테스트 결과 및 HTML 리포트 자동 업로드
+
+### 커스텀 리포터
+- **실시간 로그**: 파일 단위로 그룹화된 테스트 결과 출력
+- **Step 로그**: 상세한 실행 과정 확인 가능
+- **컬러 출력**: 성공/실패 상태를 시각적으로 구분
+
+**자세한 E2E 테스트 가이드**: [apps/e2e/README.md](./apps/e2e/README.md)
+
 ## 기술 스택
 
 ### 모노레포 도구
@@ -222,6 +264,11 @@ cd packages/eslint-config
 - **ESLint**: 코드 품질 관리
 - **Prettier**: 코드 포맷팅
 
+### 테스트 도구
+- **Playwright**: E2E 테스트 자동화
+- **GitHub Actions**: CI/CD 파이프라인
+- **Custom Reporter**: 실시간 테스트 결과 출력
+
 ### UI 컴포넌트
 - **TipTap**: 리치 텍스트 에디터
 - **Monaco Editor**: 코드 에디터
@@ -254,3 +301,6 @@ cd packages/eslint-config
 - [cron-job](https://cron-job.org)
 - [FSD 공식](https://feature-sliced.design/kr/docs/get-started/overview#layers)
 - [FSD 참고 블로그](https://velog.io/@floatletter91/FSDFeature-Sliced-Design%EB%A5%BC-%EC%A0%95%EB%A7%90-%EC%9E%98-%EC%A0%81%EC%9A%A9%ED%95%98%EB%8A%94-%EB%B0%A9%EB%B2%95)
+- [Playwright Documentation](https://playwright.dev/)
+- [GitHub Actions Documentation](https://docs.github.com/en/actions)
+- [VSCode GitHub Actions 확장](https://marketplace.visualstudio.com/items?itemName=GitHub.vscode-pull-request-github)
