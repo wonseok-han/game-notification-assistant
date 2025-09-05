@@ -96,7 +96,9 @@ export default defineConfig({
 
   // 웹 서버 설정 (테스트 실행 전 앱 시작)
   webServer: {
-    command: 'cd ../game-notification-assistant && pnpm dev',
+    command: process.env.CI
+      ? 'cd ../game-notification-assistant && pnpm start' // CI에서는 빌드된 앱 실행
+      : 'cd ../game-notification-assistant && pnpm dev', // 로컬에서는 개발 서버 실행
     url: process.env.BASE_URL || 'http://localhost:3000',
     reuseExistingServer: process.env.CI
       ? false
