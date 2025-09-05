@@ -44,9 +44,38 @@ jobs:
       run: |
         PNPM_PATH=$(which pnpm)
         echo "pnpm found at: $PNPM_PATH"
-        cp "$PNPM_PATH" ./pnpm
-        chmod +x ./pnpm
-        echo "pnpm copied to workspace"
+
+        # pnpm이 심볼릭 링크인 경우 실제 경로 찾기
+        REAL_PNPM_PATH=$(readlink -f "$PNPM_PATH" || echo "$PNPM_PATH")
+        echo "real pnpm path: $REAL_PNPM_PATH"
+
+        # pnpm 디렉토리 찾기 (dist 폴더가 있는 상위 디렉토리)
+        PNPM_DIR=$(dirname "$REAL_PNPM_PATH")
+        while [ ! -d "$PNPM_DIR/dist" ] && [ "$PNPM_DIR" != "/" ]; do
+          PNPM_DIR=$(dirname "$PNPM_DIR")
+        done
+
+        if [ -d "$PNPM_DIR/dist" ]; then
+          echo "pnpm directory found: $PNPM_DIR"
+          cp -r "$PNPM_DIR" ./pnpm-dir
+          # 심볼릭 링크를 실제 파일로 복사
+          cp "$REAL_PNPM_PATH" ./pnpm
+          chmod +x ./pnpm
+          echo "pnpm directory and binary copied to workspace"
+        else
+          echo "pnpm dist directory not found, trying alternative approach"
+          # npm의 글로벌 node_modules에서 pnpm 찾기
+          PNPM_GLOBAL_DIR=$(npm root -g)/pnpm
+          if [ -d "$PNPM_GLOBAL_DIR" ]; then
+            echo "pnpm found in npm global: $PNPM_GLOBAL_DIR"
+            cp -r "$PNPM_GLOBAL_DIR" ./pnpm-dir
+            cp "$PNPM_PATH" ./pnpm
+            chmod +x ./pnpm
+            echo "pnpm from npm global copied to workspace"
+          else
+            echo "pnpm directory not found, will reinstall in e2e job"
+          fi
+        fi
 
     - name: Upload pnpm and dependencies
       uses: actions/upload-artifact@v4
@@ -55,6 +84,7 @@ jobs:
         path: |
           node_modules/
           pnpm
+          pnpm-dir/
         retention-days: 1
 
   # 2. E2E Tests - 테스트 실행
@@ -84,8 +114,21 @@ jobs:
 
     - name: Restore pnpm
       run: |
-        sudo cp pnpm /usr/local/bin/pnpm
-        sudo chmod +x /usr/local/bin/pnpm
+        if [ -d "pnpm-dir" ]; then
+          echo "Restoring pnpm from copied directory"
+          # pnpm 디렉토리를 Node.js 글로벌 모듈 위치로 복사
+          PNPM_GLOBAL_DIR=$(npm root -g)/pnpm
+          sudo mkdir -p "$PNPM_GLOBAL_DIR"
+          sudo cp -r pnpm-dir/* "$PNPM_GLOBAL_DIR/"
+
+          # pnpm 실행 파일을 PATH에 추가
+          sudo cp pnpm /usr/local/bin/pnpm
+          sudo chmod +x /usr/local/bin/pnpm
+          echo "pnpm restored successfully"
+        else
+          echo "pnpm directory not found, reinstalling pnpm"
+          npm install -g pnpm@9
+        fi
 
     - name: Verify pnpm
       run: pnpm --version
