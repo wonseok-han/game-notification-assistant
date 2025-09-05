@@ -21,9 +21,6 @@ jobs:
       with:
         node-version: '22'
 
-    - name: Install pnpm
-      run: npm install -g pnpm@9
-
     - name: Get pnpm store directory
       shell: bash
       run: |
@@ -40,51 +37,11 @@ jobs:
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
 
-    - name: Find pnpm location and copy to workspace
-      run: |
-        PNPM_PATH=$(which pnpm)
-        echo "pnpm found at: $PNPM_PATH"
-
-        # pnpm이 심볼릭 링크인 경우 실제 경로 찾기
-        REAL_PNPM_PATH=$(readlink -f "$PNPM_PATH" || echo "$PNPM_PATH")
-        echo "real pnpm path: $REAL_PNPM_PATH"
-
-        # pnpm 디렉토리 찾기 (dist 폴더가 있는 상위 디렉토리)
-        PNPM_DIR=$(dirname "$REAL_PNPM_PATH")
-        while [ ! -d "$PNPM_DIR/dist" ] && [ "$PNPM_DIR" != "/" ]; do
-          PNPM_DIR=$(dirname "$PNPM_DIR")
-        done
-
-        if [ -d "$PNPM_DIR/dist" ]; then
-          echo "pnpm directory found: $PNPM_DIR"
-          cp -r "$PNPM_DIR" ./pnpm-dir
-          # 심볼릭 링크를 실제 파일로 복사
-          cp "$REAL_PNPM_PATH" ./pnpm
-          chmod +x ./pnpm
-          echo "pnpm directory and binary copied to workspace"
-        else
-          echo "pnpm dist directory not found, trying alternative approach"
-          # npm의 글로벌 node_modules에서 pnpm 찾기
-          PNPM_GLOBAL_DIR=$(npm root -g)/pnpm
-          if [ -d "$PNPM_GLOBAL_DIR" ]; then
-            echo "pnpm found in npm global: $PNPM_GLOBAL_DIR"
-            cp -r "$PNPM_GLOBAL_DIR" ./pnpm-dir
-            cp "$PNPM_PATH" ./pnpm
-            chmod +x ./pnpm
-            echo "pnpm from npm global copied to workspace"
-          else
-            echo "pnpm directory not found, will reinstall in e2e job"
-          fi
-        fi
-
-    - name: Upload pnpm and dependencies
+    - name: Upload dependencies
       uses: actions/upload-artifact@v4
       with:
-        name: pnpm-and-deps
-        path: |
-          node_modules/
-          pnpm
-          pnpm-dir/
+        name: node-modules
+        path: node_modules/
         retention-days: 1
 
   # 2. E2E Tests - 테스트 실행
@@ -106,29 +63,27 @@ jobs:
       with:
         node-version: '22'
 
-    - name: Download pnpm and dependencies
+    - name: Install pnpm
+      run: npm install -g pnpm@9
+
+    - name: Get pnpm store directory
+      shell: bash
+      run: |
+        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+    - name: Setup pnpm cache
+      uses: actions/cache@v4
+      with:
+        path: ${{ env.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+
+    - name: Download dependencies
       uses: actions/download-artifact@v4
       with:
-        name: pnpm-and-deps
+        name: node-modules
         path: ./
-
-    - name: Restore pnpm
-      run: |
-        if [ -d "pnpm-dir" ]; then
-          echo "Restoring pnpm from copied directory"
-          # pnpm 디렉토리를 Node.js 글로벌 모듈 위치로 복사
-          PNPM_GLOBAL_DIR=$(npm root -g)/pnpm
-          sudo mkdir -p "$PNPM_GLOBAL_DIR"
-          sudo cp -r pnpm-dir/* "$PNPM_GLOBAL_DIR/"
-
-          # pnpm 실행 파일을 PATH에 추가
-          sudo cp pnpm /usr/local/bin/pnpm
-          sudo chmod +x /usr/local/bin/pnpm
-          echo "pnpm restored successfully"
-        else
-          echo "pnpm directory not found, reinstalling pnpm"
-          npm install -g pnpm@9
-        fi
 
     - name: Verify pnpm
       run: pnpm --version
