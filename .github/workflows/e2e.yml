@@ -46,19 +46,18 @@ jobs:
         path: /usr/local/bin/pnpm
         key: ${{ runner.os }}-pnpm-global-9
 
+    - name: Copy pnpm to workspace
+      run: |
+        cp /usr/local/bin/pnpm ./pnpm
+        chmod +x ./pnpm
+
     - name: Upload pnpm and dependencies
       uses: actions/upload-artifact@v4
       with:
         name: pnpm-and-deps
         path: |
           node_modules/
-        retention-days: 1
-
-    - name: Upload pnpm binary
-      uses: actions/upload-artifact@v4
-      with:
-        name: pnpm-binary
-        path: /usr/local/bin/pnpm
+          pnpm
         retention-days: 1
 
   # 2. E2E Tests - 테스트 실행
@@ -84,12 +83,6 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: pnpm-and-deps
-        path: ./
-
-    - name: Download pnpm binary
-      uses: actions/download-artifact@v4
-      with:
-        name: pnpm-binary
         path: ./
 
     - name: Restore pnpm
